@@ -5,7 +5,7 @@ import csv
 from collections import Counter
 
 import pandas as pd
-index_df = pd.read_csv(r'10ntR1_10ntR2.csv')
+index_df = pd.read_csv(r'data/10ntR1_10ntR2.csv')
 #print(index_df)
 
 index_list = index_df['index'].tolist()

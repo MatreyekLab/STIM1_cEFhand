@@ -1,0 +1,115 @@
+---
+title: "STIM1 cEFhand DMS analysis"
+author: "Nisha D. Kamath, Kenneth A. Matreyek"
+date: "2024-12-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+library(tidyverse)
+library(reshape)
+library(ggrepel)
+library(gridExtra)
+library(scales)
+library(stringr)
+library(ggpubr)
+library(GGally)
+library(ggpmisc)
+library(ggbeeswarm)
+library(patchwork)
+library(rstatix)
+library(ggtext)
+library(googlesheets4)
+
+theme_set(theme_bw())
+theme_update(panel.grid.minor = element_blank())
+set.seed(96)
+```
+
+Testing the High and Low STIM1 overexpressor cells, using mCherry as the proxy to see how that population changes over time
+```{r High vs low kozak STIM1 overexpression survival}
+kozak = read.csv("data/fitness_kozak_stim1.csv")
+stim_fit_ace2_r1 = kozak %>% filter(plasmid_name == "G758" & replicate == "1") 
+stim_fit_ace2_r1 = stim_fit_ace2_r1 %>% mutate(frac_mcherry = pct_mcherry/stim_fit_ace2_r1[1,5])
+stim_fit_consensus_r1 = kozak %>% filter(plasmid_name == "pNK001B" & replicate == "1")
+stim_fit_consensus_r1 = stim_fit_consensus_r1 %>% mutate(frac_mcherry = pct_mcherry/stim_fit_consensus_r1[1,5])
+stim_fit_subopt_r1 = kozak %>% filter(plasmid_name == "pNK005C" & replicate == "1") 
+stim_fit_subopt_r1 = stim_fit_subopt_r1 %>% mutate(frac_mcherry = pct_mcherry/stim_fit_subopt_r1[1,5])
+
+stim_fit_r1 = bind_rows(stim_fit_ace2_r1, stim_fit_consensus_r1, stim_fit_subopt_r1)
+
+stim_fit_ace2_r2 = kozak %>% filter(plasmid_name == "G758" & replicate == "2") 
+stim_fit_ace2_r2 = stim_fit_ace2_r2 %>% mutate(frac_mcherry = pct_mcherry/stim_fit_ace2_r2[1,5])
+stim_fit_consensus_r2 = kozak %>% filter(plasmid_name == "pNK001B" & replicate == "2") 
+stim_fit_consensus_r2 = stim_fit_consensus_r2 %>% mutate(frac_mcherry = pct_mcherry/stim_fit_consensus_r2[1,5])
+stim_fit_subopt_r2 = kozak %>% filter(plasmid_name == "pNK005C" & replicate == "2") 
+stim_fit_subopt_r2 = stim_fit_subopt_r2 %>% mutate(frac_mcherry = pct_mcherry/stim_fit_subopt_r2[1,5])
+
+fit_merge = bind_rows(stim_fit_ace2_r1, stim_fit_ace2_r2, stim_fit_consensus_r1, stim_fit_consensus_r2, stim_fit_subopt_r1, stim_fit_subopt_r2)
+fit_merge_mean = fit_merge %>% group_by(plasmid_name, time_pt) %>% mutate(mean_frac = mean(frac_mcherry), sd = sd(frac_mcherry))
+
+fit_merge_mean$Sample <- factor(fit_merge_mean$Sample, levels = c("dEctoACE2","Consensus Kozak STIM1","Sub-optimal Kozak STIM1"))
+
+High_low_kozak_mCherry <- ggplot() +
+  scale_y_log10(limits = c(0.1,1.1), expand = c(0,0.1)) + scale_x_continuous(breaks = c(0,5,10))+ 
+  geom_line(data = fit_merge_mean, aes(x = time_pt, y = mean_frac, color = Sample), linewidth = 2, alpha = 0.4)+ 
+  geom_point(data = fit_merge_mean, aes(x = time_pt, y = frac_mcherry, color = Sample), size = 2, alpha = 0.6) + 
+  labs(x = "Days after initial time point" , y = "Fraction of initial fluorescent population") + 
+  theme(legend.position="bottom", panel.grid.minor = element_blank()) +
+  scale_color_discrete(labels=c("None", "High", "Low")) +
+  NULL; High_low_kozak_mCherry
+ggsave("Plots/High_low_kozak_mCherry.pdf", High_low_kozak_mCherry, width = 2, height = 2)
+```
+
+Now looking at how low overexpressor STIM1 cells deplete if it's a variant rather than the WT being overexpressed
+```{r Non-multiplex STIM1 variant depletion}
+mch_dep = read.csv("data/stimvar_fit_final.csv")
+mch_dep$per_day <- (1 - mch_dep$norm_pct)/7
+
+mch_dep_r1 <- mch_dep %>% filter(replicate == 1)
+mch_dep_r1$wt_norm <- mch_dep_r1$pct_mcherry / mch_dep_r1[mch_dep_r1$Sample == "WT STIM1" & mch_dep_r1$time_pt == 7, "pct_mcherry"]
+mch_dep_r2 <- mch_dep %>% filter(replicate == 2)
+mch_dep_r2$wt_norm <- mch_dep_r2$pct_mcherry / mch_dep_r2[mch_dep_r2$Sample == "WT STIM1" & mch_dep_r2$time_pt == 7, "pct_mcherry"]
+
+mch_dep_d10 = read.csv("data/fitness_slp.csv")
+mch_dep_d10$per_day <- (1 - mch_dep_d10$norm_pct)/3
+
+mch_dep_d10_r1 <- mch_dep_d10 %>% filter(replicate == 1) %>% select(-pct_live)
+mch_dep_d10_r1$wt_norm <- mch_dep_d10_r1$pct_mcherry / mch_dep_d10_r1[mch_dep_d10_r1$Sample == "WT STIM1" & mch_dep_d10_r1$time_pt == 7, "pct_mcherry"]
+mch_dep_d10_r2 <- mch_dep_d10 %>% filter(replicate == 2) %>% select(-pct_live)
+mch_dep_d10_r2$wt_norm <- mch_dep_d10_r2$pct_mcherry / mch_dep_d10_r2[mch_dep_d10_r2$Sample == "WT STIM1" & mch_dep_d10_r2$time_pt == 7, "pct_mcherry"]
+
+mch_dep_combined_d7 <- rbind(mch_dep_r1, mch_dep_r2) #%>% filter(time_pt == 7)
+mch_dep_combined_d14 <- rbind(mch_dep_r1, mch_dep_r2) #%>% filter(time_pt == 14)
+
+mch_dep_combined <- rbind(mch_dep_combined_d7, mch_dep_combined_d14)
+
+mch_dep_combined[mch_dep_combined$Sample == "dEctoACE2","Sample"] <- "Control"
+mch_dep_combined$Sample <- factor(mch_dep_combined$Sample, levels = c("Control", "WT STIM1", "[R304W]STIM1", "[R429C]STIM1"))
+mch_dep_combined$replicate <- factor(mch_dep_combined$replicate, levels = c(1,2))
+mch_dep_combined$time_pt <- factor(mch_dep_combined$time_pt, levels = c(7,14))
+mch_dep_combined[mch_dep_combined$Sample == "[R304W]STIM1" & mch_dep_combined$time_pt == 14 & mch_dep_combined$replicate == 2,"pct_mcherry"] <- 0.01
+
+Low_STIM1_variant_mCherry_plot <- ggplot() + theme(panel.grid.major.x = element_blank(), axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5)) +
+  labs(x = NULL, y = "Percent mCherry+ cells") +
+  scale_y_log10(limits = c(0.01, 15), expand = c(0,0.01)) + 
+  geom_point(data = mch_dep_combined, aes(x = Sample, y = pct_mcherry, color = time_pt, shape = replicate), position = position_dodge(width = 0.5)) +
+  NULL; Low_STIM1_variant_mCherry_plot
+ggsave(file = "Plots/Low_STIM1_variant_mCherry_plot.pdf", Low_STIM1_variant_mCherry_plot, height = 2, width = 3)
+
+```
+
+```{r Multiplex STIM1 variant depletion}
+comb_dbc_score = read.csv("data/comb_dbc_score.csv")
+dbc_validation_plot = ggplot(data = comb_dbc_score, aes(x= endo_dbc_score, y= sko_dbc_score, color = variant))+ 
+  scale_y_continuous(limits = c(-0.5, 0.5)) + scale_x_continuous(limits = c(-1,0.5))+
+  scale_color_manual(values = c("WT" = "black", "R304W" = "blue", "R429C" = "red")) +
+  theme(panel.grid.minor = element_blank())+
+  geom_point(alpha = 0.5, size = 3) +
+  geom_text_repel(data = comb_dbc_score, aes(x= endo_dbc_score, y= sko_dbc_score, color = variant, label = variant)) +
+  theme(legend.position = "none") +
+  labs(x= "Endogenous STIM1 score", y= "STIM1-/- score") +
+  NULL; dbc_validation_plot
+ggsave("plots/dbc_validation_plot.pdf", dbc_validation_plot, height = 1.75, width = 2.25)
+```
