@@ -27,6 +27,7 @@ theme_update(panel.grid.minor = element_blank())
 set.seed(96)
 ```
 
+#Preliminary experiments
 Testing the High and Low STIM1 overexpressor cells, using mCherry as the proxy to see how that population changes over time
 ```{r High vs low kozak STIM1 overexpression survival}
 kozak = read.csv("data/fitness_kozak_stim1.csv")
@@ -51,6 +52,7 @@ fit_merge_mean = fit_merge %>% group_by(plasmid_name, time_pt) %>% mutate(mean_f
 
 fit_merge_mean$Sample <- factor(fit_merge_mean$Sample, levels = c("dEctoACE2","Consensus Kozak STIM1","Sub-optimal Kozak STIM1"))
 
+#Fitness effect of kozak sequence
 High_low_kozak_mCherry <- ggplot() +
   scale_y_log10(limits = c(0.1,1.1), expand = c(0,0.1)) + scale_x_continuous(breaks = c(0,5,10))+ 
   geom_line(data = fit_merge_mean, aes(x = time_pt, y = mean_frac, color = Sample), linewidth = 2, alpha = 0.4)+ 
@@ -59,7 +61,7 @@ High_low_kozak_mCherry <- ggplot() +
   theme(legend.position="bottom", panel.grid.minor = element_blank()) +
   scale_color_discrete(labels=c("None", "High", "Low")) +
   NULL; High_low_kozak_mCherry
-ggsave("Plots/High_low_kozak_mCherry.pdf", High_low_kozak_mCherry, width = 2, height = 2)
+ggsave("Plots/supplement/supp1a_High_low_kozak_mCherry.pdf", High_low_kozak_mCherry, width = 2, height = 2)
 ```
 
 Now looking at how low overexpressor STIM1 cells deplete if it's a variant rather than the WT being overexpressed
@@ -72,14 +74,6 @@ mch_dep_r1$wt_norm <- mch_dep_r1$pct_mcherry / mch_dep_r1[mch_dep_r1$Sample == "
 mch_dep_r2 <- mch_dep %>% filter(replicate == 2)
 mch_dep_r2$wt_norm <- mch_dep_r2$pct_mcherry / mch_dep_r2[mch_dep_r2$Sample == "WT STIM1" & mch_dep_r2$time_pt == 7, "pct_mcherry"]
 
-mch_dep_d10 = read.csv("data/fitness_slp.csv")
-mch_dep_d10$per_day <- (1 - mch_dep_d10$norm_pct)/3
-
-mch_dep_d10_r1 <- mch_dep_d10 %>% filter(replicate == 1) %>% select(-pct_live)
-mch_dep_d10_r1$wt_norm <- mch_dep_d10_r1$pct_mcherry / mch_dep_d10_r1[mch_dep_d10_r1$Sample == "WT STIM1" & mch_dep_d10_r1$time_pt == 7, "pct_mcherry"]
-mch_dep_d10_r2 <- mch_dep_d10 %>% filter(replicate == 2) %>% select(-pct_live)
-mch_dep_d10_r2$wt_norm <- mch_dep_d10_r2$pct_mcherry / mch_dep_d10_r2[mch_dep_d10_r2$Sample == "WT STIM1" & mch_dep_d10_r2$time_pt == 7, "pct_mcherry"]
-
 mch_dep_combined_d7 <- rbind(mch_dep_r1, mch_dep_r2) #%>% filter(time_pt == 7)
 mch_dep_combined_d14 <- rbind(mch_dep_r1, mch_dep_r2) #%>% filter(time_pt == 14)
 
@@ -91,16 +85,18 @@ mch_dep_combined$replicate <- factor(mch_dep_combined$replicate, levels = c(1,2)
 mch_dep_combined$time_pt <- factor(mch_dep_combined$time_pt, levels = c(7,14))
 mch_dep_combined[mch_dep_combined$Sample == "[R304W]STIM1" & mch_dep_combined$time_pt == 14 & mch_dep_combined$replicate == 2,"pct_mcherry"] <- 0.01
 
+#Non-multiplex cell survival - Figure 2C
 Low_STIM1_variant_mCherry_plot <- ggplot() + theme(panel.grid.major.x = element_blank(), axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5)) +
   labs(x = NULL, y = "Percent mCherry+ cells") +
   scale_y_log10(limits = c(0.01, 15), expand = c(0,0.01)) + 
   geom_point(data = mch_dep_combined, aes(x = Sample, y = pct_mcherry, color = time_pt, shape = replicate), position = position_dodge(width = 0.5)) +
   NULL; Low_STIM1_variant_mCherry_plot
-ggsave(file = "Plots/Low_STIM1_variant_mCherry_plot.pdf", Low_STIM1_variant_mCherry_plot, height = 2, width = 3)
+ggsave(file = "Plots/main/fig2c_Low_STIM1_variant_mCherry_plot.pdf", Low_STIM1_variant_mCherry_plot, height = 2, width = 3)
 
 ```
 
 ```{r Multiplex STIM1 variant depletion}
+#Multiplex cell survival - Figure 2D
 comb_dbc_score = read.csv("data/comb_dbc_score.csv")
 dbc_validation_plot = ggplot(data = comb_dbc_score, aes(x= endo_dbc_score, y= sko_dbc_score, color = variant))+ 
   scale_y_continuous(limits = c(-0.5, 0.5)) + scale_x_continuous(limits = c(-1,0.5))+
@@ -111,5 +107,1274 @@ dbc_validation_plot = ggplot(data = comb_dbc_score, aes(x= endo_dbc_score, y= sk
   theme(legend.position = "none") +
   labs(x= "Endogenous STIM1 score", y= "STIM1-/- score") +
   NULL; dbc_validation_plot
-ggsave("plots/dbc_validation_plot.pdf", dbc_validation_plot, height = 1.75, width = 2.25)
+ggsave("plots/main/fig2d_dbc_validation_plot.pdf", dbc_validation_plot, height = 1.75, width = 2.25)
 ```
+
+#Deep mutational scan of the STIM1 cEFhand
+##Plasmid library
+```{r}
+raw_plasmid = read.csv("data/lib_raw.csv")
+raw_plasmid = raw_plasmid[-1]
+variant_name = read.csv("data/variant_name.csv", header = TRUE) %>% select(c("variant"))
+variant_name = variant_name %>% mutate(across(where(is.character), str_trim))
+raw_plasmid = full_join(variant_name, raw_plasmid)
+
+## Figure out expected frequency limits of detection based on total read counts
+plasmid_readcounts <- colSums(raw_plasmid[,c("lib1","lib2","lib3","lib4","lib5")], na.rm = T)
+
+lod_frame <- read.csv(file = "data/Sampling_limit_of_detection.csv", header = T, stringsAsFactors = F)
+
+## figure out read counts that should service as limits of detection for each sample
+plasmid_lod_readcounts <- c()
+plasmid_lod_freqs <- c()
+for(re in plasmid_readcounts){
+  lod_frame$reads - re
+  temp_subset <- (lod_frame %>% mutate(abs_diff = abs(reads - re)) %>% arrange(abs_diff))[1,]
+  plasmid_lod_readcounts <- c(plasmid_lod_readcounts, temp_subset$count)
+  plasmid_lod_freqs <- c(plasmid_lod_freqs, temp_subset$freq)
+}
+
+lod_dataframe <- data.frame("reads" = plasmid_readcounts, "count" = plasmid_lod_readcounts, "freq" = plasmid_lod_freqs)
+
+## Now figure out which data points were below the limit of detection
+raw_plasmid[is.na(raw_plasmid)] <- 0
+
+raw_plasmid2 <- data.frame("variant" = raw_plasmid$variant,
+                           "lib1" = raw_plasmid$lib1 < plasmid_lod_readcounts[1],
+                           "lib2" = raw_plasmid$lib2 < plasmid_lod_readcounts[2],
+                           "lib3" = raw_plasmid$lib3 < plasmid_lod_readcounts[3],
+                           "lib4" = raw_plasmid$lib4 < plasmid_lod_readcounts[4],
+                           "lib5" = raw_plasmid$lib5 < plasmid_lod_readcounts[5])
+
+## These were the total number of variants below the limit of detection in each plasmid sequencing run:
+colSums(raw_plasmid2[,c("lib1","lib2","lib3","lib4","lib5")])
+
+## Now calculate plasmid frequencies, and for plasmids below the limit of detection in the original plasmid prep, call them NA
+plasmid_freq = raw_plasmid %>% mutate(r1 = lib1/plasmid_readcounts[1], 
+                                      r2 = lib2/plasmid_readcounts[2], 
+                                      r3 = lib3/plasmid_readcounts[3],
+                                      r4 = lib4/plasmid_readcounts[4],
+                                      r5 = lib5/plasmid_readcounts[5])
+
+plasmid_freq[raw_plasmid2$lib3 == T,"r3"] <- plasmid_lod_freqs[3]
+plasmid_freq[raw_plasmid2$lib4 == T,"r4"] <- plasmid_lod_freqs[4]
+plasmid_freq[raw_plasmid2$lib5 == T,"r5"] <- plasmid_lod_freqs[5]
+
+plasmid_freq[raw_plasmid2$lib1 == T,c("r1","r2","r3","r4","r5")] <- NA
+plasmid_freq[raw_plasmid2$lib2 == T,c("r1","r2","r3","r4","r5")] <- NA
+
+plasmid_freq2 = raw_plasmid %>% mutate(r1_freq = lib1/sum(lib1, na.rm= T), r2_freq = lib2/sum(lib2, na.rm= T), r3_freq = lib3/sum(lib3, na.rm= T), r4_freq = lib4/sum(lib4, na.rm= T), r5_freq = lib5/sum(lib5, na.rm= T))
+plasmid_freq2$freq_endo = rowMeans(plasmid_freq2[,c("r1_freq","r2_freq")], na.rm = T)
+plasmid_freq2$freq_sko = rowMeans(plasmid_freq2[,c("r3_freq", "r4_freq", "r5_freq")], na.rm= T)
+plasmid_freq2$zscore_endo = (plasmid_freq2$freq_endo - mean(plasmid_freq2$freq_endo, na.rm= TRUE))/sd(plasmid_freq2$freq_endo, na.rm= TRUE)
+plasmid_freq2$zscore_sko = (plasmid_freq2$freq_sko - mean(plasmid_freq2$freq_sko, na.rm= TRUE))/sd(plasmid_freq2$freq_sko, na.rm= TRUE)
+
+#plasmid library density plot - figure supplement 2A
+plasmid_fitted_distribution_plot <- ggplot() + labs(x= "Frequency of variant", y= "Density") + 
+  scale_x_log10(labels = scales::scientific) +
+  geom_density(data = plasmid_freq2, aes(x = freq_endo), color = "red") +
+  geom_density(data = plasmid_freq2, aes(x = freq_sko), color = "green") +
+  scale_y_continuous(limits = c(0,1.2))+
+  scale_color_manual(values = c("Endogenous STIM1 cEFhand library", "STIM1-/- cEFhand library"))
+plasmid_fitted_distribution_plot
+
+ggsave("plots/supplement/supp2a_plasmid_fitted_distribution_plot.pdf", plasmid_fitted_distribution_plot, height = 2, width = 3)
+# #distribution of missense, nonsense and synonymous variants in plasmid librar - figure supplement 2B
+plasmid_freq2 = plasmid_freq2 %>% mutate(start = substr(variant, 1,1),
+                                         position = substr(variant, 2,3),
+                                         end = substr(variant, 4,4))
+plasmid_freq2 = plasmid_freq2 %>% mutate(type = case_when(start == end ~ "synonymous",
+                                                          start != end & end != "_" ~ "missense",
+                                                          end == "_" ~ "nonsense"))
+plasmid_endo_hist = ggplot(data = plasmid_freq2, aes(x= freq_endo, fill = type))+
+  geom_histogram(bins = 30)+ scale_x_log10()+
+  facet_grid(rows = vars(type), scale = "free")+NULL; plasmid_endo_hist
+
+plasmid_sko_hist = ggplot(data = plasmid_freq2, aes(x= freq_sko, fill = type))+
+  geom_histogram(bins = 30)+ scale_x_log10()+
+  facet_grid(rows = vars(type), scale = "free")+NULL; plasmid_sko_hist
+
+ggsave("plots/supplement/supp2b_plasmid_endo_hist.pdf", plasmid_endo_hist, height = 2, width = 2)
+ggsave("plots/supplement/supp2b_plasmid_sko_hist.pdf", plasmid_sko_hist, height = 2, width = 2)
+
+
+#plasmid library replicate correlation plot - figure supplement 2C
+plasmid_cor = log10(plasmid_freq[,c("r1","r2","r3", "r4", "r5")])
+colnames(plasmid_cor) = c("R1", "R2", "R3", "R4", "R5")
+
+plasmid_cor_plot = ggpairs(plasmid_cor, aes(alpha = 0.15))
+ggsave("plots/supplement/supp2c_plasmid_cor_plot.pdf", plasmid_cor_plot, height = 4, width = 4)
+```
+
+```{r}
+#simulate how many cells are required for full coverage of library
+singlemut_uniq_number <- length(unique(plasmid_freq2$variant))
+elib_sampling_frame <- data.frame("cells" = c(1e4,3e4,1e5,3e5,1e6,3e6), "fraction_observed" = 0)
+slib_sampling_frame <- data.frame("cells" = c(1e4,3e4,1e5,3e5,1e6,3e6), "fraction_observed" = 0)
+plasmid_freq3 <- lapply(plasmid_freq2, function(x) replace(x, is.nan(x) | is.na(x), 0))
+
+for(x in 1:nrow(elib_sampling_frame)){
+  elib_sampling <- sample(plasmid_freq3$variant, elib_sampling_frame$cells[x], prob = plasmid_freq3$freq_endo, replace = T)
+  elib_sampling_df <- data.frame(table(elib_sampling))
+  elib_sampling_df2 <- subset(elib_sampling_df, Freq >= 10) # Whatever cutoff you want to use
+  elib_sampling_frame$fraction_observed[x] <- nrow(elib_sampling_df2) / singlemut_uniq_number
+}
+
+endo_summary_frame <- data.frame("cells" = elib_sampling_frame$cells, "endo" = elib_sampling_frame$fraction_observed)
+
+
+for(x in 1:nrow(slib_sampling_frame)){
+  slib_sampling <- sample(plasmid_freq3$variant, slib_sampling_frame$cells[x], prob = plasmid_freq3$freq_sko, replace = T)
+  slib_sampling_df <- data.frame(table(slib_sampling))
+  slib_sampling_df2 <- subset(slib_sampling_df, Freq >= 10) # Whatever cutoff you want to use
+  slib_sampling_frame$fraction_observed[x] <- nrow(slib_sampling_df2) / singlemut_uniq_number
+}
+
+sko_summary_frame <- data.frame("cells" = slib_sampling_frame$cells, "sko" = slib_sampling_frame$fraction_observed)
+
+real_summary_frame = left_join(endo_summary_frame, sko_summary_frame)
+
+#simulation of how many cells need to be recombined to see a variant at least 10 times - figure supplement 2D
+lib_simulation = ggplot() + 
+  labs(y = "Fraction of possible variants\nrecombined at least 10 times", x = "Number of cells recombined") +
+  scale_x_log10(labels = scales::scientific, breaks= c(1e4,3e4,1e5,3e5,1e6, 3e6)) + scale_y_continuous(limits = c(0.2,1.0), expand = c(0,0.01))+
+  geom_line(data = real_summary_frame, aes(x = cells, y = endo), color = "red") + geom_point(data = real_summary_frame, aes(cells, endo), color = "red") +
+  geom_line(data = real_summary_frame, aes(x = cells, y = sko), color = "green") + geom_point(data = real_summary_frame, aes(cells, sko), color = "green")+NULL; lib_simulation 
+
+ggsave("plots/supplement/supp2d_lib_simulation.pdf", lib_simulation, height = 2, width = 3)
+```
+#Key: endo = standard LP cells, sko = knockout LP cells
+## Looking at standard LP cell DMS data and turning variant counts into frequencies
+```{r counts}
+## Import raw endogenous STIM1 counts
+endo_p = plasmid_freq2 %>% dplyr::select(c("variant", "lib1", "lib2"))
+endo_raw_counts = read.csv("data/endo_raw_cells.csv", header = TRUE)
+endo_raw_counts = subset(endo_raw_counts, select = -X )
+endo_raw_counts = left_join(endo_p, endo_raw_counts)
+
+## Figure out the total number of reads per sample
+endo_readcounts <- data.frame("total_count" = colSums(endo_raw_counts[,2:ncol(endo_raw_counts)], na.rm = T))
+
+## Plot the number of total reads we have per sample
+ggplot() + scale_x_log10(limits = c(1e5,1e7)) + 
+  geom_histogram(data = endo_readcounts, aes(x = total_count), bins = 20, color = "black", fill = "grey80")
+## Libraries have lower total reads (presumably because of Amp-EZ); genomic DNA sequencing had generally comparable total reads
+
+## figure out read counts that should service as limits of detection for each sample
+endo_lod_readcounts <- c()
+endo_lod_freqs <- c()
+for(re in endo_readcounts$total_count){
+  temp_subset <- (lod_frame %>% mutate(abs_diff = abs(reads - re)) %>% arrange(abs_diff))[1,]
+  endo_lod_readcounts <- c(endo_lod_readcounts, temp_subset$count)
+  endo_lod_freqs <- c(endo_lod_freqs, temp_subset$freq)
+}
+endo_lod_dataframe <- data.frame("reads" = endo_readcounts, "count" = endo_lod_readcounts, "freq" = endo_lod_freqs)
+
+## Now figure out which data points were below the limit of detection
+endo_raw_counts[is.na(endo_raw_counts)] <- 0
+
+endo_raw_counts2 <- data.frame("variant" = endo_raw_counts$variant,
+                           "lib1" = endo_raw_counts$lib1 < endo_lod_readcounts[1],
+                           "lib2" = endo_raw_counts$lib2 < endo_lod_readcounts[2],
+                           "r1tp1" = endo_raw_counts$r1tp1 < endo_lod_readcounts[3],
+                           "r1tp2" = endo_raw_counts$r1tp2 < endo_lod_readcounts[4],
+                           "r1tp3" = endo_raw_counts$r1tp3 < endo_lod_readcounts[5],
+                           "r2tp1" = endo_raw_counts$r2tp1 < endo_lod_readcounts[6],
+                           "r2tp2" = endo_raw_counts$r2tp2 < endo_lod_readcounts[7],
+                           "r2tp3" = endo_raw_counts$r2tp3 < endo_lod_readcounts[8],
+                           "r4tp1" = endo_raw_counts$r4tp1 < endo_lod_readcounts[9],
+                           "r4tp2" = endo_raw_counts$r4tp2 < endo_lod_readcounts[10],
+                           "r4tp3" = endo_raw_counts$r4tp3 < endo_lod_readcounts[11],
+                           "r5tp1" = endo_raw_counts$r5tp1 < endo_lod_readcounts[12],
+                           "r5tp2" = endo_raw_counts$r5tp2 < endo_lod_readcounts[13],
+                           "r5tp3" = endo_raw_counts$r5tp3 < endo_lod_readcounts[14],
+                           "r6tp1" = endo_raw_counts$r6tp1 < endo_lod_readcounts[15],
+                           "r6tp2" = endo_raw_counts$r6tp2 < endo_lod_readcounts[16],
+                           "r6tp3" = endo_raw_counts$r6tp3 < endo_lod_readcounts[17]
+                           )
+
+## These were the total number of variants below the limit of detection in each endo sequencing run:
+colSums(endo_raw_counts2[,c("r1tp1","r1tp2","r1tp3","r2tp1","r2tp2","r2tp3","r4tp1","r4tp2","r4tp3","r5tp1","r5tp2","r5tp3","r6tp1","r6tp2","r6tp3")])
+
+## Now calculate endo frequencies, and for endos below the limit of detection, give them the limit of detection frequency value
+endo_freq = endo_raw_counts %>% mutate(f_lib1 = lib1/endo_readcounts$total_count[1], 
+                                      f_lib2 = lib2/endo_readcounts$total_count[2], 
+                                      f_r1tp1 = r1tp1/endo_readcounts$total_count[3],
+                                      f_r1tp2 = r1tp2/endo_readcounts$total_count[4],
+                                      f_r1tp3 = r1tp3/endo_readcounts$total_count[5],
+                                      f_r2tp1 = r2tp1/endo_readcounts$total_count[6],
+                                      f_r2tp2 = r2tp2/endo_readcounts$total_count[7],
+                                      f_r2tp3 = r2tp3/endo_readcounts$total_count[8],
+                                      f_r4tp1 = r4tp1/endo_readcounts$total_count[9],
+                                      f_r4tp2 = r4tp2/endo_readcounts$total_count[10],
+                                      f_r4tp3 = r4tp3/endo_readcounts$total_count[11],
+                                      f_r5tp1 = r5tp1/endo_readcounts$total_count[12],
+                                      f_r5tp2 = r5tp2/endo_readcounts$total_count[13],
+                                      f_r5tp3 = r5tp3/endo_readcounts$total_count[14],
+                                      f_r6tp1 = r6tp1/endo_readcounts$total_count[15],
+                                      f_r6tp2 = r6tp2/endo_readcounts$total_count[16],
+                                      f_r6tp3 = r6tp3/endo_readcounts$total_count[17]
+                                      )
+
+endo_freq[endo_raw_counts2$r1tp1 == T,"f_r1tp1"] <- endo_lod_freqs[3]
+endo_freq[endo_raw_counts2$r1tp2 == T,"f_r1tp2"] <- endo_lod_freqs[4]
+endo_freq[endo_raw_counts2$r1tp3 == T,"f_r1tp3"] <- endo_lod_freqs[5]
+endo_freq[endo_raw_counts2$r2tp1 == T,"f_r2tp1"] <- endo_lod_freqs[6]
+endo_freq[endo_raw_counts2$r2tp2 == T,"f_r2tp2"] <- endo_lod_freqs[7]
+endo_freq[endo_raw_counts2$r2tp3 == T,"f_r2tp3"] <- endo_lod_freqs[8]
+endo_freq[endo_raw_counts2$r4tp1 == T,"f_r4tp1"] <- endo_lod_freqs[9]
+endo_freq[endo_raw_counts2$r4tp2 == T,"f_r4tp2"] <- endo_lod_freqs[10]
+endo_freq[endo_raw_counts2$r4tp3 == T,"f_r4tp3"] <- endo_lod_freqs[11]
+endo_freq[endo_raw_counts2$r5tp1 == T,"f_r5tp1"] <- endo_lod_freqs[12]
+endo_freq[endo_raw_counts2$r5tp2 == T,"f_r5tp2"] <- endo_lod_freqs[13]
+endo_freq[endo_raw_counts2$r5tp3 == T,"f_r5tp3"] <- endo_lod_freqs[14]
+endo_freq[endo_raw_counts2$r6tp1 == T,"f_r6tp1"] <- endo_lod_freqs[15]
+endo_freq[endo_raw_counts2$r6tp2 == T,"f_r6tp2"] <- endo_lod_freqs[16]
+endo_freq[endo_raw_counts2$r6tp3 == T,"f_r6tp3"] <- endo_lod_freqs[17]
+
+endo_freq[endo_raw_counts2$lib1 == T,c("f_lib1","f_lib2","f_r1tp1","f_r1tp2","f_r1tp3","f_r2tp1","f_r2tp2","f_r2tp3","f_r4tp1","f_r4tp2","f_r4tp3","f_r5tp1","f_r5tp2","f_r5tp3","f_r6tp1","f_r6tp2","f_r6tp3")] <- NA
+endo_freq[endo_raw_counts2$lib2 == T,c("f_lib1","f_lib2","f_r1tp1","f_r1tp2","f_r1tp3","f_r2tp1","f_r2tp2","f_r2tp3","f_r4tp1","f_r4tp2","f_r4tp3","f_r5tp1","f_r5tp2","f_r5tp3","f_r6tp1","f_r6tp2","f_r6tp3")] <- NA
+
+endo_freq$endo_frac_lod <- rowSums(endo_raw_counts2[,c("r1tp1","r1tp2","r1tp3","r2tp1","r2tp2","r2tp3","r4tp1","r4tp2","r4tp3","r5tp1","r5tp2","r5tp3","r6tp1","r6tp2","r6tp3")])/length(c("r1tp1","r1tp2","r1tp3","r2tp1","r2tp2","r2tp3","r4tp1","r4tp2","r4tp3","r5tp1","r5tp2","r5tp3","r6tp1","r6tp2","r6tp3"))
+
+
+## Take geometric means of the variant frequencies for the two preps
+endo_freq$lib_freq <- 10^rowMeans(log10(endo_freq[,c("f_lib1","f_lib2")]))
+
+endo_freq$r1tp1_ratio <- endo_freq$f_r1tp1 / endo_freq$lib_freq
+endo_freq$r1tp2_ratio <- endo_freq$f_r1tp2 / endo_freq$lib_freq
+endo_freq$r1tp3_ratio <- endo_freq$f_r1tp3 / endo_freq$lib_freq
+endo_freq$r1_ratio <- 10^rowMeans(log10(endo_freq[,c("r1tp1_ratio","r1tp2_ratio","r1tp3_ratio")]))
+endo_freq$r2tp1_ratio <- endo_freq$f_r1tp1 / endo_freq$lib_freq
+endo_freq$r2tp2_ratio <- endo_freq$f_r2tp2 / endo_freq$lib_freq
+endo_freq$r2tp3_ratio <- endo_freq$f_r2tp3 / endo_freq$lib_freq
+endo_freq$r2_ratio <- 10^rowMeans(log10(endo_freq[,c("r2tp1_ratio","r2tp2_ratio","r2tp3_ratio")]))
+endo_freq$r4tp1_ratio <- endo_freq$f_r4tp1 / endo_freq$lib_freq
+endo_freq$r4tp2_ratio <- endo_freq$f_r4tp2 / endo_freq$lib_freq
+endo_freq$r4tp3_ratio <- endo_freq$f_r4tp3 / endo_freq$lib_freq
+endo_freq$r4_ratio <- 10^rowMeans(log10(endo_freq[,c("r4tp1_ratio","r4tp2_ratio","r4tp3_ratio")]))
+endo_freq$r5tp1_ratio <- endo_freq$f_r5tp1 / endo_freq$lib_freq
+endo_freq$r5tp2_ratio <- endo_freq$f_r5tp2 / endo_freq$lib_freq
+endo_freq$r5tp3_ratio <- endo_freq$f_r5tp3 / endo_freq$lib_freq
+endo_freq$r5_ratio <- 10^rowMeans(log10(endo_freq[,c("r5tp1_ratio","r5tp2_ratio","r5tp3_ratio")]))
+endo_freq$r6tp1_ratio <- endo_freq$f_r6tp1 / endo_freq$lib_freq
+endo_freq$r6tp2_ratio <- endo_freq$f_r6tp2 / endo_freq$lib_freq
+endo_freq$r6tp3_ratio <- endo_freq$f_r6tp3 / endo_freq$lib_freq
+endo_freq$r6_ratio <- 10^rowMeans(log10(endo_freq[,c("r6tp1_ratio","r6tp2_ratio","r6tp3_ratio")]))
+
+endo_freq$geo_ratio <- 10^rowMeans(log10(endo_freq[,c("r1_ratio","r2_ratio","r4_ratio","r5_ratio","r6_ratio")]))
+
+endo_freq$position <- substr(endo_freq$variant,2,3)
+endo_freq$start <- substr(endo_freq$variant,1,1)
+endo_freq$end <- substr(endo_freq$variant,4,4)
+```
+```{r standard LP cell survival scores}
+endo_wt = endo_freq %>% filter(variant == "Z0Z")
+endo_raw_freq_ratio = endo_freq %>% mutate(start = substr(variant, 1,1), end = substr(variant, 4,4), position = substr(variant, 2,3))
+endo_score = endo_raw_freq_ratio %>% mutate(type = case_when(end == start ~ "syn",
+                                                                      end == "_" ~ "non", 
+                                                                      end != start & end != "_" ~ "mis")) %>% dplyr::select("variant", "r1_ratio", "r2_ratio", "r4_ratio", "r5_ratio", "r6_ratio", "start", "end", "position", "type", "endo_frac_lod")
+
+endo_score$mean_ratio <- 10^rowMeans(log10(endo_score[,c("r1_ratio","r2_ratio","r4_ratio","r5_ratio","r6_ratio")]), na.rm = T)
+endo_score$rep_count <- 5 - rowSums(is.na(endo_score[,c("r1_ratio","r2_ratio","r4_ratio","r5_ratio","r6_ratio")]))
+
+endo_score_3plusreps <- endo_score %>% filter(rep_count >= 3)
+
+endo_score_3plusreps_log = endo_score_3plusreps %>% mutate(r1_log = log10(r1_ratio),
+                                                         r2_log = log10(r2_ratio),
+                                                         r4_log = log10(r4_ratio),
+                                                         r5_log = log10(r5_ratio),
+                                                         r6_log = log10(r6_ratio))
+
+endo_cor = endo_score_3plusreps_log %>% select(r1_log, r2_log, r4_log, r5_log, r6_log)
+colnames(endo_cor) = c("R1", "R2", "R3", "R4", "R5")
+endo_cor_plot = endo_cor %>% ggpairs(aes(alpha = 0.10))
+ggsave("plots/supplement/supp3a_endo_cor_plot.pdf", endo_cor_plot, height = 4, width = 5 )
+
+```
+
+## Knockout LP cell DMS data
+```{r counts}
+## Import raw endogenous STIM1 counts
+sko_p = plasmid_freq2 %>% dplyr::select(c("variant", "lib3", "lib4", "lib5"))
+sko_raw_counts <- read.csv(file = "data/raw_counts_sko.csv", header = T, stringsAsFactors = F)
+sko_raw_counts <-  subset(sko_raw_counts, select = -X )
+sko_raw_counts = left_join(sko_p, sko_raw_counts)
+
+## Figure out the total number of reads per sample
+sko_readcounts <- data.frame("total_count" = colSums(sko_raw_counts[,2:ncol(sko_raw_counts)], na.rm = T))
+
+## Plot the number of total reads we have per sample
+ggplot() + scale_x_log10(limits = c(1e5,1e7)) + 
+  geom_histogram(data = sko_readcounts, aes(x = total_count), bins = 20, color = "black", fill = "grey80")
+## Libraries have lower total reads (presumably because of Amp-EZ); genomic DNA sequencing had generally comparable total reads
+
+## figure out read counts that should service as limits of detection for each sample
+sko_lod_readcounts <- c()
+sko_lod_freqs <- c()
+for(re in sko_readcounts$total_count){
+  temp_subset <- (lod_frame %>% mutate(abs_diff = abs(reads - re)) %>% arrange(abs_diff))[1,]
+  sko_lod_readcounts <- c(sko_lod_readcounts, temp_subset$count)
+  sko_lod_freqs <- c(sko_lod_freqs, temp_subset$freq)
+}
+sko_lod_dataframe <- data.frame("reads" = sko_readcounts, "count" = sko_lod_readcounts, "freq" = sko_lod_freqs)
+
+## Now figure out which data points were below the limit of detection
+sko_raw_counts[is.na(sko_raw_counts)] <- 0
+
+sko_raw_counts2 <- data.frame("variant" = sko_raw_counts$variant,
+                           "lib3" = sko_raw_counts$lib3 < sko_lod_readcounts[1],
+                           "lib4" = sko_raw_counts$lib4 < sko_lod_readcounts[2],
+                           "lib5" = sko_raw_counts$lib5 < sko_lod_readcounts[3],
+                           "r1tp1" = sko_raw_counts$r1tp1 < sko_lod_readcounts[4],
+                           "r1tp2" = sko_raw_counts$r1tp2 < sko_lod_readcounts[5],
+                           "r1tp3" = sko_raw_counts$r1tp3 < sko_lod_readcounts[6],
+                           "r2tp1" = sko_raw_counts$r2tp1 < sko_lod_readcounts[7],
+                           "r2tp2" = sko_raw_counts$r2tp2 < sko_lod_readcounts[8],
+                           "r2tp3" = sko_raw_counts$r2tp3 < sko_lod_readcounts[9],
+                           "r3tp1" = sko_raw_counts$r3tp1 < sko_lod_readcounts[10],
+                           "r3tp3" = sko_raw_counts$r3tp3 < sko_lod_readcounts[11],
+                           "r4tp1" = sko_raw_counts$r4tp1 < sko_lod_readcounts[12],
+                           "r4tp2" = sko_raw_counts$r4tp2 < sko_lod_readcounts[13],
+                           "r5tp1" = sko_raw_counts$r5tp1 < sko_lod_readcounts[14],
+                           "r5tp2" = sko_raw_counts$r5tp2 < sko_lod_readcounts[15],
+                           "r5tp3" = sko_raw_counts$r5tp3 < sko_lod_readcounts[16],
+                           "r6tp1" = sko_raw_counts$r6tp1 < sko_lod_readcounts[17],
+                           "r6tp2" = sko_raw_counts$r6tp2 < sko_lod_readcounts[18],
+                           "r6tp3" = sko_raw_counts$r6tp3 < sko_lod_readcounts[19]
+                           )
+
+## These were the total number of variants below the limit of detection in each sko sequencing run:
+colSums(sko_raw_counts2[,c("r1tp1","r1tp2","r1tp3","r2tp1","r2tp2","r2tp3","r3tp1","r3tp3","r4tp1","r4tp2","r5tp1","r5tp2","r5tp3","r6tp1","r6tp2","r6tp3")])
+
+## Now calculate sko frequencies, and for skos below the limit of detection, give them the limit of detection frequency value
+sko_freq = sko_raw_counts %>% mutate(f_lib3 = lib3/sko_readcounts$total_count[1], 
+                                     f_lib4 = lib4/sko_readcounts$total_count[2], 
+                                     f_lib5 = lib5/sko_readcounts$total_count[3], 
+                                     f_r1tp1 = r1tp1/sko_readcounts$total_count[4],
+                                     f_r1tp2 = r1tp2/sko_readcounts$total_count[5],
+                                     f_r1tp3 = r1tp3/sko_readcounts$total_count[6],
+                                     f_r2tp1 = r2tp1/sko_readcounts$total_count[7],
+                                     f_r2tp2 = r2tp2/sko_readcounts$total_count[8],
+                                     f_r2tp3 = r2tp3/sko_readcounts$total_count[9],
+                                     f_r3tp1 = r3tp1/sko_readcounts$total_count[10],
+                                     f_r3tp3 = r3tp3/sko_readcounts$total_count[11],
+                                     f_r4tp1 = r4tp1/sko_readcounts$total_count[12],
+                                     f_r4tp2 = r4tp2/sko_readcounts$total_count[13],
+                                     f_r5tp1 = r5tp1/sko_readcounts$total_count[14],
+                                     f_r5tp2 = r5tp2/sko_readcounts$total_count[15],
+                                     f_r5tp3 = r5tp3/sko_readcounts$total_count[16],
+                                     f_r6tp1 = r6tp1/sko_readcounts$total_count[17],
+                                     f_r6tp2 = r6tp2/sko_readcounts$total_count[18],
+                                     f_r6tp3 = r6tp3/sko_readcounts$total_count[19]
+                                     )
+
+sko_freq[sko_raw_counts2$r1tp1 == T,"f_r1tp1"] <- sko_lod_freqs[4]
+sko_freq[sko_raw_counts2$r1tp2 == T,"f_r1tp2"] <- sko_lod_freqs[5]
+sko_freq[sko_raw_counts2$r1tp3 == T,"f_r1tp3"] <- sko_lod_freqs[6]
+sko_freq[sko_raw_counts2$r2tp1 == T,"f_r2tp1"] <- sko_lod_freqs[7]
+sko_freq[sko_raw_counts2$r2tp2 == T,"f_r2tp2"] <- sko_lod_freqs[8]
+sko_freq[sko_raw_counts2$r2tp3 == T,"f_r2tp3"] <- sko_lod_freqs[9]
+sko_freq[sko_raw_counts2$r3tp1 == T,"f_r3tp1"] <- sko_lod_freqs[10]
+sko_freq[sko_raw_counts2$r3tp3 == T,"f_r3tp3"] <- sko_lod_freqs[11]
+sko_freq[sko_raw_counts2$r4tp1 == T,"f_r4tp1"] <- sko_lod_freqs[12]
+sko_freq[sko_raw_counts2$r4tp2 == T,"f_r4tp2"] <- sko_lod_freqs[13]
+sko_freq[sko_raw_counts2$r5tp1 == T,"f_r5tp1"] <- sko_lod_freqs[14]
+sko_freq[sko_raw_counts2$r5tp2 == T,"f_r5tp2"] <- sko_lod_freqs[15]
+sko_freq[sko_raw_counts2$r5tp3 == T,"f_r5tp3"] <- sko_lod_freqs[16]
+sko_freq[sko_raw_counts2$r6tp1 == T,"f_r6tp1"] <- sko_lod_freqs[17]
+sko_freq[sko_raw_counts2$r6tp2 == T,"f_r6tp2"] <- sko_lod_freqs[18]
+sko_freq[sko_raw_counts2$r6tp3 == T,"f_r6tp3"] <- sko_lod_freqs[19]
+
+sko_freq[sko_raw_counts2$lib3 == T,c("f_lib3","f_lib4","f_lib5","f_r1tp1","f_r1tp2","f_r1tp3","f_r2tp1","f_r2tp2","f_r2tp3","f_r3tp1","f_r3tp3","f_r4tp1","f_r4tp2","f_r5tp1","f_r5tp2","f_r5tp3","f_r6tp1","f_r6tp2","f_r6tp3")] <- NA
+sko_freq[sko_raw_counts2$lib4 == T,c("f_lib3","f_lib4","f_lib5","f_r1tp1","f_r1tp2","f_r1tp3","f_r2tp1","f_r2tp2","f_r2tp3","f_r3tp1","f_r3tp3","f_r4tp1","f_r4tp2","f_r5tp1","f_r5tp2","f_r5tp3","f_r6tp1","f_r6tp2","f_r6tp3")] <- NA
+sko_freq[sko_raw_counts2$lib5 == T,c("f_lib3","f_lib4","f_lib5","f_r1tp1","f_r1tp2","f_r1tp3","f_r2tp1","f_r2tp2","f_r2tp3","f_r3tp1","f_r3tp3","f_r4tp1","f_r4tp2","f_r5tp1","f_r5tp2","f_r5tp3","f_r6tp1","f_r6tp2","f_r6tp3")] <- NA
+
+sko_freq$sko_frac_lod <- rowSums(sko_raw_counts2[,c("r1tp1","r1tp2","r1tp3","r2tp1","r2tp2","r2tp3","r3tp1","r3tp3","r4tp1","r4tp2","r5tp1","r5tp2","r5tp3","r6tp1","r6tp2","r6tp3")])/length(c("r1tp1","r1tp2","r1tp3","r2tp1","r2tp2","r2tp3","r3tp1","r3tp3","r4tp1","r4tp2","r5tp1","r5tp2","r5tp3","r6tp1","r6tp2","r6tp3"))
+
+## Take geometric means of the variant frequencies for the two preps
+sko_freq$lib_freq <- 10^rowMeans(log10(sko_freq[,c("f_lib3","f_lib4","f_lib5")]))
+
+sko_freq$r1tp1_ratio <- sko_freq$f_r1tp1 / sko_freq$lib_freq
+sko_freq$r1tp2_ratio <- sko_freq$f_r1tp2 / sko_freq$lib_freq
+sko_freq$r1tp3_ratio <- sko_freq$f_r1tp3 / sko_freq$lib_freq
+sko_freq$r1_ratio <- 10^rowMeans(log10(sko_freq[,c("r1tp1_ratio","r1tp2_ratio","r1tp3_ratio")]))
+sko_freq$r2tp1_ratio <- sko_freq$f_r1tp1 / sko_freq$lib_freq
+sko_freq$r2tp2_ratio <- sko_freq$f_r2tp2 / sko_freq$lib_freq
+sko_freq$r2tp3_ratio <- sko_freq$f_r2tp3 / sko_freq$lib_freq
+sko_freq$r2_ratio <- 10^rowMeans(log10(sko_freq[,c("r2tp1_ratio","r2tp2_ratio","r2tp3_ratio")]))
+sko_freq$r3tp1_ratio <- sko_freq$f_r3tp1 / sko_freq$lib_freq
+sko_freq$r3tp3_ratio <- sko_freq$f_r3tp3 / sko_freq$lib_freq
+sko_freq$r3_ratio <- 10^rowMeans(log10(sko_freq[,c("r3tp1_ratio","r3tp3_ratio")]))
+sko_freq$r4tp1_ratio <- sko_freq$f_r4tp1 / sko_freq$lib_freq
+sko_freq$r4tp2_ratio <- sko_freq$f_r4tp2 / sko_freq$lib_freq
+sko_freq$r4_ratio <- 10^rowMeans(log10(sko_freq[,c("r4tp1_ratio","r4tp2_ratio")]))
+sko_freq$r5tp1_ratio <- sko_freq$f_r5tp1 / sko_freq$lib_freq
+sko_freq$r5tp2_ratio <- sko_freq$f_r5tp2 / sko_freq$lib_freq
+sko_freq$r5tp3_ratio <- sko_freq$f_r5tp3 / sko_freq$lib_freq
+sko_freq$r5_ratio <- 10^rowMeans(log10(sko_freq[,c("r5tp1_ratio","r5tp2_ratio","r5tp3_ratio")]))
+sko_freq$r6tp1_ratio <- sko_freq$f_r6tp1 / sko_freq$lib_freq
+sko_freq$r6tp2_ratio <- sko_freq$f_r6tp2 / sko_freq$lib_freq
+sko_freq$r6tp3_ratio <- sko_freq$f_r6tp3 / sko_freq$lib_freq
+sko_freq$r6_ratio <- 10^rowMeans(log10(sko_freq[,c("r6tp1_ratio","r6tp2_ratio","r6tp3_ratio")]))
+
+sko_freq$geo_ratio <- 10^rowMeans(log10(sko_freq[,c("r1_ratio","r2_ratio","r3_ratio","r4_ratio","r5_ratio","r6_ratio")]))
+
+sko_freq$position <- substr(sko_freq$variant,2,3)
+sko_freq$start <- substr(sko_freq$variant,1,1)
+sko_freq$end <- substr(sko_freq$variant,4,4)
+
+```
+
+```{r knockout LP cell survival scores}
+sko_wt = sko_freq %>% filter(variant == "Z0Z")
+sko_raw_freq_ratio = sko_freq %>% mutate(start = substr(variant, 1,1), end = substr(variant, 4,4), position = substr(variant, 2,3))
+sko_score = sko_raw_freq_ratio %>% mutate(type = case_when(end == start ~ "syn",
+                                                                      end == "_" ~ "non", 
+                                                                      end != start & end != "_" ~ "mis")) %>% dplyr::select("variant", "r1_ratio", "r2_ratio", "r3_ratio" ,"r4_ratio", "r5_ratio", "r6_ratio", "start", "end", "position", "type","sko_frac_lod")
+
+sko_score$mean_ratio <- 10^rowMeans(log10(sko_score[,c("r1_ratio","r2_ratio","r3_ratio", "r4_ratio","r5_ratio","r6_ratio")]), na.rm = T)
+sko_score$rep_count <- 5 - rowSums(is.na(sko_score[,c("r1_ratio","r2_ratio", "r3_ratio",
+                                                      "r4_ratio","r5_ratio","r6_ratio")]))
+
+sko_score_3plusreps <- sko_score %>% filter(rep_count >= 3)
+
+sko_score_3plusreps_log = sko_score_3plusreps %>% mutate(r1_log = log10(r1_ratio),
+                                                         r2_log = log10(r2_ratio),
+                                                         r3_log = log10(r3_ratio),
+                                                         r4_log = log10(r4_ratio),
+                                                         r5_log = log10(r5_ratio),
+                                                         r6_log = log10(r6_ratio))
+
+sko_cor = sko_score_3plusreps_log %>% select(r1_log, r2_log, r3_log, r4_log, r5_log, r6_log) 
+colnames(sko_cor) = c("R1", "R2", "R3", "R4", "R5", "r6")
+sko_cor_plot = sko_cor %>% ggpairs(aes(alpha = 0.10))
+ggsave("plots/supplement/supp3b_sko_cor_plot.pdf", sko_cor_plot, height = 4, width = 6)
+```
+
+## Great, so now we have enrichment scores for experiments done in standard and knockout LP cells
+```{r Combining all existing DMS scores}
+#number of endogenous and SKO scores
+sum(!is.na(endo_score$mean_ratio))
+sum(!is.na(sko_score$mean_ratio))
+
+var_endo = na.omit(endo_score) %>% select("variant") %>% mutate(endo = "yes")
+var_sko = na.omit(sko_score) %>% select("variant") %>% mutate(sko = "yes")
+
+var_both = left_join(variant_name, var_endo)
+var_both = left_join(var_both, var_sko)
+var_both = na.omit(var_both)
+
+## Combining all existing data
+combined <- merge(endo_score[,c("variant","position","start","end","type","mean_ratio","endo_frac_lod")], sko_score[,c("variant","mean_ratio","sko_frac_lod")], by = "variant", all = T) %>% filter(!is.na(type))
+colnames(combined)[colnames(combined) == "mean_ratio.x"] <- "endo_ratio"
+colnames(combined)[colnames(combined) == "mean_ratio.y"] <- "sko_ratio"
+
+combined = replace(combined, combined == 0, NA)
+
+```
+
+## Bring in the validation data next
+```{r SSV Validation counts and analysis - standard LP}
+## Import raw endogenous STIM1 counts
+endo_ssv <- read.csv(file = "data/endo_ssv_raw.csv", header = T, stringsAsFactors = F)
+endo_ssv_freq <- data.frame(apply(endo_ssv[,2:ncol(endo_ssv)],2,function(x){x/sum(x)}))
+endo_ssv_freq$variant <- endo_ssv$variant
+endo_ssv_freq$lib = (((endo_ssv_freq$lib_1) + (endo_ssv_freq$lib_2))/2)
+endo_ssv_freq = endo_ssv_freq %>% dplyr::select(c("variant", "lib", "r1tp1", "r1tp2", "r1tp3", "r2tp1", "r2tp2", "r2tp3", "r3tp1", "r3tp2", "r3tp3"))
+
+## Figure out the total number of reads per sample
+endo_ssv_colsums <- data.frame("total_count" = colSums(endo_ssv[,2:ncol(endo_ssv)]))
+
+## Plot the number of total reads we have per sample
+ggplot() + scale_x_log10(limits = c(1e5,1e7)) + 
+  geom_histogram(data = endo_ssv_colsums, aes(x = total_count), bins = 20, color = "black", fill = "grey80")
+## Libraries have lower total reads (presumably because of Amp-EZ); genomic DNA sequencing had generally comparable total reads
+
+## Confirm that frequencies were adequately calculated
+colSums(endo_ssv_freq[,2:ncol(endo_ssv_freq)])
+
+## Now we can add the column labels back
+endo_ssv_freq2 <- endo_ssv_freq
+
+endo_ssv_freq3 <- data.frame("variant" = endo_ssv_freq2$variant)
+
+endo_ssv_freq3$plasmid <- endo_ssv_freq2$lib
+endo_ssv_freq3$r1 <- rowMeans(endo_ssv_freq2[,c("r1tp1","r1tp2","r1tp3")], na.rm = F)
+endo_ssv_freq3$r2 <- rowMeans(endo_ssv_freq2[,c("r2tp1","r2tp2","r2tp3")], na.rm= F)
+endo_ssv_freq3$r3 <- rowMeans(endo_ssv_freq2[,c("r3tp1", "r3tp3")], na.rm= F)
+
+endo_ssv_freq_ratio <- data.frame("variant" = endo_ssv_freq2$variant)
+
+endo_ssv_freq_ratio$r1_ratio <- endo_ssv_freq3$r1 / endo_ssv_freq3$plasmid
+endo_ssv_freq_ratio$r2_ratio <- endo_ssv_freq3$r2 / endo_ssv_freq3$plasmid
+endo_ssv_freq_ratio$r3_ratio <- endo_ssv_freq3$r3 / endo_ssv_freq3$plasmid
+
+endo_ssv_freq_ratio$r1_ratio_log10 <- log10(endo_ssv_freq_ratio$r1_ratio)
+endo_ssv_freq_ratio$r2_ratio_log10 <- log10(endo_ssv_freq_ratio$r2_ratio)
+endo_ssv_freq_ratio$r3_ratio_log10 <- log10(endo_ssv_freq_ratio$r3_ratio)
+
+
+endo_ssv_cor = endo_ssv_freq_ratio %>% dplyr::select(c("r1_ratio_log10", "r2_ratio_log10", "r3_ratio_log10"))
+endo_ssv_cor = endo_ssv_cor[!is.infinite(rowSums(endo_ssv_cor)),]
+colnames(endo_ssv_cor) = c("R1", "R2", "R3")
+
+endo_ssv_cor_plot = endo_ssv_cor %>% ggpairs()
+endo_ssv_cor_plot
+
+endo_ssv_freq_ratio = endo_ssv_freq_ratio %>% mutate(start = substr(variant, 1,1), end = substr(variant, 4,4), position = substr(variant, 2,3)) #%>% filter(variant != "Z0Z")
+endo_ssv_score = endo_ssv_freq_ratio %>% mutate(type = case_when(end == start ~ "syn",
+                                                                      end == "_" ~ "non", 
+                                                                      end != start & end != "_" ~ "mis")) %>% dplyr::select("variant", "r1_ratio", "r2_ratio", "r3_ratio", "start", "end", "position", "type")
+
+endo_ssv_score$mean_ratio <- 10^rowMeans(log10(endo_ssv_score[,c("r1_ratio","r2_ratio", "r3_ratio")])) #skipped R3 bc of no tp2
+endo_ssv_score$endo_ssv_score = log10(endo_ssv_score$mean_ratio)
+```
+
+```{r SSV Validation counts and analysis - knockout LP}
+## Import raw endogenous STIM1 counts
+sko_ssv <- read.csv(file = "data/sko_ssv_raw.csv", header = T, stringsAsFactors = F)
+sko_ssv_freq <- data.frame(apply(sko_ssv[,2:ncol(sko_ssv)],2,function(x){x/sum(x)}))
+sko_ssv_freq$variant <- sko_ssv$variant
+sko_ssv_freq$lib = (((sko_ssv_freq$lib_1) + (sko_ssv_freq$lib_2))/2)
+
+sko_ssv_freq = sko_ssv_freq %>% dplyr::select(c("variant","lib_1","lib_2","lib", "r1tp1", "r1tp2", "r1tp3", "r2tp1", "r2tp2", "r2tp3", "r3tp1", "r3tp2", "r3tp3"))
+
+## Confirm that frequencies were adequately calculated
+colSums(sko_ssv_freq[,2:ncol(sko_ssv_freq)])
+
+## Now we can add the column labels back
+sko_ssv_freq2 <-sko_ssv_freq
+
+sko_ssv_freq3 <- data.frame("variant" = sko_ssv_freq2$variant)
+
+sko_ssv_freq3$plasmid <- log10(sko_ssv_freq2$lib)
+sko_ssv_freq3$r1 <- rowMeans(log10(sko_ssv_freq2[,c("r1tp1","r1tp2","r1tp3")]), na.rm = F)
+sko_ssv_freq3$r2 <- rowMeans(log10(sko_ssv_freq2[,c("r2tp1","r2tp2","r2tp3")]), na.rm= F)
+sko_ssv_freq3$r3 <- rowMeans(log10(sko_ssv_freq2[,c("r3tp1","r3tp2", "r3tp3")]), na.rm= F)
+
+sko_ssv_freq_ratio <- data.frame("variant" = sko_ssv_freq2$variant)
+
+sko_ssv_freq_ratio$r1_ratio <- 10^(sko_ssv_freq3$r1 - sko_ssv_freq3$plasmid)
+sko_ssv_freq_ratio$r2_ratio <- 10^(sko_ssv_freq3$r2 - sko_ssv_freq3$plasmid)
+sko_ssv_freq_ratio$r3_ratio <- 10^(sko_ssv_freq3$r3 - sko_ssv_freq3$plasmid)
+
+sko_ssv_freq_ratio$r1_ratio_log10 <- log10(sko_ssv_freq_ratio$r1_ratio)
+sko_ssv_freq_ratio$r2_ratio_log10 <- log10(sko_ssv_freq_ratio$r2_ratio)
+sko_ssv_freq_ratio$r3_ratio_log10 <- log10(sko_ssv_freq_ratio$r3_ratio)
+
+
+sko_ssv_cor = sko_ssv_freq_ratio %>% dplyr::select(c("r1_ratio_log10", "r2_ratio_log10", "r3_ratio_log10"))
+sko_ssvcor = sko_ssv_cor[!is.infinite(rowSums(sko_ssv_cor)),]
+colnames(sko_ssv_cor) = c("R1", "R2", "R3")
+
+sko_ssv_cor_plot = sko_ssv_cor %>% ggpairs()
+sko_ssv_cor_plot
+
+sko_ssv_wt = sko_ssv_freq_ratio %>% filter(variant == "Z0Z")
+sko_ssv_freq_ratio = sko_ssv_freq_ratio %>% mutate(start = substr(variant, 1,1), end = substr(variant, 4,4), position = substr(variant, 2,3))# %>% filter(variant != "Z0Z")
+sko_ssv_score = sko_ssv_freq_ratio %>% mutate(type = case_when(end == start ~ "syn",
+                                                                      end == "_" ~ "non", 
+                                                                      end != start & end != "_" ~ "mis")) %>% dplyr::select("variant", "r1_ratio", "r2_ratio", "r3_ratio", "start", "end", "position", "type")
+
+sko_ssv_score$mean_ratio <- 10^rowMeans(log10(sko_ssv_score[,c("r1_ratio","r2_ratio", "r3_ratio")]))
+sko_ssv_score$sko_ssv_score = log10(sko_ssv_score$mean_ratio)
+```
+
+## Add the validation data to the combined dataframe
+```{r combined table with dms and validation data}
+## All DMS and single variant validation values included so far
+combined2 <- merge(merge(combined, sko_ssv_score[,c("variant","mean_ratio")], by = "variant", all = T), endo_ssv_score[,c("variant","mean_ratio")], by = "variant", all = T)
+colnames(combined2)[colnames(combined2) %in% c("mean_ratio.x", "mean_ratio.y")] <- c("endo_ssv_ratio","sko_ssv_ratio")
+
+combined2[combined2$variant == "Z0Z","type"] <- "WT"
+
+## Add plasmid frequencies as well
+combined2 <- merge(combined2,endo_freq[,c("variant","lib_freq")], by = "variant", all.x = T)
+colnames(combined2)[colnames(combined2) == "lib_freq"] = "endo_plasmid"
+
+combined2 <- merge(combined2,sko_freq[,c("variant","lib_freq")], by = "variant", all.x = T)
+colnames(combined2)[colnames(combined2) == "lib_freq"] = "sko_plasmid"
+
+#adding depletion in bacteria
+## Take geometric means of the variant frequencies for the two preps
+plasmid_freq$lib_prep1 <- 10^rowMeans(log10(plasmid_freq[,c("r1","r2")]))
+plasmid_freq$lib_prep2 <- 10^rowMeans(log10(plasmid_freq[,c("r3","r4","r5")]))
+
+plasmid_freq$lib_prep_ratio <- plasmid_freq$lib_prep2 / plasmid_freq$lib_prep1
+
+plasmid_freq$position <- substr(plasmid_freq$variant,2,3)
+plasmid_freq$start <- substr(plasmid_freq$variant,1,1)
+plasmid_freq$end <- substr(plasmid_freq$variant,4,4)
+combined2 <- merge(combined2, plasmid_freq[,c("variant","lib_prep_ratio")], all.x = T)
+colnames(combined2)[colnames(combined2) == "lib_prep_ratio"] = "bac_ratio"
+
+
+## Making positional data
+combined_positional <- combined2 %>% filter(type == "mis") %>% group_by(position) %>% summarize(endo_positional = 10^mean(log10(endo_ratio), na.rm = T), sko_positional = 10^mean(log10(sko_ratio), na.rm = T), bac_positional = 10^mean(log10(bac_ratio), na.rm = T))
+positional_scores = combined2 %>% filter(type == "mis") %>% group_by(position) %>% summarize(endo_avg = 10^mean(log10(endo_ratio), na.rm = T), sko_avg = 10^mean(log10(sko_ratio), na.rm = T), bac_avg = 10^mean(log10(bac_ratio), na.rm = T))
+## Add positional data to my variant dataframe
+combined2 <- merge(combined2,combined_positional, by = "position")
+
+combined2 = combined2 %>% group_by(position) %>% mutate(endo_lib_positional = mean(endo_plasmid, na.rm=T),
+                                                        sko_lib_positional = mean(sko_plasmid, na.rm = T))
+
+#Data frame of survival scores for standard LP, knockout LP and bacteria
+write.csv(combined2, "data/dms_scores.csv")
+```
+
+```{r KAM new section looking at whether SKO scores can be affected by the fact that they were done with the retransformed plasmid library}
+combined2$hypo_lowest <- NA
+for(x in 1:nrow(combined2)){
+  combined2$hypo_lowest[x]
+}
+
+ggplot() + scale_x_log10() + scale_y_log10() +
+  geom_point(data = combined2, aes(x = sko_plasmid, y = sko_ratio)) +
+  geom_point(data = combined2 %>% filter(sko_frac_lod > 2/3), aes(x = sko_plasmid, y = sko_ratio), color = "red") +
+  geom_point(data = combined2 %>% filter(position == 70), aes(x = sko_plasmid, y = sko_ratio), color = "green")
+             
+ggplot() + scale_x_log10() + scale_y_log10() +
+  geom_point(data = combined2, aes(x = endo_plasmid, y = endo_ratio)) +
+  geom_point(data = combined2 %>% filter(endo_frac_lod > 2/3), aes(x = endo_plasmid, y = endo_ratio), color = "red") +
+  geom_point(data = combined2 %>% filter(position == 93), aes(x = endo_plasmid, y = endo_ratio), color = "green")
+
+
+## K, I think we may as well mark variants where their values are going to be inaccurately high b/c of lack of range of detectable frequencies
+combined2$endo_inac_score <- "no"
+combined2$sko_inac_score <- "no"
+for(x in 1:nrow(combined2)){
+  if(!is.na(combined2$endo_frac_lod[x])){
+    if(combined2$endo_frac_lod[x] > 2/3){
+      combined2$endo_inac_score[x] <- "yes"
+    }
+  }
+  if(!is.na(combined2$sko_frac_lod[x])){
+    if(combined2$sko_frac_lod[x] > 2/3){
+      combined2$sko_inac_score[x] <- "yes"
+    }
+  }
+}
+
+ggplot() + scale_x_log10() + scale_y_log10() +
+  geom_point(data = combined2, aes(x = sko_plasmid, y = sko_ratio)) +
+  geom_point(data = combined2 %>% filter(sko_inac_score == "yes"), aes(x = sko_plasmid, y = sko_ratio), color = "red") +
+  geom_point(data = combined2 %>% filter(position == 93), aes(x = sko_plasmid, y = sko_ratio), color = "green")
+             
+ggplot() + scale_x_log10() + scale_y_log10() +
+  geom_point(data = combined2, aes(x = endo_plasmid, y = endo_ratio)) +
+  geom_point(data = combined2 %>% filter(endo_inac_score == "yes"), aes(x = endo_plasmid, y = endo_ratio), color = "red") +
+  geom_point(data = combined2 %>% filter(position == 93), aes(x = endo_plasmid, y = endo_ratio), color = "green")
+```
+## Make some histograms separated by mutation type
+```{r Score histogram}
+histogram_data = combined2 %>% filter(type %in% c("mis", "syn", "non"))
+histogram_data$type[histogram_data$type == "mis"] = "Mis"
+histogram_data$type[histogram_data$type == "non"] = "Non"
+histogram_data$type[histogram_data$type == "syn"] = "Syn"
+
+histogram_data$type <- factor(histogram_data$type, rev(c("Mis","Non","Syn")))
+
+
+endo_histogram_plot2 = ggplot() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  geom_histogram(data = histogram_data, aes(x = log10(endo_ratio)), alpha = 0.75, color = "black", bins = 10) + 
+  labs(x= "Enrichment Score", y = "Count", fill = "Sample", title = "Endogenous") +
+  facet_grid(rows = vars(type), scales = "free") +
+  theme(legend.position = "none")+
+  scale_x_continuous(breaks = pretty_breaks(n = 3)) +  
+  scale_y_continuous(breaks = pretty_breaks(n = 3)) +
+  NULL; endo_histogram_plot2
+ggsave("plots/main/fig3b_endo_histogram_plot2.pdf", endo_histogram_plot2, height = 1.75, width = 1.5)
+
+sko_histogram_plot2 = ggplot() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  geom_histogram(data = histogram_data, 
+                 aes(x = log10(sko_ratio)), 
+                 alpha = 0.75, 
+                 color = "black", 
+                 bins = 10) + 
+  labs(x = "Enrichment Score", 
+       y = "Count", 
+       title = "Knockout") +
+  facet_grid(rows = vars(type), scales = "free") + 
+  scale_x_continuous(breaks = pretty_breaks(n = 3)) +  
+  scale_y_continuous(breaks = pretty_breaks(n = 3)) +
+  theme(legend.position = "none")+
+  NULL; sko_histogram_plot2
+ggsave("plots/main/fig3c_sko_histogram_plot2.pdf", sko_histogram_plot2, height = 1.75, width = 1.5)
+
+bac_histogram_plot2 = ggplot() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        strip.text = element_blank()) +
+  geom_histogram(data = histogram_data, aes(x = log10(bac_ratio)), alpha = 0.75, color = "black", bins = 10) + 
+  labs(x= "Score", y = "Count", fill = "Sample", title = NULL) +
+  facet_grid(rows = vars(type), scale = "free") +
+  scale_x_continuous(breaks = pretty_breaks(n = 3)) +  
+  scale_y_continuous(breaks = pretty_breaks(n = 2)) +
+  theme(legend.position = "none")+
+  NULL; bac_histogram_plot2
+ggsave("plots/main/fig4b_bac_histogram_plot2.pdf", bac_histogram_plot2, height = 1.5, width = 1.5)
+```
+#Heatmaps
+```{r Make a dataframe we can use for annotating the heatmaps}
+
+wt_seq <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNY"
+
+annotation_df <- data.frame("position" = seq(63,98))
+annotation_df$start <- NA
+for(x in 1:nrow(annotation_df)){annotation_df$start[x] <- substr(wt_seq,x,x)}
+
+annotation_df2 <- annotation_df
+
+main_chain_coordination_res <- c(82)
+side_chain_coordination_res <- c(76, 78, 80, 87)
+
+annotation_df3 <- merge(annotation_df2, data.frame("position" = side_chain_coordination_res, "coord" = 1), all.x = T)
+annotation_df3[annotation_df3$position %in% main_chain_coordination_res,"coord"] <- 1.1
+
+helix <- c(seq(64,73),seq(89,97))
+annotation_df4 <- merge(annotation_df3, data.frame("position" = helix, "helix" = 1), all.x = T)
+annotation_df4[is.na(annotation_df4)] <- 0
+annotation_df4$position = as.character(annotation_df4$position)
+
+## Make another dataframe of all posssible variants for helping with data frames of missing values
+
+all_res_list <- c("_","P","C","M","T","S","G","A","V","I","L","F","Y","W","H","K","R","N","Q","D","E")
+all_variant_list <- c()
+
+for(x in 1:nrow(annotation_df4)){
+  for(y in all_res_list){
+    all_variant_list <- c(all_variant_list,temp_start_pos <- paste0(annotation_df4$start[x], annotation_df4$position[x], y))
+  }
+}
+
+all_variant_df <- data.frame("variant" = all_variant_list)
+
+```
+
+
+
+##Endogenous STIM1
+```{r Endogenous STIM1 positional patterns}
+endo_mis = combined2 %>% filter(type == "mis") %>% select(c("variant", "endo_ratio", "start", "end", "position"))
+endo_non = combined2 %>% filter(type == "non") %>% select(c("variant", "endo_ratio", "start", "end", "position"))
+endo_syn = combined2 %>% filter(type == "syn") %>% select(c("variant", "endo_ratio", "start", "end", "position"))
+
+endo_positional_ratios <- endo_mis %>% group_by(position) %>% summarize(missense_geomean = mean(endo_ratio), missense_min = min(endo_ratio))
+endo_positional_ratios2 <- merge(endo_positional_ratios, endo_non[,c("position","endo_ratio")], by = "position", all.x = T)
+endo_positional_ratios3 <- merge(endo_positional_ratios2, endo_syn[,c("position","endo_ratio")], by = "position", all.x = T)
+colnames(endo_positional_ratios3) <- c("position", "missense_geomean","missense_min", "nonsense","synonymous")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = endo_positional_ratios3, aes(x = missense_geomean, y = nonsense)) +
+  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense)) +
+  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = endo_positional_ratios3, aes(x = missense_geomean, y = synonymous)) +
+  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = endo_positional_ratios3, aes(x = nonsense, y = synonymous)) +
+  geom_text_repel(data = endo_positional_ratios3, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+```
+
+```{r Endogenous STIM1 heatmap}
+
+endo_score_heatmap = combined2 %>% select(c("variant", "position", "start", "end","type", "endo_ratio")) %>% filter(!(position %in% c(0,99)) & !(end %in% c("?")))
+
+## For values below 0.01, set it to 0.01 for the heatmap
+for(x in 1:nrow(endo_score_heatmap)){
+  if(!is.na(endo_score_heatmap$endo_ratio[x]) & endo_score_heatmap$endo_ratio[x] < 0.01){endo_score_heatmap$endo_ratio[x] <- 0.01}
+}
+
+endo_score_heatmap$position = as.character(endo_score_heatmap$position)
+endo_score_heatmap = endo_score_heatmap %>% filter(variant != "Z0Z")
+
+endo_score_heatmap$end <- factor(endo_score_heatmap$end, levels = c("_","P","C","M","T","S","G","A","V","I","L","F","Y","W","H","K","R","N","Q","D","E"))
+
+endo_score_heatmap1 <- rbind(endo_score_heatmap,
+                         data.frame("position" = annotation_df4$position, "endo_ratio" = 1, "variant" = NA, "start" = annotation_df4$start, "end" = "WT res", "type" = "annot"),
+                         data.frame("position" = annotation_df4$position, "endo_ratio" = annotation_df4$coord, "variant" = NA, "start" = "Coord", "end" = "Coord", "type" = "annot"),
+                         data.frame("position" = annotation_df4$position, "endo_ratio" = annotation_df4$helix, "variant" = NA, "start" = "Helix", "end" = "Helix", "type" = "annot"), 
+                          data.frame("position" = positional_scores$position, "endo_ratio" = positional_scores$endo_avg, "variant" = NA, "r1_ratio" = NA, "r2_ratio" = NA, "r4_ratio" = NA, "r5_ratio" = NA, "r6_ratio" = NA, "start" = "Geomean (mis)", "end" = "Geomean (mis)", "type" = "annot", "rep_count" = NA))
+
+endo_score_heatmap1$end <- factor(endo_score_heatmap1$end, levels = rev(c("Geomean (mis)","Helix","Coord","WT res","_","R","H","K","D","E","S","T","N","Q","A","V","I","L","M","F","Y","W","C","G","P")))
+endo_syn$end <- factor(endo_syn$end, levels = rev(c("Geomean (mis)","Helix","Coord","WT res","_","R","H","K","D","E","S","T","N","Q","A","V","I","L","M","F","Y","W","C","G","P")))
+
+heatmap_endo <- ggplot() + labs(x = NULL, y = NULL) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", na.value = "grey") +
+  geom_tile(data = endo_score_heatmap1 %>% filter(position != "0Z"), aes(x = position, y = end, fill = log10(endo_ratio))) +
+  geom_point(data = endo_syn, aes(x = position, y = end), size = 0.25) +
+  geom_text(data = endo_score_heatmap1 %>% filter(end == "WT res" & endo_ratio == 1), aes(x = position, y = end, label = start), size = 1) +
+  geom_text(data = endo_score_heatmap1 %>% filter(end == "Coord" & endo_ratio == 1), aes(x = position, y = end), label = "S", color = "darkgreen", size = 1) +
+  geom_text(data = endo_score_heatmap1 %>% filter(end == "Coord" & endo_ratio == 1.1), aes(x = position, y = end), label = "M", color = "darkgreen", size = 1) +
+  geom_text(data = endo_score_heatmap1 %>% filter(end == "Helix" & endo_ratio == 1), aes(x = position, y = end), label = "H", color = "purple", size = 1) +
+  NULL +
+  labs(x= "Position", y= "Residue Change", fill = "Enrichment Score") + theme(legend.position = "bottom") + theme(text = element_text(size = 5)) +
+  NULL; heatmap_endo
+ggsave(file = "Plots/main/fig3b_heatmap_endo.pdf", heatmap_endo, height = 2, width = 4)
+```
+
+##STIM1 KO
+```{r STIM1 KO positional patterns}
+sko_mis = combined2 %>% filter(type == "mis") %>% select(c("variant", "sko_ratio", "start", "end", "position"))
+sko_non = combined2 %>% filter(type == "non") %>% select(c("variant", "sko_ratio", "start", "end", "position"))
+sko_syn = combined2 %>% filter(type == "syn") %>% select(c("variant", "sko_ratio", "start", "end", "position"))
+
+sko_positional_ratios <- sko_mis %>% group_by(position) %>% summarize(missense_geomean = mean(sko_ratio), missense_min = min(sko_ratio))
+sko_positional_ratios2 <- merge(sko_positional_ratios, sko_non[,c("position","sko_ratio")], by = "position", all.x = T)
+sko_positional_ratios3 <- merge(sko_positional_ratios2, sko_syn[,c("position","sko_ratio")], by = "position", all.x = T)
+colnames(sko_positional_ratios3) <- c("position", "missense_geomean","missense_min", "nonsense","synonymous")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = sko_positional_ratios3, aes(x = missense_geomean, y = nonsense)) +
+  geom_text_repel(data = sko_positional_ratios3, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = sko_positional_ratios3, aes(x = missense_min, y = nonsense)) +
+  geom_text_repel(data = sko_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = sko_positional_ratios3, aes(x = missense_geomean, y = synonymous)) +
+  geom_text_repel(data = sko_positional_ratios3, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = sko_positional_ratios3, aes(x = nonsense, y = synonymous)) +
+  geom_text_repel(data = sko_positional_ratios3, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+```
+
+```{r STIM1 KO heatmap}
+sko_score_heatmap = combined2 %>% select(c("variant", "position", "start", "end","type", "sko_ratio")) %>% filter(!(position %in% c(0,99)) & !(end %in% c("?")))
+sko_score_heatmap[sko_score_heatmap$sko_ratio == "NaN","sko_ratio"] <- NA
+
+## For values below 0.01, set it to 0.01 for the heatmap
+for(x in 1:nrow(sko_score_heatmap)){
+  if(!is.na(sko_score_heatmap$sko_ratio[x]) & sko_score_heatmap$sko_ratio[x] < 0.01){sko_score_heatmap$sko_ratio[x] <- 0.01}
+}
+
+sko_score_heatmap$position = as.character(sko_score_heatmap$position)
+sko_score_heatmap = sko_score_heatmap %>% filter(variant != "Z0Z")
+
+sko_score_heatmap$end <- factor(sko_score_heatmap$end, levels = c("_","P","C","M","T","S","G","A","V","I","L","F","Y","W","H","K","R","N","Q","D","E"))
+
+sko_score_heatmap1 <- rbind(sko_score_heatmap,
+                         data.frame("position" = annotation_df4$position, "sko_ratio" = 1, "variant" = NA, "start" = annotation_df4$start, "end" = "WT res", "type" = "annot"),
+                         data.frame("position" = annotation_df4$position, "sko_ratio" = annotation_df4$coord, "variant" = NA, "start" = "Coord", "end" = "Coord", "type" = "annot"),
+                         data.frame("position" = annotation_df4$position, "sko_ratio" = annotation_df4$helix, "variant" = NA, "start" = "Helix", "end" = "Helix", "type" = "annot"), 
+                          data.frame("position" = positional_scores$position, "sko_ratio" = positional_scores$sko_avg, "variant" = NA, "r1_ratio" = NA, "r2_ratio" = NA, "r4_ratio" = NA, "r5_ratio" = NA, "r6_ratio" = NA, "start" = "Geomean (mis)", "end" = "Geomean (mis)", "type" = "annot", "rep_count" = NA))
+
+sko_score_heatmap1$end <- factor(sko_score_heatmap1$end, levels = rev(c("Geomean (mis)","Helix","Coord","WT res","_","R","H","K","D","E","S","T","N","Q","A","V","I","L","M","F","Y","W","C","G","P")))
+sko_syn$end <- factor(sko_syn$end, levels = rev(c("Geomean (mis)","Helix","Coord","WT res","_","R","H","K","D","E","S","T","N","Q","A","V","I","L","M","F","Y","W","C","G","P")))
+
+heatmap_sko <- ggplot() + labs(x = NULL, y = NULL) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", na.value = "grey") +
+  geom_tile(data = sko_score_heatmap1 %>% filter(position != "0Z"), aes(x = position, y = end, fill = log10(sko_ratio))) +
+  geom_point(data = sko_syn, aes(x = position, y = end), size = 0.25) +
+  geom_text(data = sko_score_heatmap1 %>% filter(end == "WT res" & sko_ratio == 1), aes(x = position, y = end, label = start), size = 1) +
+  geom_text(data = sko_score_heatmap1 %>% filter(end == "Coord" & sko_ratio == 1), aes(x = position, y = end), label = "S", color = "darkgreen", size = 1) +
+  geom_text(data = sko_score_heatmap1 %>% filter(end == "Coord" & sko_ratio == 1.1), aes(x = position, y = end), label = "M", color = "darkgreen", size = 1) +
+  geom_text(data = sko_score_heatmap1 %>% filter(end == "Helix" & sko_ratio == 1), aes(x = position, y = end), label = "H", color = "purple", size = 1) +
+  NULL +
+  labs(x= "Position", y= "Residue Change", fill = "Enrichment Score") + theme(legend.position = "bottom") + theme(text = element_text(size = 5)) +
+  NULL; heatmap_sko
+ggsave(file = "Plots/main/fig3c_heatmap_sko.pdf", heatmap_sko, height = 2, width = 4)
+```
+
+
+```{r Comparing enrichment scores across cell backgrounds}
+endo_cor2 = endo_freq[,c("variant","r1_ratio","r2_ratio", "r4_ratio", "r5_ratio", "r6_ratio")]
+endo_cor2[,c("r1_ratio","r2_ratio", "r4_ratio", "r5_ratio", "r6_ratio")] <- log10(endo_cor2[,c("r1_ratio","r2_ratio", "r4_ratio", "r5_ratio", "r6_ratio")])
+endo_cor2_melt <- melt(endo_cor2, id = "variant") %>% mutate(type = "Endogenous")
+
+sko_cor2 = sko_freq[,c("variant","r1_ratio","r2_ratio", "r3_ratio","r4_ratio", "r5_ratio", "r6_ratio")]
+sko_cor2[,c("r1_ratio","r2_ratio", "r3_ratio","r4_ratio", "r5_ratio", "r6_ratio")] <- log10(sko_cor2[,c("r1_ratio","r2_ratio", "r3_ratio", "r4_ratio", "r5_ratio", "r6_ratio")])
+sko_cor2_melt <- melt(sko_cor2, id = "variant") %>% mutate(type = "Knockout")
+
+endo_sko_melt <- rbind(endo_cor2_melt, sko_cor2_melt)
+endo_sko_melt$variable <- as.character(endo_sko_melt$variable)
+
+a67x <- endo_sko_melt %>% filter(variant == "A67_")
+
+endo_sko_melt[endo_sko_melt$variable == "r1_ratio","variable"] <- "rep1"
+endo_sko_melt[endo_sko_melt$variable == "r2_ratio","variable"] <- "rep2"
+endo_sko_melt[endo_sko_melt$variable == "r3_ratio","variable"] <- "rep3"
+endo_sko_melt[endo_sko_melt$variable == "r4_ratio","variable"] <- "rep4"
+endo_sko_melt[endo_sko_melt$variable == "r5_ratio","variable"] <- "rep5"
+endo_sko_melt[endo_sko_melt$variable == "r6_ratio","variable"] <- "rep6"
+
+Endogenous_SKO_histogram <- ggplot() + theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank()) + 
+  labs(x = "Enrichment score", y = "Number of instances", fill = "Replicate") + 
+  geom_histogram(data = endo_sko_melt, aes(x = value, fill = variable), color = "black", size = 0.2) +
+  facet_grid(rows = vars(type), scales = "free_y") +
+  NULL; Endogenous_SKO_histogram
+ggsave(file = "Plots/supplement/supp3c_Endogenous_SKO_histogram.pdf", Endogenous_SKO_histogram, height = 2.5, width = 3.75)
+
+```
+
+```{r Bacteria STIM1 heatmap}
+bac_mis = combined2 %>% filter(type == "mis") %>% select(c("variant", "bac_ratio", "start", "end", "position"))
+bac_non = combined2 %>% filter(type == "non") %>% select(c("variant", "bac_ratio", "start", "end", "position"))
+bac_syn = combined2 %>% filter(type == "syn") %>% select(c("variant", "bac_ratio", "start", "end", "position"))
+
+bac_positional_ratios <- bac_mis %>% group_by(position) %>% summarize(missense_geomean = 10^mean(log10(bac_ratio), na.rm = T), missense_min = min(bac_ratio))
+bac_positional_ratios2 <- merge(bac_positional_ratios, bac_non[,c("position","bac_ratio")], by = "position", all.x = T)
+bac_positional_ratios3 <- merge(bac_positional_ratios2, bac_syn[,c("position","bac_ratio")], by = "position", all.x = T)
+colnames(bac_positional_ratios3) <- c("position", "missense_geomean","missense_min", "nonsense","synonymous")
+
+Bacterial_missense_geomean_nonsense_scatterplot <- ggplot() +
+  #scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = bac_positional_ratios3, aes(x = log10(missense_geomean), y = log10(nonsense)), alpha = 0.25) +
+  #geom_text_repel(data = bac_positional_ratios3, aes(x = log10(missense_geomean), y = log10(nonsense), label = position), color = "red", size = 2, segment.color = "orange") +
+  scale_x_continuous(breaks = pretty_breaks(n = 3)) +  
+  scale_y_continuous(breaks = pretty_breaks(n = 3)) +
+  labs(x = "Missense score", y = "Nonsense\nscore") +
+  NULL; Bacterial_missense_geomean_nonsense_scatterplot
+ggsave(file = "Plots/main/fig4c_Bacterial_missense_geomean_nonsense_scatterplot.pdf", Bacterial_missense_geomean_nonsense_scatterplot, height = 1.4, width = 2)
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = bac_positional_ratios3, aes(x = missense_min, y = nonsense)) +
+  geom_text_repel(data = bac_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = bac_positional_ratios3, aes(x = missense_geomean, y = synonymous)) +
+  geom_text_repel(data = bac_positional_ratios3, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+  geom_point(data = bac_positional_ratios3, aes(x = nonsense, y = synonymous)) +
+  geom_text_repel(data = bac_positional_ratios3, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+bac_score_heatmap = combined2 %>% select(c("variant", "position", "start", "end","type", "bac_ratio")) %>% filter(!(position %in% c(0,99)) & !(end %in% c("?")))
+
+## For values below 0.01, set it to 0.01 for the heatmap
+for(x in 1:nrow(bac_score_heatmap)){
+  if(!is.na(bac_score_heatmap$bac_ratio[x]) & bac_score_heatmap$bac_ratio[x] < 0.01){bac_score_heatmap$bac_ratio[x] <- 0.01}
+}
+
+bac_score_heatmap$position = as.character(bac_score_heatmap$position)
+bac_score_heatmap = bac_score_heatmap %>% filter(variant != "Z0Z")
+
+bac_score_heatmap$end <- factor(bac_score_heatmap$end, levels = c("_","P","C","M","T","S","G","A","V","I","L","F","Y","W","H","K","R","N","Q","D","E"))
+
+## Also bring in positional geomeans
+bac_positional_ratios4 <- bac_positional_ratios3[,c("position","missense_geomean")]
+bac_positional_ratios4[is.na(bac_positional_ratios4)] <- 0
+bac_positional_ratios4[bac_positional_ratios4$missense_geomean < 0.1,"missense_geomean"] <- 0.1
+
+bac_score_heatmap1 <- rbind(bac_score_heatmap,
+                         data.frame("position" = annotation_df4$position, "bac_ratio" = 1, "variant" = NA, "start" = annotation_df4$start, "end" = "WT res", "type" = "annot"),
+                         data.frame("position" = annotation_df4$position, "bac_ratio" = annotation_df4$coord, "variant" = NA, "start" = "Coord", "end" = "Coord", "type" = "annot"),
+                         data.frame("position" = annotation_df4$position, "bac_ratio" = annotation_df4$helix, "variant" = NA, "start" = "Helix", "end" = "Helix", "type" = "annot"), 
+                          data.frame("position" = bac_positional_ratios4$position, "bac_ratio" = bac_positional_ratios4$missense_geomean, "variant" = NA, "r1_ratio" = NA, "r2_ratio" = NA, "r4_ratio" = NA, "r5_ratio" = NA, "r6_ratio" = NA, "start" = "Geomean (mis)", "end" = "Geomean (mis)", "type" = "annot", "rep_count" = NA))
+
+
+bac_score_heatmap1$end <- factor(bac_score_heatmap1$end, levels = rev(c("Geomean (mis)","Helix","Coord","WT res","_","R","H","K","D","E","S","T","N","Q","A","V","I","L","M","F","Y","W","C","G","P")))
+bac_syn$end <- factor(bac_syn$end, levels = rev(c("Geomean (mis)","Helix","Coord","WT res","_","R","H","K","D","E","S","T","N","Q","A","V","I","L","M","F","Y","W","C","G","P")))
+
+# bac_score_heatmap1 = left_join(variant_name, bac_score_heatmap1)
+
+heatmap_bac <- ggplot() + labs(x = NULL, y = NULL) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", na.value = "grey") +
+  geom_tile(data = bac_score_heatmap1 %>% filter(position != "0Z"), aes(x = position, y = end, fill = log10(bac_ratio))) +
+  geom_point(data = bac_syn, aes(x = position, y = end), size = 0.25) +
+  geom_text(data = bac_score_heatmap1 %>% filter(end == "WT res" & bac_ratio == 1), aes(x = position, y = end, label = start), size = 1) +
+  geom_text(data = bac_score_heatmap1 %>% filter(end == "Coord" & bac_ratio == 1), aes(x = position, y = end), label = "S", color = "darkgreen", size = 1) +
+  geom_text(data = bac_score_heatmap1 %>% filter(end == "Coord" & bac_ratio == 1.1), aes(x = position, y = end), label = "M", color = "darkgreen", size = 1) +
+  geom_text(data = bac_score_heatmap1 %>% filter(end == "Helix" & bac_ratio == 1), aes(x = position, y = end), label = "H", color = "purple", size = 1) +
+  NULL +
+  labs(x= "Position", y= "Residue Change", fill = "Enrichment Score") + theme(legend.position = "bottom") + theme(text = element_text(size = 5)) +
+  NULL; heatmap_bac
+ggsave(file = "Plots/main/fig4a_heatmap_bac.pdf", heatmap_bac, height = 2, width = 4)
+```
+#Validation plots
+```{r validation plots}
+#standard LP
+endo_ssv_plot = ggplot(data = combined2, aes(x= log10(endo_ratio) , y= log10(endo_ssv_ratio)))+
+  geom_point(size = 2, alpha = 0.5) +
+  geom_text_repel(aes(label = variant), color = "orange", alpha = 0.75) +
+  labs(x= "Endogenous STIM1 DMS", y= "Endogenous STIM1 Validation") +
+  #stat_smooth (geom="line", alpha=0.3, size=1, span=0.5, method = lm) +
+  scale_x_continuous(limits = c(-3,1)) + scale_y_continuous(limits = c(-2.2,0)) +
+  theme(legend.position = "none") +
+  NULL; endo_ssv_plot
+ggsave("plots/supplement/supp3d_endo_ssv_plot.pdf", endo_ssv_plot, height = 2.5, width = 2.5)
+
+#knockout LP
+sko_ssv_plot = ggplot(data = combined2, aes(x= log10(sko_ratio) , y= log10(sko_ssv_ratio)))+
+  geom_point(size = 2, alpha = 0.5) +
+  geom_text_repel(aes(label = variant), color = "orange", alpha = 0.75) +
+  labs(x= "STIM1-/- DMS", y= "STIM1-/- Validation") +
+  theme(legend.position = "none") +
+  #stat_smooth (geom="line", alpha=0.3, size=1, span=0.5, method = lm) + 
+  scale_x_continuous(limits = c(-0.75,0.25)) + scale_y_continuous(limits = c(-3.3,0)) +
+  NULL; sko_ssv_plot
+ggsave("plots/supplement/supp3e_sko_ssv_plot.pdf", sko_ssv_plot, height = 2.5, width = 2.5)
+```
+
+#Bacteria DMS
+```{r}
+bac_raw_counts <- read.csv(file = "data/bac_stim1.csv", header = T, stringsAsFactors = F)
+bac_raw_counts <-  subset(bac_raw_counts, select = -X )
+bac_raw_counts = bac_raw_counts %>% select(-position)
+
+## Figure out the total number of reads per sample
+bac_readcounts <- data.frame("total_count" = colSums(bac_raw_counts[,2:ncol(bac_raw_counts)], na.rm = T))
+
+## Plot the number of total reads we have per sample
+ggplot() + scale_x_log10(limits = c(1e5,1e7)) + 
+  geom_histogram(data = bac_readcounts, aes(x = total_count), bins = 20, color = "black", fill = "grey80")
+## Libraries have lower total reads (presumably because of Amp-EZ); genomic DNA sequencing had generally comparable total reads
+
+## figure out read counts that should service as limits of detection for each sample
+bac_lod_readcounts <- c()
+bac_lod_freqs <- c()
+for(re in bac_readcounts$total_count){
+  temp_subset <- (lod_frame %>% mutate(abs_diff = abs(reads - re)) %>% arrange(abs_diff))[1,]
+  bac_lod_readcounts <- c(bac_lod_readcounts, temp_subset$count)
+  bac_lod_freqs <- c(bac_lod_freqs, temp_subset$freq)
+}
+bac_lod_dataframe <- data.frame("reads" = bac_readcounts, "count" = bac_lod_readcounts, "freq" = bac_lod_freqs)
+
+## Now figure out which data points were below the limit of detection
+bac_raw_counts[is.na(bac_raw_counts)] <- 0
+
+bac_raw_counts2 <- data.frame("variant" = bac_raw_counts$variant,
+                           "lib1" = bac_raw_counts$lib1 < bac_lod_readcounts[1],
+                           "lib2" = bac_raw_counts$lib2 < bac_lod_readcounts[2],
+                           "r1_10b_lb" = bac_raw_counts$r1_10b_lb < bac_lod_readcounts[3],
+                           "r1_10b_mm" = bac_raw_counts$r1_10b_mm < bac_lod_readcounts[4],
+                           "r1_10b_ca" = bac_raw_counts$r1_10b_ca < bac_lod_readcounts[5],
+                           "r1_dh5a_lb" = bac_raw_counts$r1_dh5a_lb < bac_lod_readcounts[6],
+                           "r1_dh5a_mm" = bac_raw_counts$r1_dh5a_mm < bac_lod_readcounts[7],
+                           "r1_dh5a_ca" = bac_raw_counts$r1_dh5a_ca < bac_lod_readcounts[8],
+                           "r1_bl21_lb" = bac_raw_counts$r1_bl21_lb < bac_lod_readcounts[9],
+                           "r1_bl21_mm" = bac_raw_counts$r1_bl21_mm < bac_lod_readcounts[10],
+                           "r1_bl21_ca" = bac_raw_counts$r1_bl21_ca < bac_lod_readcounts[11],
+                           "r2_10b_lb" = bac_raw_counts$r2_10b_lb < bac_lod_readcounts[12],
+                           "r2_10b_mm" = bac_raw_counts$r2_10b_mm < bac_lod_readcounts[13],
+                           "r2_10b_ca" = bac_raw_counts$r2_10b_ca < bac_lod_readcounts[14],
+                           "r2_dh5a_lb" = bac_raw_counts$r2_dh5a_lb < bac_lod_readcounts[15],
+                           "r2_dh5a_mm" = bac_raw_counts$r2_dh5a_mm < bac_lod_readcounts[16],
+                           "r2_dh5a_ca" = bac_raw_counts$r2_dh5a_ca < bac_lod_readcounts[17],
+                           "r2_bl21_lb" = bac_raw_counts$r2_bl21_lb < bac_lod_readcounts[18],
+                           "r2_bl21_mm" = bac_raw_counts$r2_bl21_mm < bac_lod_readcounts[19],
+                           "r2_bl21_ca" = bac_raw_counts$r2_bl21_ca < bac_lod_readcounts[20],
+                           "r3_10b_lb" = bac_raw_counts$r3_10b_lb < bac_lod_readcounts[21],
+                           "r3_10b_mm" = bac_raw_counts$r3_10b_mm < bac_lod_readcounts[22],
+                           "r3_10b_ca" = bac_raw_counts$r3_10b_ca < bac_lod_readcounts[23],
+                           "r3_dh5a_lb" = bac_raw_counts$r3_dh5a_lb < bac_lod_readcounts[24],
+                           "r3_dh5a_mm" = bac_raw_counts$r3_dh5a_mm < bac_lod_readcounts[25],
+                           "r3_dh5a_ca" = bac_raw_counts$r3_dh5a_ca < bac_lod_readcounts[26],
+                           "r3_bl21_lb" = bac_raw_counts$r3_bl21_lb < bac_lod_readcounts[27],
+                           "r3_bl21_mm" = bac_raw_counts$r3_bl21_mm < bac_lod_readcounts[28],
+                           "r3_bl21_ca" = bac_raw_counts$r3_bl21_ca < bac_lod_readcounts[29]
+                           )
+
+## These were the total number of variants below the limit of detection in each bac sequencing run:
+colSums(bac_raw_counts2[,c("r1_10b_lb","r1_10b_mm","r1_10b_ca","r1_dh5a_lb","r1_dh5a_mm","r1_dh5a_ca","r1_bl21_lb","r1_bl21_mm","r1_bl21_ca",
+                          "r2_10b_lb","r2_10b_mm","r2_10b_ca","r2_dh5a_lb","r2_dh5a_mm","r2_dh5a_ca","r2_bl21_lb","r2_bl21_mm","r2_bl21_ca",
+                         "r3_10b_lb","r3_10b_mm","r3_10b_ca","r3_dh5a_lb","r3_dh5a_mm","r3_dh5a_ca","r3_bl21_lb","r3_bl21_mm","r3_bl21_ca")])
+
+## Now calculate bac frequencies, and for bacs below the limit of detection, give them the limit of detection frequency value
+bac_freq = bac_raw_counts %>% mutate(f_lib1 = lib1/bac_readcounts$total_count[1], 
+                                     f_lib2 = lib2/bac_readcounts$total_count[2], 
+                                     f_r1_10b_lb = r1_10b_lb/bac_readcounts$total_count[3],
+                                     f_r1_10b_mm = r1_10b_mm/bac_readcounts$total_count[4],
+                                     f_r1_10b_ca = r1_10b_ca/bac_readcounts$total_count[5],
+                                     f_r1_dh5a_lb = r1_dh5a_lb/bac_readcounts$total_count[6],
+                                     f_r1_dh5a_mm = r1_dh5a_mm/bac_readcounts$total_count[7],
+                                     f_r1_dh5a_ca = r1_dh5a_ca/bac_readcounts$total_count[8],
+                                     f_r1_bl21_lb = r1_bl21_lb/bac_readcounts$total_count[9],
+                                     f_r1_bl21_mm = r1_bl21_mm/bac_readcounts$total_count[10],
+                                     f_r1_bl21_ca = r1_bl21_ca/bac_readcounts$total_count[11],
+                                     f_r2_10b_lb = r2_10b_lb/bac_readcounts$total_count[12],
+                                     f_r2_10b_mm = r2_10b_mm/bac_readcounts$total_count[13],
+                                     f_r2_10b_ca = r2_10b_ca/bac_readcounts$total_count[14],
+                                     f_r2_dh5a_lb = r2_dh5a_lb/bac_readcounts$total_count[15],
+                                     f_r2_dh5a_mm = r2_dh5a_mm/bac_readcounts$total_count[16],
+                                     f_r2_dh5a_ca = r2_dh5a_ca/bac_readcounts$total_count[17],
+                                     f_r2_bl21_lb = r2_bl21_lb/bac_readcounts$total_count[18],
+                                     f_r2_bl21_mm = r2_bl21_mm/bac_readcounts$total_count[19],
+                                     f_r2_bl21_ca = r2_bl21_ca/bac_readcounts$total_count[20],
+                                     f_r3_10b_lb = r3_10b_lb/bac_readcounts$total_count[21],
+                                     f_r3_10b_mm = r3_10b_mm/bac_readcounts$total_count[22],
+                                     f_r3_10b_ca = r3_10b_ca/bac_readcounts$total_count[23],
+                                     f_r3_dh5a_lb = r3_dh5a_lb/bac_readcounts$total_count[24],
+                                     f_r3_dh5a_mm = r3_dh5a_mm/bac_readcounts$total_count[25],
+                                     f_r3_dh5a_ca = r3_dh5a_ca/bac_readcounts$total_count[26],
+                                     f_r3_bl21_lb = r3_bl21_lb/bac_readcounts$total_count[27],
+                                     f_r3_bl21_mm = r3_bl21_mm/bac_readcounts$total_count[28],
+                                     f_r3_bl21_ca = r3_bl21_ca/bac_readcounts$total_count[29])
+
+bac_freq[bac_raw_counts2$r1_10b_lb == T,"f_r1_10b_lb"] <- bac_lod_freqs[3]
+bac_freq[bac_raw_counts2$r1_10b_mm == T,"f_r1_10b_mm"] <- bac_lod_freqs[4]
+bac_freq[bac_raw_counts2$r1_10b_ca == T,"f_r1_10b_ca"] <- bac_lod_freqs[5]
+bac_freq[bac_raw_counts2$r1_dh5a_lb == T,"f_r1_dh5a_lb"] <- bac_lod_freqs[6]
+bac_freq[bac_raw_counts2$r1_dh5a_mm == T,"f_r1_dh5a_mm"] <- bac_lod_freqs[7]
+bac_freq[bac_raw_counts2$r1_dh5a_ca == T,"f_r1_dha5_ca"] <- bac_lod_freqs[8]
+bac_freq[bac_raw_counts2$r1_bl21_lb == T,"f_r1_bl21_lb"] <- bac_lod_freqs[9]
+bac_freq[bac_raw_counts2$r1_bl21_mm == T,"f_r1_bl21_mm"] <- bac_lod_freqs[10]
+bac_freq[bac_raw_counts2$r1_bl21_ca == T,"f_r1_bl21_ca"] <- bac_lod_freqs[11]
+bac_freq[bac_raw_counts2$r2_10b_lb == T,"f_r2_10b_lb"] <- bac_lod_freqs[12]
+bac_freq[bac_raw_counts2$r2_10b_mm == T,"f_r2_10b_mm"] <- bac_lod_freqs[13]
+bac_freq[bac_raw_counts2$r2_10b_ca == T,"f_r2_10b_ca"] <- bac_lod_freqs[14]
+bac_freq[bac_raw_counts2$r2_dh5a_lb == T,"f_r2_dh5a_lb"] <- bac_lod_freqs[15]
+bac_freq[bac_raw_counts2$r2_dh5a_mm == T,"f_r2_dh5a_mm"] <- bac_lod_freqs[16]
+bac_freq[bac_raw_counts2$r2_dh5a_ca == T,"f_r2_dha5_ca"] <- bac_lod_freqs[17]
+bac_freq[bac_raw_counts2$r2_bl21_lb == T,"f_r2_bl21_lb"] <- bac_lod_freqs[18]
+bac_freq[bac_raw_counts2$r2_bl21_mm == T,"f_r2_bl21_mm"] <- bac_lod_freqs[19]
+bac_freq[bac_raw_counts2$r2_bl21_ca == T,"f_r2_bl21_ca"] <- bac_lod_freqs[20]
+bac_freq[bac_raw_counts2$r3_10b_lb == T,"f_r3_10b_lb"] <- bac_lod_freqs[21]
+bac_freq[bac_raw_counts2$r3_10b_mm == T,"f_r3_10b_mm"] <- bac_lod_freqs[22]
+bac_freq[bac_raw_counts2$r3_10b_ca == T,"f_r3_10b_ca"] <- bac_lod_freqs[23]
+bac_freq[bac_raw_counts2$r3_dh5a_lb == T,"f_r3_dh5a_lb"] <- bac_lod_freqs[24]
+bac_freq[bac_raw_counts2$r3_dh5a_mm == T,"f_r3_dh5a_mm"] <- bac_lod_freqs[25]
+bac_freq[bac_raw_counts2$r3_dh5a_ca == T,"f_r3_dha5_ca"] <- bac_lod_freqs[26]
+bac_freq[bac_raw_counts2$r3_bl21_lb == T,"f_r3_bl21_lb"] <- bac_lod_freqs[27]
+bac_freq[bac_raw_counts2$r3_bl21_mm == T,"f_r3_bl21_mm"] <- bac_lod_freqs[28]
+bac_freq[bac_raw_counts2$r3_bl21_ca == T,"f_r3_bl21_ca"] <- bac_lod_freqs[29]
+
+bac_freq[bac_raw_counts2$lib1 == T,c("f_lib1","f_lib2","f_r1_10b_lb","f_r1_10b_mm","f_r1_10b_ca","f_r1_dh5a_lb","f_r1_dh5a_mm","f_r1_dh5a_ca","f_r1_bl21_lb","f_r1_bl21_mm","f_r1_bl21_ca","f_r2_10b_lb","f_r2_10b_mm","f_r2_10b_ca","f_r2_dh5a_lb","f_r2_dh5a_mm","f_r2_dh5a_ca","f_r2_bl21_lb","f_r2_bl21_mm","f_r2_bl21_ca","f_r3_10b_lb","f_r3_10b_mm","f_r3_10b_ca","f_r3_dh5a_lb","f_r3_dh5a_mm","f_r3_dh5a_ca","f_r3_bl21_lb","f_r3_bl21_mm","f_r3_bl21_ca")] <- NA
+bac_freq[bac_raw_counts2$lib2 == T,c("f_lib1","f_lib2","f_r1_10b_lb","f_r1_10b_mm","f_r1_10b_ca","f_r1_dh5a_lb","f_r1_dh5a_mm","f_r1_dh5a_ca","f_r1_bl21_lb","f_r1_bl21_mm","f_r1_bl21_ca","f_r2_10b_lb","f_r2_10b_mm","f_r2_10b_ca","f_r2_dh5a_lb","f_r2_dh5a_mm","f_r2_dh5a_ca","f_r2_bl21_lb","f_r2_bl21_mm","f_r2_bl21_ca","f_r3_10b_lb","f_r3_10b_mm","f_r3_10b_ca","f_r3_dh5a_lb","f_r3_dh5a_mm","f_r3_dh5a_ca","f_r3_bl21_lb","f_r3_bl21_mm","f_r3_bl21_ca")] <- NA
+
+
+bac_freq$bac_frac_lod <- rowSums(bac_raw_counts2[,c("r1_10b_lb","r1_10b_mm","r1_10b_ca","r1_dh5a_lb","r1_dh5a_mm","r1_dh5a_ca","r1_bl21_lb","r1_bl21_mm","r1_bl21_ca","r2_10b_lb","r2_10b_mm","r2_10b_ca","r2_dh5a_lb","r2_dh5a_mm","r2_dh5a_ca","r2_bl21_lb","r2_bl21_mm","r2_bl21_ca","r3_10b_lb","r3_10b_mm","r3_10b_ca","r3_dh5a_lb","r3_dh5a_mm","r3_dh5a_ca","r3_bl21_lb","r3_bl21_mm","r3_bl21_ca")])/length(c("r1_10b_lb","r1_10b_mm","r1_10b_ca","r1_dh5a_lb","r1_dh5a_mm","r1_dh5a_ca","r1_bl21_lb","r1_bl21_mm","r1_bl21_ca","r2_10b_lb","r2_10b_mm","r2_10b_ca","r2_dh5a_lb","r2_dh5a_mm","r2_dh5a_ca","r2_bl21_lb","r2_bl21_mm","r2_bl21_ca","r3_10b_lb","r3_10b_mm","r3_10b_ca","r3_dh5a_lb","r3_dh5a_mm","r3_dh5a_ca","r3_bl21_lb","r3_bl21_mm","r3_bl21_ca"))
+
+## Take geometric means of the variant frequencies for the two preps
+bac_freq$lib_freq <- 10^rowMeans(log10(bac_freq[,c("f_lib1","f_lib2")]))
+
+bac_freq$r1_10b_lb_ratio <- bac_freq$f_r1_10b_lb / bac_freq$lib_freq
+bac_freq$r1_10b_mm_ratio <- bac_freq$f_r1_10b_mm / bac_freq$lib_freq
+bac_freq$r1_10b_ca_ratio <- bac_freq$f_r1_10b_ca / bac_freq$lib_freq
+bac_freq$r1_dh5a_lb_ratio <- bac_freq$f_r1_dh5a_lb / bac_freq$lib_freq
+bac_freq$r1_dh5a_mm_ratio <- bac_freq$f_r1_dh5a_mm / bac_freq$lib_freq
+bac_freq$r1_dh5a_ca_ratio <- bac_freq$f_r1_dh5a_ca / bac_freq$lib_freq
+bac_freq$r1_bl21_lb_ratio <- bac_freq$f_r1_bl21_lb / bac_freq$lib_freq
+bac_freq$r1_bl21_mm_ratio <- bac_freq$f_r1_bl21_mm / bac_freq$lib_freq
+bac_freq$r1_bl21_ca_ratio <- bac_freq$f_r1_bl21_ca / bac_freq$lib_freq
+
+bac_freq$r2_10b_lb_ratio <- bac_freq$f_r2_10b_lb / bac_freq$lib_freq
+bac_freq$r2_10b_mm_ratio <- bac_freq$f_r2_10b_mm / bac_freq$lib_freq
+bac_freq$r2_10b_ca_ratio <- bac_freq$f_r2_10b_ca / bac_freq$lib_freq
+bac_freq$r2_dh5a_lb_ratio <- bac_freq$f_r2_dh5a_lb / bac_freq$lib_freq
+bac_freq$r2_dh5a_mm_ratio <- bac_freq$f_r2_dh5a_mm / bac_freq$lib_freq
+bac_freq$r2_dh5a_ca_ratio <- bac_freq$f_r2_dh5a_ca / bac_freq$lib_freq
+bac_freq$r2_bl21_lb_ratio <- bac_freq$f_r2_bl21_lb / bac_freq$lib_freq
+bac_freq$r2_bl21_mm_ratio <- bac_freq$f_r2_bl21_mm / bac_freq$lib_freq
+bac_freq$r2_bl21_ca_ratio <- bac_freq$f_r2_bl21_ca / bac_freq$lib_freq
+
+bac_freq$r3_10b_lb_ratio <- bac_freq$f_r3_10b_lb / bac_freq$lib_freq
+bac_freq$r3_10b_mm_ratio <- bac_freq$f_r3_10b_mm / bac_freq$lib_freq
+bac_freq$r3_10b_ca_ratio <- bac_freq$f_r3_10b_ca / bac_freq$lib_freq
+bac_freq$r3_dh5a_lb_ratio <- bac_freq$f_r3_dh5a_lb / bac_freq$lib_freq
+bac_freq$r3_dh5a_mm_ratio <- bac_freq$f_r3_dh5a_mm / bac_freq$lib_freq
+bac_freq$r3_dh5a_ca_ratio <- bac_freq$f_r3_dh5a_ca / bac_freq$lib_freq
+bac_freq$r3_bl21_lb_ratio <- bac_freq$f_r3_bl21_lb / bac_freq$lib_freq
+bac_freq$r3_bl21_mm_ratio <- bac_freq$f_r3_bl21_mm / bac_freq$lib_freq
+bac_freq$r3_bl21_ca_ratio <- bac_freq$f_r3_bl21_ca / bac_freq$lib_freq
+
+bac_ratio_ns = bac_freq %>% select(c("variant", "r1_10b_lb_ratio", "r1_10b_mm_ratio", "r1_10b_ca_ratio", "r1_dh5a_lb_ratio", "r1_dh5a_mm_ratio", "r1_dh5a_ca_ratio", "r1_bl21_lb_ratio", "r1_bl21_mm_ratio", "r1_bl21_ca_ratio",
+                                  "r2_10b_lb_ratio", "r2_10b_mm_ratio", "r2_10b_ca_ratio", "r2_dh5a_lb_ratio", "r2_dh5a_mm_ratio", "r2_dh5a_ca_ratio", "r2_bl21_lb_ratio", "r2_bl21_mm_ratio", "r2_bl21_ca_ratio",
+                                  "r3_10b_lb_ratio", "r3_10b_mm_ratio", "r3_10b_ca_ratio", "r3_dh5a_lb_ratio", "r3_dh5a_mm_ratio", "r3_dh5a_ca_ratio", "r3_bl21_lb_ratio", "r3_bl21_mm_ratio", "r3_bl21_ca_ratio"))
+
+
+bac_ratio_ns$lb_10b<- rowMeans(log10(bac_freq[,c("r1_10b_lb_ratio", "r2_10b_lb_ratio", "r3_10b_lb_ratio")]))
+bac_ratio_ns$lb_dh5a<- rowMeans(log10(bac_freq[,c("r1_dh5a_lb_ratio", "r2_dh5a_lb_ratio", "r3_dh5a_lb_ratio")]))
+bac_ratio_ns$lb_bl21<- rowMeans(log10(bac_freq[,c("r1_bl21_lb_ratio", "r2_bl21_lb_ratio", "r3_bl21_lb_ratio")]))
+
+bac_ratio_ns$mm_10b<- rowMeans(log10(bac_freq[,c("r1_10b_mm_ratio", "r2_10b_mm_ratio", "r3_10b_mm_ratio")]))
+bac_ratio_ns$mm_dh5a<- rowMeans(log10(bac_freq[,c("r1_dh5a_mm_ratio", "r2_dh5a_mm_ratio", "r3_dh5a_mm_ratio")]))
+bac_ratio_ns$mm_bl21<- rowMeans(log10(bac_freq[,c("r1_bl21_mm_ratio", "r2_bl21_mm_ratio", "r3_bl21_mm_ratio")]))
+
+bac_ratio_ns$ca_10b<- rowMeans(log10(bac_freq[,c("r1_10b_ca_ratio", "r2_10b_ca_ratio", "r3_10b_ca_ratio")]))
+bac_ratio_ns$ca_dh5a<- rowMeans(log10(bac_freq[,c("r1_dh5a_ca_ratio", "r2_dh5a_ca_ratio", "r3_dh5a_ca_ratio")]))
+bac_ratio_ns$ca_bl21<- rowMeans(log10(bac_freq[,c("r1_bl21_ca_ratio", "r2_bl21_ca_ratio", "r3_bl21_ca_ratio")]))
+
+bac_ratio_ns$position <- substr(bac_ratio_ns$variant,2,3)
+bac_ratio_ns$start <- substr(bac_ratio_ns$variant,1,1)
+bac_ratio_ns$end <- substr(bac_ratio_ns$variant,4,4)
+
+
+bac_cor_ns = bac_ratio_ns %>% select(c("lb_10b", "lb_dh5a", "lb_bl21", "mm_10b", "mm_dh5a", "mm_bl21", "ca_10b", "ca_dh5a", "ca_bl21"))
+bac_cor_ns = bac_cor_ns[!is.infinite(rowSums(bac_cor_ns)),]
+
+bac_cor_ns_plot = bac_cor_ns %>% ggpairs(aes(alpha = 0.15))
+bac_cor_ns_plot
+
+```
+
+
+```{r bacteria heatmap}
+bac_ratio_ns_tomelt <- bac_ratio_ns %>% select(variant, lb_10b, lb_dh5a, lb_bl21, mm_10b, mm_dh5a, mm_bl21, ca_10b, ca_dh5a, ca_bl21)
+
+bac_ratio_ns_melted <- melt(bac_ratio_ns_tomelt)
+bac_ratio_ns_melted$variable <- as.character(bac_ratio_ns_melted$variable)
+bac_ratio_ns_melted$media <- NA
+bac_ratio_ns_melted$bacteria <- NA
+bac_ratio_ns_melted$position <- NA
+bac_ratio_ns_melted$end <- NA
+for(x in 1:nrow(bac_ratio_ns_melted)){
+  bac_ratio_ns_melted$media[x] <- strsplit(bac_ratio_ns_melted$variable[x],"_")[[1]][1]
+  bac_ratio_ns_melted$bacteria[x] <- strsplit(bac_ratio_ns_melted$variable[x],"_")[[1]][2]
+  bac_ratio_ns_melted$position[x] <- gsub("[^0-9]","",bac_ratio_ns_melted$variant[x])
+  bac_ratio_ns_melted$end[x] <- substr(gsub("[0-9]","",bac_ratio_ns_melted$variant[x]),2,2)
+}
+
+## Do WT normalization of the values
+bac_ratio_ns_melted$wt_norm <- 0
+for(x in 1:nrow(bac_ratio_ns_melted)){
+  temp_wt_value <- subset(bac_ratio_ns_melted, media == bac_ratio_ns_melted$media[x] & bacteria == bac_ratio_ns_melted$bacteria[x] & variant == "Z0Z")$value
+  bac_ratio_ns_melted$wt_norm[x] <- bac_ratio_ns_melted$value[x] - temp_wt_value
+}
+
+bac_ratio_ns_melted_no_wt <- bac_ratio_ns_melted %>% filter(variant != "Z0Z")
+
+bac_ratio_ns_melted_no_wt$position <- factor(bac_ratio_ns_melted_no_wt$position, levels = c("70","78","92","75","77","97"))
+bac_ratio_ns_melted_no_wt$media <- factor(bac_ratio_ns_melted_no_wt$media, levels = c("lb","ca","mm"))
+bac_ratio_ns_melted_no_wt$bacteria <- factor(bac_ratio_ns_melted_no_wt$bacteria, levels = c("10b","dh5a","bl21"))
+
+Bacterial_condition_heatmaps <- ggplot() + 
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", na.value = "grey80") +
+  geom_tile(data = bac_ratio_ns_melted_no_wt, aes(x = position, y = end, fill = wt_norm)) +
+  facet_grid(rows = vars(media), cols = vars(bacteria)) +
+  labs(x = NULL, y = "Mutant amino acid") +
+  theme(axis.text.y = element_blank(), legend.position = "top") +
+  NULL; Bacterial_condition_heatmaps
+ggsave(file = "Plots/main/fig4e_Bacterial_condition_heatmaps.pdf", Bacterial_condition_heatmaps, height = 3.25, width = 3.5)
+
+```
+
+```{r Try doing a principal component analysis after casting variants as columns and treating each condition as rows}
+
+bac_ratio_ns_matrix_for_pca <- data.frame(t(bac_ratio_ns_tomelt %>% filter(!is.na(lb_10b))))
+colnames(bac_ratio_ns_matrix_for_pca) <- bac_ratio_ns_matrix_for_pca[1,]
+bac_ratio_ns_matrix_for_pca2 <- bac_ratio_ns_matrix_for_pca[-1,]
+bac_ratio_ns_matrix_for_pca2[, ] <- apply(bac_ratio_ns_matrix_for_pca2[, ], 2, function(x) as.numeric(as.character(x)))
+bac_ratio_ns_matrix_for_pca3 <- as.matrix(bac_ratio_ns_matrix_for_pca2)
+bac_ratio_pca = prcomp(bac_ratio_ns_matrix_for_pca3)
+
+# create data frame with scores
+scores = as.data.frame(bac_ratio_pca$x)
+scores$labels <- rownames(scores)
+
+for(x in 1:nrow(scores)){
+  scores$media[x] <- strsplit(scores$labels[x],"_")[[1]][1]
+  scores$bacteria[x] <- strsplit(scores$labels[x],"_")[[1]][2]
+}
+
+bacteria_media_pca_scatterplot <- ggplot() + 
+  xlab(paste("Principal component 1\n(",round(summary(bac_ratio_pca)$importance[2] * 100,0),"% of variance)",sep="")) + 
+  ylab(paste("Principal component 2\n(",round(summary(bac_ratio_pca)$importance[5] * 100,0),"% of variance)",sep="")) + 
+  #geom_text_repel(data = scores, aes(x = PC1, y = PC2, label = labels), segment.color = 'grey90', point.padding = 0.05, size = 2, segment.alpha = 0.5, color = "red") +
+  geom_point(data = scores, aes(x = PC1, y = PC2, color = bacteria, shape = media), size = 2, alpha = 0.5) +
+  theme(panel.grid = element_blank(), legend.position = "top") + 
+  NULL; bacteria_media_pca_scatterplot
+ggsave(file = "Plots/main/fig4f_Bacteria_media_pca_scatterplot.pdf", bacteria_media_pca_scatterplot, height = 2.5, width = 2)
+```
+
