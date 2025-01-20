@@ -1753,7 +1753,75 @@ Ortholog_variants <- ggplot() + scale_x_continuous(limits = log10(c(0.003,3))) +
 ggsave(file = "Plots/main/fig7e_Ortholog_variants.pdf", Ortholog_variants, height = 2.25, width = 2.5)
 
 ```
-##Missing fig 7D
+
+```{r ortholog sequence similarity}
+human <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
+e66d <- "LSFDAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
+r69c <- "LSFEAVCNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
+n70s <- "LSFEAVRSIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
+v103a <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTAKHSTFHGEDKLISVEDLWKAWKSSEVY"
+s106n <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHNTFHGEDKLISVEDLWKAWKSSEVY"
+e111g <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGGDKLISVEDLWKAWKSSEVY"
+s126a <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKASEVY"
+e66d_n70s <- "LSFDAVRSIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
+e66d_s126a <- "LSFDAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKASEVY"
+v68i_l74q_a123s <- "LSFEAIRNIHKQMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKSWKSSEVY"
+v68i_l92i_s100a <- "LSFEAIRNIHKLMDDDANGDVDVEESDEFIREDLNYHDSTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
+e66d_n70s_s106n <- "LSFDAVRSIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHNTFHGEDKLISVEDLWKAWKSSEVY"
+l74q_d82n_s126a <- "LSFEAVRNIHKQMDDDANGNVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKASEVY"
+l74q_a123s_s126a <- "LSFEAVRNIHKQMDDDANGDVDVEESDEFLREDLNYHDPAVKHSTFHGEDKLISVEDLWKSWKASEVY"
+
+ortholog_frame <- data.frame("position" = seq(63,63+67))
+
+for(x in 1:nchar(human)){
+  ortholog_frame$human[x] <- substr(human,x,x)
+  ortholog_frame$e66d[x] <- substr(e66d,x,x)
+  ortholog_frame$r69c[x] <- substr(r69c,x,x)
+  ortholog_frame$n70s[x] <- substr(n70s,x,x)
+  ortholog_frame$v103a[x] <- substr(v103a,x,x)
+  ortholog_frame$s106n[x] <- substr(s106n,x,x)
+  ortholog_frame$e111g[x] <- substr(e111g,x,x)
+  ortholog_frame$s126a[x] <- substr(s126a,x,x)
+  ortholog_frame$e66d_n70s[x] <- substr(e66d_n70s,x,x)
+  ortholog_frame$e66d_s126a[x] <- substr(e66d_s126a,x,x)
+  ortholog_frame$v68i_l74q_a123s[x] <- substr(v68i_l74q_a123s,x,x)
+  ortholog_frame$v68i_l92i_s100a[x] <- substr(v68i_l92i_s100a,x,x)
+  ortholog_frame$e66d_n70s_s106n[x] <- substr(e66d_n70s_s106n,x,x)
+  ortholog_frame$l74q_d82n_s126a[x] <- substr(l74q_d82n_s126a,x,x)
+  ortholog_frame$l74q_t102a_a123s_s126a[x] <- substr(l74q_a123s_s126a,x,x)
+}
+
+ortholog_frame_melt <- melt(ortholog_frame, id = "position")
+ortholog_frame_melt$variable <- toupper(ortholog_frame_melt$variable)
+ortholog_frame_melt$variable <- factor(ortholog_frame_melt$variable, levels = rev(toupper(c("human","e66d","r69c","n70s","v103a","s106n","e111g","s126a","e66d_n70s","e66d_s126a","e66d_n70s_s106n","v68i_l92i_s100a","v68i_l74q_a123s","l74q_d82n_s126a","l74q_t102a_a123s_s126a"))))
+
+ortholog_frame2 <- ortholog_frame
+
+for(x in 3:ncol(ortholog_frame2)){
+  for(y in 1:nrow(ortholog_frame2)){
+   if(ortholog_frame2[y,x] == ortholog_frame2[y,"human"]){ortholog_frame2[y,x] <- ""}
+  }
+}
+
+ortholog_frame_melt2 <- melt(ortholog_frame2, id = "position")
+
+ortholog_frame_melt2$variable <- toupper(ortholog_frame_melt2$variable)
+ortholog_frame_melt2$variable <- factor(ortholog_frame_melt2$variable, levels = rev(toupper(c("human","e66d","r69c","n70s","v103a","s106n","e111g","s126a","e66d_n70s","e66d_s126a","e66d_n70s_s106n","v68i_l92i_s100a","v68i_l74q_a123s","l74q_d82n_s126a","l74q_t102a_a123s_s126a"))))
+
+orthologs_efhands_plot <- ggplot() + theme(panel.grid = element_blank()) +
+  geom_text(data = ortholog_frame_melt, aes(x = position, y = variable, label = value), size = 2, alpha = 0.1) +
+  geom_text(data = ortholog_frame_melt2, aes(x = position, y = variable, label = value), size = 2) +
+    geom_rect(aes(xmin = 64, xmax = 74, ymin = "HUMAN", ymax = "L74Q_T102A_A123S_S126A"), alpha = 0.15, fill = "red") +
+  geom_rect(aes(xmin = 76, xmax = 87, ymin = "HUMAN", ymax = "L74Q_T102A_A123S_S126A"), alpha = 0.15, fill = "green") +
+  geom_rect(aes(xmin = 89, xmax = 97, ymin = "HUMAN", ymax = "L74Q_T102A_A123S_S126A"), alpha = 0.15, fill = "blue") +
+    geom_rect(aes(xmin = 101, xmax = 107, ymin = "HUMAN", ymax = "L74Q_T102A_A123S_S126A"), alpha = 0.15, fill = muted("red")) +
+  geom_rect(aes(xmin = 109, xmax = 117, ymin = "HUMAN", ymax = "L74Q_T102A_A123S_S126A"), alpha = 0.15, fill = muted("green")) +
+  geom_rect(aes(xmin = 118, xmax = 126, ymin = "HUMAN", ymax = "L74Q_T102A_A123S_S126A"), alpha = 0.15, fill = muted("blue")) +
+  labs(x = "Position in mammalian STIM1 protein", y = NULL) +
+  NULL; orthologs_efhands_plot
+ggsave(file = "plots/main/fig7d_orthologs_efhands_plot.pdf", orthologs_efhands_plot, height = 2.5, width = 6.25)
+
+```
 
 ```{r Subset for SNVs}
 
