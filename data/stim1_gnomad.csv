@@ -1,0 +1,18 @@
+rsID,variant,Protein Consequence,Transcript Consequence,VEP Annotation,ClinVar Clinical Significance,ClinVar Variation ID,Flags,Allele Count,Allele Number,Allele Frequency
+rs199799231,E66K,p.Glu66Lys,c.196G>A,missense_variant,Uncertain significance,666040,,37,1614070,2.29E-05
+,E66A,p.Glu66Ala,c.197A>C,missense_variant,,,,1,1614232,6.19E-07
+rs1317286420,A67P,p.Ala67Pro,c.199G>C,missense_variant,,,,3,1614252,1.86E-06
+rs201061396,R69C,p.Arg69Cys,c.205C>T,missense_variant,Uncertain significance,952024,,14,1614070,8.67E-06
+,R69G,p.Arg69Gly,c.205C>G,missense_variant,,,,1,1614188,6.20E-07
+rs376734394,R69H,p.Arg69His,c.206G>A,missense_variant,Uncertain significance,2950825,,8,1614096,4.96E-06
+rs2093351712,N70Y,p.Asn70Tyr,c.208A>T,missense_variant,,,,2,1614096,1.24E-06
+rs768950124,D77N,p.Asp77Asn,c.229G>A,missense_variant,,,,21,1614112,1.30E-05
+rs1029278195,N80D,p.Asn80Asp,c.238A>G,missense_variant,Uncertain significance,1499307,,4,1614090,2.48E-06
+rs748277951,N80S,p.Asn80Ser,c.239A>G,missense_variant,Uncertain significance,849947,,18,1614120,1.12E-05
+rs1156301676,N82H,p.Asp82His,c.244G>C,missense_variant,,,,1,1614244,6.19E-07
+rs1156301676,D82Y,p.Asp82Tyr,c.244G>T,missense_variant,,,,5,1614124,3.10E-06
+,E86K,p.Glu86Lys,c.256G>A,missense_variant,,,,1,1614228,6.19E-07
+rs773255654,D89A,p.Asp89Ala,c.266A>C,missense_variant,,,,15,1614204,9.29E-06
+,E90G,p.Glu90Gly,c.269A>G,missense_variant,,,,1,1614196,6.20E-07
+rs954648171,E90D,p.Glu90Asp,c.270G>C,missense_variant,Uncertain significance,2927489,,7,1614068,4.34E-06
+,N97S,p.Asn97Ser,c.290A>G,missense_variant,,,,3,1614026,1.86E-06
