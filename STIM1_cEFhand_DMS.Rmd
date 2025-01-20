@@ -95,6 +95,7 @@ ggsave(file = "Plots/main/fig2c_Low_STIM1_variant_mCherry_plot.pdf", Low_STIM1_v
 
 ```
 
+Similar to above but variants are multiplexed
 ```{r Multiplex STIM1 variant depletion}
 #Multiplex cell survival - Figure 2D
 comb_dbc_score = read.csv("data/comb_dbc_score.csv")
@@ -105,14 +106,15 @@ dbc_validation_plot = ggplot(data = comb_dbc_score, aes(x= endo_dbc_score, y= sk
   geom_point(alpha = 0.5, size = 3) +
   geom_text_repel(data = comb_dbc_score, aes(x= endo_dbc_score, y= sko_dbc_score, color = variant, label = variant)) +
   theme(legend.position = "none") +
-  labs(x= "Endogenous STIM1 score", y= "STIM1-/- score") +
+  labs(x= "Standard score", y= "Knockout score") +
   NULL; dbc_validation_plot
 ggsave("plots/main/fig2d_dbc_validation_plot.pdf", dbc_validation_plot, height = 1.75, width = 2.25)
 ```
 
-#Deep mutational scan of the STIM1 cEFhand
+Deep mutational scan of the STIM1 cEFhand
+We first bring in all the DMS data and create a large dataframe for analysis.
 ##Plasmid library
-```{r}
+```{r counts}
 raw_plasmid = read.csv("data/lib_raw.csv")
 raw_plasmid = raw_plasmid[-1]
 variant_name = read.csv("data/variant_name.csv", header = TRUE) %>% select(c("variant"))
@@ -175,7 +177,7 @@ plasmid_fitted_distribution_plot <- ggplot() + labs(x= "Frequency of variant", y
   geom_density(data = plasmid_freq2, aes(x = freq_endo), color = "red") +
   geom_density(data = plasmid_freq2, aes(x = freq_sko), color = "green") +
   scale_y_continuous(limits = c(0,1.2))+
-  scale_color_manual(values = c("Endogenous STIM1 cEFhand library", "STIM1-/- cEFhand library"))
+  scale_color_manual(values = c("Library 1", "Library 2"))
 plasmid_fitted_distribution_plot
 
 ggsave("plots/supplement/supp2a_plasmid_fitted_distribution_plot.pdf", plasmid_fitted_distribution_plot, height = 2, width = 3)
@@ -187,11 +189,11 @@ plasmid_freq2 = plasmid_freq2 %>% mutate(type = case_when(start == end ~ "synony
                                                           start != end & end != "_" ~ "missense",
                                                           end == "_" ~ "nonsense"))
 plasmid_endo_hist = ggplot(data = plasmid_freq2, aes(x= freq_endo, fill = type))+
-  geom_histogram(bins = 30)+ scale_x_log10()+
+  geom_histogram(bins = 30)+ scale_x_log10()+ theme(legend.position = "none")+
   facet_grid(rows = vars(type), scale = "free")+NULL; plasmid_endo_hist
 
 plasmid_sko_hist = ggplot(data = plasmid_freq2, aes(x= freq_sko, fill = type))+
-  geom_histogram(bins = 30)+ scale_x_log10()+
+  geom_histogram(bins = 30)+ scale_x_log10()+ theme(legend.position = "none")+
   facet_grid(rows = vars(type), scale = "free")+NULL; plasmid_sko_hist
 
 ggsave("plots/supplement/supp2b_plasmid_endo_hist.pdf", plasmid_endo_hist, height = 2, width = 2)
@@ -206,8 +208,7 @@ plasmid_cor_plot = ggpairs(plasmid_cor, aes(alpha = 0.15))
 ggsave("plots/supplement/supp2c_plasmid_cor_plot.pdf", plasmid_cor_plot, height = 4, width = 4)
 ```
 
-```{r}
-#simulate how many cells are required for full coverage of library
+```{r simulation to determine cells required for full coverage of library}
 singlemut_uniq_number <- length(unique(plasmid_freq2$variant))
 elib_sampling_frame <- data.frame("cells" = c(1e4,3e4,1e5,3e5,1e6,3e6), "fraction_observed" = 0)
 slib_sampling_frame <- data.frame("cells" = c(1e4,3e4,1e5,3e5,1e6,3e6), "fraction_observed" = 0)
@@ -246,7 +247,7 @@ ggsave("plots/supplement/supp2d_lib_simulation.pdf", lib_simulation, height = 2,
 #Key: endo = standard LP cells, sko = knockout LP cells
 ## Looking at standard LP cell DMS data and turning variant counts into frequencies
 ```{r counts}
-## Import raw endogenous STIM1 counts
+## Import raw standard LP DMS counts
 endo_p = plasmid_freq2 %>% dplyr::select(c("variant", "lib1", "lib2"))
 endo_raw_counts = read.csv("data/endo_raw_cells.csv", header = TRUE)
 endo_raw_counts = subset(endo_raw_counts, select = -X )
@@ -395,7 +396,7 @@ ggsave("plots/supplement/supp3a_endo_cor_plot.pdf", endo_cor_plot, height = 4, w
 
 ## Knockout LP cell DMS data
 ```{r counts}
-## Import raw endogenous STIM1 counts
+## Import raw knockout LP DMS counts
 sko_p = plasmid_freq2 %>% dplyr::select(c("variant", "lib3", "lib4", "lib5"))
 sko_raw_counts <- read.csv(file = "data/raw_counts_sko.csv", header = T, stringsAsFactors = F)
 sko_raw_counts <-  subset(sko_raw_counts, select = -X )
@@ -554,7 +555,7 @@ ggsave("plots/supplement/supp3b_sko_cor_plot.pdf", sko_cor_plot, height = 4, wid
 
 ## Great, so now we have enrichment scores for experiments done in standard and knockout LP cells
 ```{r Combining all existing DMS scores}
-#number of endogenous and SKO scores
+
 sum(!is.na(endo_score$mean_ratio))
 sum(!is.na(sko_score$mean_ratio))
 
@@ -576,7 +577,7 @@ combined = replace(combined, combined == 0, NA)
 
 ## Bring in the validation data next
 ```{r SSV Validation counts and analysis - standard LP}
-## Import raw endogenous STIM1 counts
+## Import raw standard LP SSV counts
 endo_ssv <- read.csv(file = "data/endo_ssv_raw.csv", header = T, stringsAsFactors = F)
 endo_ssv_freq <- data.frame(apply(endo_ssv[,2:ncol(endo_ssv)],2,function(x){x/sum(x)}))
 endo_ssv_freq$variant <- endo_ssv$variant
@@ -632,7 +633,7 @@ endo_ssv_score$endo_ssv_score = log10(endo_ssv_score$mean_ratio)
 ```
 
 ```{r SSV Validation counts and analysis - knockout LP}
-## Import raw endogenous STIM1 counts
+## Import raw knockout LP SSV counts
 sko_ssv <- read.csv(file = "data/sko_ssv_raw.csv", header = T, stringsAsFactors = F)
 sko_ssv_freq <- data.frame(apply(sko_ssv[,2:ncol(sko_ssv)],2,function(x){x/sum(x)}))
 sko_ssv_freq$variant <- sko_ssv$variant
@@ -723,7 +724,7 @@ combined2 = combined2 %>% group_by(position) %>% mutate(endo_lib_positional = me
 write.csv(combined2, "data/dms_scores.csv")
 ```
 
-```{r KAM new section looking at whether SKO scores can be affected by the fact that they were done with the retransformed plasmid library}
+```{r Looking at whether SKO scores can be affected by the fact that they were done with the retransformed plasmid library}
 combined2$hypo_lowest <- NA
 for(x in 1:nrow(combined2)){
   combined2$hypo_lowest[x]
@@ -739,8 +740,7 @@ ggplot() + scale_x_log10() + scale_y_log10() +
   geom_point(data = combined2 %>% filter(endo_frac_lod > 2/3), aes(x = endo_plasmid, y = endo_ratio), color = "red") +
   geom_point(data = combined2 %>% filter(position == 93), aes(x = endo_plasmid, y = endo_ratio), color = "green")
 
-
-## K, I think we may as well mark variants where their values are going to be inaccurately high b/c of lack of range of detectable frequencies
+#marking variant scores that will be inaccurate due to low counts
 combined2$endo_inac_score <- "no"
 combined2$sko_inac_score <- "no"
 for(x in 1:nrow(combined2)){
@@ -780,7 +780,7 @@ endo_histogram_plot2 = ggplot() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
   geom_histogram(data = histogram_data, aes(x = log10(endo_ratio)), alpha = 0.75, color = "black", bins = 10) + 
-  labs(x= "Enrichment Score", y = "Count", fill = "Sample", title = "Endogenous") +
+  labs(x= "Enrichment Score", y = "Count", fill = "Sample", title = "Standard scores") +
   facet_grid(rows = vars(type), scales = "free") +
   theme(legend.position = "none")+
   scale_x_continuous(breaks = pretty_breaks(n = 3)) +  
@@ -798,7 +798,7 @@ sko_histogram_plot2 = ggplot() +
                  bins = 10) + 
   labs(x = "Enrichment Score", 
        y = "Count", 
-       title = "Knockout") +
+       title = "Knockout scores") +
   facet_grid(rows = vars(type), scales = "free") + 
   scale_x_continuous(breaks = pretty_breaks(n = 3)) +  
   scale_y_continuous(breaks = pretty_breaks(n = 3)) +
@@ -819,7 +819,8 @@ bac_histogram_plot2 = ggplot() +
   NULL; bac_histogram_plot2
 ggsave("plots/main/fig4b_bac_histogram_plot2.pdf", bac_histogram_plot2, height = 1.5, width = 1.5)
 ```
-#Heatmaps
+
+Heatmaps of DMS scores in standard LP, knockout LP and bacteria
 ```{r Make a dataframe we can use for annotating the heatmaps}
 
 wt_seq <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNY"
@@ -856,10 +857,8 @@ all_variant_df <- data.frame("variant" = all_variant_list)
 
 ```
 
-
-
-##Endogenous STIM1
-```{r Endogenous STIM1 positional patterns}
+##Standard LP cells
+```{r positional patterns}
 endo_mis = combined2 %>% filter(type == "mis") %>% select(c("variant", "endo_ratio", "start", "end", "position"))
 endo_non = combined2 %>% filter(type == "non") %>% select(c("variant", "endo_ratio", "start", "end", "position"))
 endo_syn = combined2 %>% filter(type == "syn") %>% select(c("variant", "endo_ratio", "start", "end", "position"))
@@ -886,7 +885,7 @@ ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.
   geom_text_repel(data = endo_positional_ratios3, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
 ```
 
-```{r Endogenous STIM1 heatmap}
+```{r Standard LP heatmap}
 
 endo_score_heatmap = combined2 %>% select(c("variant", "position", "start", "end","type", "endo_ratio")) %>% filter(!(position %in% c(0,99)) & !(end %in% c("?")))
 
@@ -923,7 +922,7 @@ heatmap_endo <- ggplot() + labs(x = NULL, y = NULL) +
 ggsave(file = "Plots/main/fig3b_heatmap_endo.pdf", heatmap_endo, height = 2, width = 4)
 ```
 
-##STIM1 KO
+##Knockout LP cells
 ```{r STIM1 KO positional patterns}
 sko_mis = combined2 %>% filter(type == "mis") %>% select(c("variant", "sko_ratio", "start", "end", "position"))
 sko_non = combined2 %>% filter(type == "non") %>% select(c("variant", "sko_ratio", "start", "end", "position"))
@@ -988,11 +987,10 @@ heatmap_sko <- ggplot() + labs(x = NULL, y = NULL) +
 ggsave(file = "Plots/main/fig3c_heatmap_sko.pdf", heatmap_sko, height = 2, width = 4)
 ```
 
-
 ```{r Comparing enrichment scores across cell backgrounds}
 endo_cor2 = endo_freq[,c("variant","r1_ratio","r2_ratio", "r4_ratio", "r5_ratio", "r6_ratio")]
 endo_cor2[,c("r1_ratio","r2_ratio", "r4_ratio", "r5_ratio", "r6_ratio")] <- log10(endo_cor2[,c("r1_ratio","r2_ratio", "r4_ratio", "r5_ratio", "r6_ratio")])
-endo_cor2_melt <- melt(endo_cor2, id = "variant") %>% mutate(type = "Endogenous")
+endo_cor2_melt <- melt(endo_cor2, id = "variant") %>% mutate(type = "Standard")
 
 sko_cor2 = sko_freq[,c("variant","r1_ratio","r2_ratio", "r3_ratio","r4_ratio", "r5_ratio", "r6_ratio")]
 sko_cor2[,c("r1_ratio","r2_ratio", "r3_ratio","r4_ratio", "r5_ratio", "r6_ratio")] <- log10(sko_cor2[,c("r1_ratio","r2_ratio", "r3_ratio", "r4_ratio", "r5_ratio", "r6_ratio")])
@@ -1019,6 +1017,7 @@ ggsave(file = "Plots/supplement/supp3c_Endogenous_SKO_histogram.pdf", Endogenous
 
 ```
 
+#Bacteria - original
 ```{r Bacteria STIM1 heatmap}
 bac_mis = combined2 %>% filter(type == "mis") %>% select(c("variant", "bac_ratio", "start", "end", "position"))
 bac_non = combined2 %>% filter(type == "non") %>% select(c("variant", "bac_ratio", "start", "end", "position"))
@@ -1098,7 +1097,7 @@ ggsave(file = "Plots/main/fig4a_heatmap_bac.pdf", heatmap_bac, height = 2, width
 endo_ssv_plot = ggplot(data = combined2, aes(x= log10(endo_ratio) , y= log10(endo_ssv_ratio)))+
   geom_point(size = 2, alpha = 0.5) +
   geom_text_repel(aes(label = variant), color = "orange", alpha = 0.75) +
-  labs(x= "Endogenous STIM1 DMS", y= "Endogenous STIM1 Validation") +
+  labs(x= "Standard LP DMS", y= "Standard LP Validation") +
   #stat_smooth (geom="line", alpha=0.3, size=1, span=0.5, method = lm) +
   scale_x_continuous(limits = c(-3,1)) + scale_y_continuous(limits = c(-2.2,0)) +
   theme(legend.position = "none") +
@@ -1109,7 +1108,7 @@ ggsave("plots/supplement/supp3d_endo_ssv_plot.pdf", endo_ssv_plot, height = 2.5,
 sko_ssv_plot = ggplot(data = combined2, aes(x= log10(sko_ratio) , y= log10(sko_ssv_ratio)))+
   geom_point(size = 2, alpha = 0.5) +
   geom_text_repel(aes(label = variant), color = "orange", alpha = 0.75) +
-  labs(x= "STIM1-/- DMS", y= "STIM1-/- Validation") +
+  labs(x= "Knockout LP DMS", y= "Knockout LP Validation") +
   theme(legend.position = "none") +
   #stat_smooth (geom="line", alpha=0.3, size=1, span=0.5, method = lm) + 
   scale_x_continuous(limits = c(-0.75,0.25)) + scale_y_continuous(limits = c(-3.3,0)) +
@@ -1117,8 +1116,8 @@ sko_ssv_plot = ggplot(data = combined2, aes(x= log10(sko_ratio) , y= log10(sko_s
 ggsave("plots/supplement/supp3e_sko_ssv_plot.pdf", sko_ssv_plot, height = 2.5, width = 2.5)
 ```
 
-#Bacteria DMS
-```{r}
+Bacteria DMS with three E.coli strains and three different media
+```{r counts}
 bac_raw_counts <- read.csv(file = "data/bac_stim1.csv", header = T, stringsAsFactors = F)
 bac_raw_counts <-  subset(bac_raw_counts, select = -X )
 bac_raw_counts = bac_raw_counts %>% select(-position)
@@ -1309,7 +1308,6 @@ bac_cor_ns_plot
 
 ```
 
-
 ```{r bacteria heatmap}
 bac_ratio_ns_tomelt <- bac_ratio_ns %>% select(variant, lb_10b, lb_dh5a, lb_bl21, mm_10b, mm_dh5a, mm_bl21, ca_10b, ca_dh5a, ca_bl21)
 
@@ -1348,6 +1346,13 @@ Bacterial_condition_heatmaps <- ggplot() +
   NULL; Bacterial_condition_heatmaps
 ggsave(file = "Plots/main/fig4e_Bacterial_condition_heatmaps.pdf", Bacterial_condition_heatmaps, height = 3.25, width = 3.5)
 
+#original DMS scores vs new bacteria DMS score
+bac_score_10b = left_join(bac_ratio_ns, combined2)
+bac_old_vs_new = ggplot(data = bac_score_10b, aes(x= log10(bac_ratio), y = lb_10b))+
+  geom_point(alpha = 0.5) +
+  stat_smooth (geom="line", alpha=0.3, size=1, span=0.5, method = lm) + stat_poly_eq(use_label(c("R2"))) +
+  labs(x= "Original Bacteria Score", y= "Bacteria DMS score")+NULL; bac_old_vs_new
+ggsave("plots/supplement/supp4c_bac_old_vs_new.pdf", bac_old_vs_new, height = 2, width = 2)
 ```
 
 ```{r Try doing a principal component analysis after casting variants as columns and treating each condition as rows}
@@ -1377,8 +1382,8 @@ bacteria_media_pca_scatterplot <- ggplot() +
   NULL; bacteria_media_pca_scatterplot
 ggsave(file = "Plots/main/fig4f_Bacteria_media_pca_scatterplot.pdf", bacteria_media_pca_scatterplot, height = 2.5, width = 2)
 ```
-
-#Comparisons of variants based on position, mutated residue, synonymous or nonsense variants for all three datasets
+Analysis of DMS scores:
+1. Comparisons of variants based on position, mutated residue, synonymous or nonsense variants for all three datasets
 ```{r positional comparison}
 positional_matrix_for_pca <- data.frame((positional_scores))
 rownames(positional_matrix_for_pca) <- positional_matrix_for_pca[,1]
@@ -1515,7 +1520,6 @@ non_ko_v_bac_scatterplot <- ggplot(data = non_scores, aes(x= log10(sko_ratio), y
   labs(x= "Knockout score", y= "Bacterial score") +
   NULL; non_ko_v_bac_scatterplot
 ```
-
 ```{r Compile all of the r-squared values from above to figure out inter-dataset relationships}
 method2 <- "spearman"
 
@@ -1550,13 +1554,12 @@ Dataset_spearman_comparison_plot <- ggplot() +
 ggsave(file = "Plots/main/fig5a_Dataset_spearman_comparison_plot.pdf", Dataset_spearman_comparison_plot, height = 2, width = 4)
 
 ```
-
-#synonymous distribution - to make the pink box for the rest of the figures
+Synonymous distribution - to make the pink box for the rest of the figures
 ```{r}
 syn_endo_range <- c(log10(quantile(syn_scores$endo_ratio, 0.025, na.rm = T)),log10(quantile(syn_scores$endo_ratio, 0.975, na.rm = T)))
 syn_sko_range <- c(log10(quantile(syn_scores$sko_ratio, 0.025, na.rm = T)),log10(quantile(syn_scores$sko_ratio, 0.975, na.rm = T)))
 ```
-
+2. EF-hand motif
 ```{r Compare mutational signatures for coordination residues in the EF-hand motif}
 
 coord_res <- c(76, 78, 80, 81, 87)
@@ -1574,7 +1577,7 @@ Coord_res_scatterplots <- ggplot(data = coord_subset, aes(x = log10(endo_ratio),
   scale_x_continuous(breaks = pretty_breaks(n = 3)) +
   scale_y_continuous(breaks = pretty_breaks(n = 3), limits = c(-1.5,0.5)) +
   geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.02) + 
-  labs(x = "Endogenous score", y = "Knockout score") +
+  labs(x = "Standard score", y = "Knockout score") +
   NULL; Coord_res_scatterplots
 ggsave(file = "Plots/main/fig6b_Coord_res_scatterplots.pdf", Coord_res_scatterplots, height = 1.75, width = 6)
 
@@ -1660,6 +1663,7 @@ efmotif_clustered_heatmap <- ggplot() +
   NULL; efmotif_clustered_heatmap
 ggsave(file = "plots/main/fig6d_efmotif_clustered_heatmap.pdf", efmotif_clustered_heatmap, height = 2.4, width = 3.5)
 ```
+3. Alpha1 helix and orthologs
 ```{r Subsetting the EF-hand into three sections}
 
 section1 <- combined2 %>% filter(type == "mis" & position %in% seq(64,71) & !(position %in% c(70))) %>% mutate(section = "1.a1")
@@ -1700,7 +1704,7 @@ segment123_for_scatterplot <- rbind(section1, section2, section3)
 segment123_for_scatterplot$section <- as.character(segment123_for_scatterplot$section)
 
 EFdomain_subsectioned_scatterplot <- ggplot() + theme(panel.grid = element_blank()) + 
-  labs(x = "Endogenous score", y = "Knockout score") + 
+  labs(x = "Standard score", y = "Knockout score") + 
   geom_point(data = segment123_for_scatterplot[,c("endo_ratio","sko_ratio","section")], aes(x = log10(endo_ratio), y = log10(sko_ratio), color = section), alpha = 0.3, size = 0.8) +
   NULL; EFdomain_subsectioned_scatterplot
 ggsave(file = "Plots/main/fig7a_EFdomain_subsectioned_scatterplot.pdf", EFdomain_subsectioned_scatterplot, height = 2, width = 4)
@@ -1712,7 +1716,7 @@ not_segment123_positional <- combined2 %>% filter(!(position %in% unique(segment
 subsectioned_positinal_labels <- c(63, 83, 84, 87)
 
 EFdomain_position_subsectioned_scatterplot <- ggplot() + theme(panel.grid = element_blank()) + 
-  labs(x = "Endogenous score", y = "Knockout score") + 
+  labs(x = "Standard score", y = "Knockout score") + 
   geom_point(data = segment123_positional[,c("endo_positional","sko_positional","section")], aes(x = log10(endo_positional), y = log10(sko_positional), color = section), alpha = 0.8, size = 0.8) +
   geom_point(data = not_segment123_positional, aes(x = log10(endo_positional), y = log10(sko_positional)), alpha = 0.4, size = 0.8) +
   geom_text_repel(data = segment123_positional %>% filter(position %in% subsectioned_positinal_labels), aes(x = log10(endo_positional), y = log10(sko_positional), label = position)) +
@@ -1723,38 +1727,6 @@ ggsave(file = "Plots/main/fig7c_EFdomain_position_subsectioned_scatterplot.pdf",
 ```
 
 ```{r Orthologs}
-#bringing in variants caused by single nucleotide variation (SNV)
-snv <- read.table(file = "Data/STIM1_SNV_table.tsv", sep = "\t", header = T)
-
-snv2 <- snv %>% group_by(variant) %>% summarize(variant = variant, snv = "yes") %>% distinct()
-snv3 <- merge(combined2, snv2, by = "variant")
-
-snv3$endo_score <- log10(snv3$endo_ratio)
-snv3$sko_score <- log10(snv3$sko_ratio)
-snv3$bac_score <- log10(snv3$bac_ratio)
-
-snv3_mis <- snv3 %>% filter(type == "mis")
-snv3_syn <- snv3 %>% filter(type == "syn")
-ortholog = read.csv("data/stim1_orthologs.csv") %>% filter(!is.na(Example))
-
-ortholog2 <- merge(ortholog %>% filter(Num_diff == 1 & Interpretation == "ortholog" & Redundant == "no"), snv3, by = "variant", all.x = T)
-ortholog3 <- merge(ortholog %>% filter(Num_diff == 1 & Interpretation == "ortholog" & Redundant == "no"), combined2, by = "variant", all.x = T) 
-ortholog4 <- merge(ortholog %>% filter(Num_diff == 1 & Redundant != "yes"), combined2, by = "variant", all.x = T) 
-
-Ortholog_variants <- ggplot() + scale_x_continuous(limits = log10(c(0.003,3))) + scale_y_continuous(limits = log10(c(0.07,5))) +
-  geom_point(data = combined2, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.05, size = 1) +
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.5) + 
-  #geom_point(data = ortholog4, aes(x = log10(endo_ratio), y = log10(sko_ratio)), shape = 21, fill = "pink", alpha = 0.9, size = 1.5, color = "black") +
-  geom_point(data = ortholog3, aes(x = log10(endo_ratio), y = log10(sko_ratio)), shape = 21, fill = "red", alpha = 0.9, size = 1.5, color = "black") +
-  geom_text_repel(data = ortholog3, aes(x = log10(endo_ratio), y = log10(sko_ratio), label = variant), shape = 21, fill = "red", alpha = 0.9, color = "black") +
-  labs(x = "Endogenous score", y = "Knockout score") +
-  theme(panel.grid = element_blank()) +
-  NULL; Ortholog_variants
-ggsave(file = "Plots/main/fig7e_Ortholog_variants.pdf", Ortholog_variants, height = 2.25, width = 2.5)
-
-```
-
-```{r ortholog sequence similarity}
 human <- "LSFEAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
 e66d <- "LSFDAVRNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
 r69c <- "LSFEAVCNIHKLMDDDANGDVDVEESDEFLREDLNYHDPTVKHSTFHGEDKLISVEDLWKAWKSSEVY"
@@ -1821,10 +1793,39 @@ orthologs_efhands_plot <- ggplot() + theme(panel.grid = element_blank()) +
   NULL; orthologs_efhands_plot
 ggsave(file = "plots/main/fig7d_orthologs_efhands_plot.pdf", orthologs_efhands_plot, height = 2.5, width = 6.25)
 
+#bringing in variants caused by single nucleotide variation (SNV)
+snv <- read.table(file = "Data/STIM1_SNV_table.tsv", sep = "\t", header = T)
+
+snv2 <- snv %>% group_by(variant) %>% summarize(variant = variant, snv = "yes") %>% distinct()
+snv3 <- merge(combined2, snv2, by = "variant")
+
+snv3$endo_score <- log10(snv3$endo_ratio)
+snv3$sko_score <- log10(snv3$sko_ratio)
+snv3$bac_score <- log10(snv3$bac_ratio)
+
+snv3_mis <- snv3 %>% filter(type == "mis")
+snv3_syn <- snv3 %>% filter(type == "syn")
+ortholog = read.csv("data/stim1_orthologs.csv") %>% filter(!is.na(Example))
+
+ortholog2 <- merge(ortholog %>% filter(Num_diff == 1 & Interpretation == "ortholog" & Redundant == "no"), snv3, by = "variant", all.x = T)
+ortholog3 <- merge(ortholog %>% filter(Num_diff == 1 & Interpretation == "ortholog" & Redundant == "no"), combined2, by = "variant", all.x = T) 
+ortholog4 <- merge(ortholog %>% filter(Num_diff == 1 & Redundant != "yes"), combined2, by = "variant", all.x = T) 
+
+Ortholog_variants <- ggplot() + scale_x_continuous(limits = log10(c(0.003,3))) + scale_y_continuous(limits = log10(c(0.07,5))) +
+  geom_point(data = combined2, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.05, size = 1) +
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.5) + 
+  #geom_point(data = ortholog4, aes(x = log10(endo_ratio), y = log10(sko_ratio)), shape = 21, fill = "pink", alpha = 0.9, size = 1.5, color = "black") +
+  geom_point(data = ortholog3, aes(x = log10(endo_ratio), y = log10(sko_ratio)), shape = 21, fill = "red", alpha = 0.9, size = 1.5, color = "black") +
+  geom_text_repel(data = ortholog3, aes(x = log10(endo_ratio), y = log10(sko_ratio), label = variant), shape = 21, fill = "red", alpha = 0.9, color = "black") +
+  labs(x = "Standard score", y = "Knockout score") +
+  theme(panel.grid = element_blank()) +
+  NULL; Ortholog_variants
+ggsave(file = "Plots/main/fig7e_Ortholog_variants.pdf", Ortholog_variants, height = 2.25, width = 2.5)
+
 ```
 
+STIM1 cEF-hand variants invovled in human disease
 ```{r Subset for SNVs}
-
 Endo_snv_histogram <- ggplot() + 
   theme(panel.grid.minor = element_blank(), panel.grid.major = element_blank()) +
   labs(x = "Standard score", y = "Missense\nvariants") +
@@ -1876,19 +1877,10 @@ Gnomad_variants <- ggplot() +
 ggsave(file = "Plots/main/fig8b_Gnomad_variants.pdf", Gnomad_variants, height = 1.4, width = 2)
 
 ##stopped here
-variants <- read_sheet("https://docs.google.com/spreadsheets/d/1inCXiMfZmj_AK5zasEUUxrOcbrbHVU6B4eBxKt2dGw0/edit?usp=sharing", sheet = "Curated")
+variants = read.csv("data/stim1_curated.csv")
 
 clinvar <- variants %>% filter(!is.na(ClinVar) & !(ClinVar %in% c("NA"))) %>% filter(Position >= 66 & Position <= 98)
 clinvar2 <- merge(clinvar, snv3, by = "variant")
-
-Clinvar_variants <- ggplot() + scale_x_log10(limits = c(0.01,3)) + scale_y_log10(limits = c(0.1,5)) +
-  geom_point(data = snv3, aes(x = endo_ratio, y = sko_ratio), alpha = 0.05, size = 1) +
-  geom_point(data = clinvar2, aes(x = endo_ratio, y = sko_ratio, color = ClinVar), alpha = 0.7, size = 2) +
-  labs(x = "Endogenous score", y = "Knockout score") +
-  NULL; Clinvar_variants
-ggsave(file = "Plots/Clinvar_variants.pdf", Clinvar_variants, height = 2, width = 3.4)
-
-
 clinvar2$Disease1 <- factor(clinvar2$Disease1, levels = c("Myopathy",NA))
 
 Clinvar_variants2 <- ggplot() + #scale_x_log10(limits = c(0.01,3)) + scale_y_log10(limits = c(0.1,5)) +
@@ -1898,16 +1890,114 @@ Clinvar_variants2 <- ggplot() + #scale_x_log10(limits = c(0.01,3)) + scale_y_log
   geom_point(data = clinvar2 %>% filter(Disease1 == "Myopathy"), aes(x = log10(endo_ratio), y = log10(sko_ratio), color = Disease1), alpha = 0.6, size = 1.5, fill = "purple", color = "black", shape = 21) +
   geom_point(data = clinvar2 %>% filter(is.na(Disease1)), aes(x = log10(endo_ratio), y = log10(sko_ratio), color = Disease1), alpha = 0.6, size = 1.5, fill = "orange", color = "black", shape = 21) +
   geom_text_repel(data = clinvar2 %>% filter(endo_ratio < 0.12), aes(x = log10(endo_ratio), y = log10(sko_ratio), label = variant), size = 2, segment.color = "orange", color = "red", nudge_x = -0.5) +
-  labs(x = "Endogenous score", y = "Knockout score") +
+  labs(x = "Standard score", y = "Knockout score") +
   NULL; Clinvar_variants2
-ggsave(file = "Plots/Clinvar_variants2.pdf", Clinvar_variants2, height = 1.4, width = 2)
+ggsave(file = "Plots/main/fig8c_Clinvar_variants2.pdf", Clinvar_variants2, height = 1.4, width = 2)
+
+```
+
+```{r COSMIC and cBioPortal}
+cosmic = read.csv("data/stim1_cosmic.csv")
+
+cosmic$variant <- substr(cosmic$AA.Mutation,3,12)
+
+cosmic$res <- ""; cosmic$position <- ""; cosmic$mut <- "";
+for(x in 1:nrow(cosmic)){
+  cosmic$res[x] <- substr(cosmic$variant[x],1,1)
+  cosmic$position[x] <- gsub("[^0-9]","",cosmic$variant[x])
+  cosmic$mut[x] <- substr(gsub("[0-9]","",cosmic$variant[x]),2,2)
+}
+cosmic$position <- as.numeric(cosmic$position)
 
 
-## SNVs not in ClinVar
+cosmic_table <- cosmic %>% group_by(position) %>% tally()
 
-snv_not_seen <- snv3 %>% filter(!(variant %in% subset(clinvar2, ClinVar %in% c("VUS","LP","Path")))) %>% filter(type == "mis")
+ggplot() + scale_y_log10() +
+  geom_vline(xintercept = c(63,98)) +
+  geom_point(data = cosmic_table, aes(x = position, y = n))
 
-snv_not_seen_low_score <- snv_not_seen %>% filter(log10(endo_ratio) < syn_endo_range[1])
 
+cosmic2 <- merge(cosmic, snv3, by = "variant")
+
+#### Next bring in cBioPortal data
+
+cbioportal = read.csv("data/stim1_cbioportal.csv")
+#241001_STIM1_cBioPortal.tsv
+
+cbioportal_variants <- cbioportal$Protein.Change
+cbioportal_variants2 <- cbioportal_variants[nchar(cbioportal_variants) <= 5]
+cbioportal_variants3 <- data.frame(table(cbioportal_variants2))
+colnames(cbioportal_variants3) <- c("variant","cbioportal")
+
+cbioportal_variants4 <- merge(cbioportal_variants3, snv3, by = "variant", all.y = T)
+cbioportal_variants5 <- merge(cosmic, cbioportal_variants4, by = "variant", all.y = T)
+cbioportal_variants6 <- cbioportal_variants5 %>% filter(!is.na(cbioportal) | !is.na(Count))
+
+## Number of variants below syn threshold
+cbioportal_variants6_low <- cbioportal_variants6 %>% filter(endo_score < syn_endo_range[1] | sko_score < syn_sko_range[1])
+cbioportal_variants6_lowboth <- cbioportal_variants6 %>% filter(endo_score < syn_endo_range[1] & sko_score < syn_sko_range[1])
+
+cbioportal_only <- cbioportal_variants6 %>% filter(!is.na(cbioportal) & is.na(Count))
+cosmic_only <- cbioportal_variants6 %>% filter(is.na(cbioportal) & !is.na(Count))
+cbioportal_cosmic <- cbioportal_variants6 %>% filter(!is.na(cbioportal) & !is.na(Count))
+
+cBioPortal_cosmic_variants <- ggplot() + 
+  # scale_x_log10(limits = c(0.01,3)) + scale_y_log10(limits = c(0.1,5)) +
+  theme(panel.grid = element_blank()) +
+  geom_point(data = snv3, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.1, size = 1) +
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.3) + 
+  geom_point(data = cbioportal_cosmic, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.6, size = 1.5, fill = "darkgreen", color = "black", shape = 21) +
+  geom_point(data = cbioportal_only, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.6, size = 1.5, fill = "green", color = "black", shape = 21) +
+  geom_point(data = cosmic_only, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.6, size = 1.5, fill = "yellow4", color = "black", shape = 21) +
+  labs(x = "Standard score", y = "Knockout score") +
+  geom_text_repel(data = cbioportal_variants6 %>% filter(log10(endo_ratio) < -0.89 & log10(sko_ratio) < -0.23), aes(x = log10(endo_ratio), y = log10(sko_ratio), label = variant, nudge_x = -1.5), size = 2, segment.color = "orange", segment.alpha = 0.5, color = "red") +
+  #geom_text(data = cbioportal_variants6 %>% filter(endo_ratio < 0.13 & sko_ratio < 0.6), aes(x = endo_ratio*0.9, y = sko_ratio*0.9, label = variant), size = 2, color = "red") +
+  NULL; cBioPortal_cosmic_variants
+ggsave(file = "Plots/main/fig8d_cBioPortal_cosmic_variants.pdf", cBioPortal_cosmic_variants, height = 1.4, width = 2)
+
+```
+
+Functional assays - CaMPARI calcium influx and ER stress
+```{r}
+er_campari = read.csv("data/er_stress_campari.csv")
+
+campari_dms_plot = ggplot(data = er_campari %>% distinct(variant, endo_ratio, campari, disease), aes(y= log10(endo_ratio), x= campari, color = disease))+
+  geom_point(alpha = 0.5, size = 1.5)+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  geom_text_repel(aes(label = variant), size =2) + 
+  labs(y= "Standard score", x= "CaMPARI2 red:green ratio") + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; campari_dms_plot
+
+ggsave("plots/main/fig9a_campari_dms_plot.pdf", campari_dms_plot, height = 1.5, width = 1.8)
+
+bax_bcl_er = ggplot(data = er_campari, aes(y= log10(endo_ratio), x= 1/mean_bcl2_bax_ratio, color = disease))+
+  labs(y= "Standard Score", x= "BAX / BCL-2 mRNA ratio")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; bax_bcl_er
+
+bip_er = ggplot(data = er_campari %>% filter(Target == "bip"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
+  labs(y= "Standard Score", x= "BiP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; bip_er
+
+chop_er = ggplot(data = er_campari %>% filter(Target == "chop"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
+  labs(y= "Standard Score", x= "CHOP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) +
+  scale_x_continuous(breaks = c(0.002,0.006)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; chop_er
+
+ggsave("plots/main/fig9b_bax_bcl_er.pdf", bax_bcl_er, height = 1.5, width = 1.8)
+ggsave("plots/main/fig9c_bip_er.pdf", bip_er, height = 1.5, width = 1.8)
+ggsave("plots/main/fig9d_chop_er.pdf", chop_er,height = 1.5, width = 1.8)
+
+```
+```{r session info}
+sessionInfo()
 ```
 
