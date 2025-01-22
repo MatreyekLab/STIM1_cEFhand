@@ -40,13 +40,13 @@ WT_dna = 'GCGACAGGAACCAGCTCGGGGGCCAACTCTGAGGAGTCCACTGCAGCAGAGTTTTGCCGAATTGACAAGC
 def process_fastq_file(file_path):
     index = 1
     read = 0
-    seq_index = 1  # Initialize the sequence index
-    processed_seq_indices = set()  # Set to store processed seq_index values
+    seq_index = 1  
+    processed_seq_indices = set()  
     if os.path.exists(file_path):
         print(f'Processing file: {file_path}')
         outfile_name = str(file_path[:len(file_path)-6])+"_codon.tsv"
         outfile = codecs.open(outfile_name, "w", "utf-8", "replace")
-        outfile.write("read_class\tvariant\tseq_index\n")  # Add "seq_index" header
+        outfile.write("read_class\tvariant\tseq_index\n")  
         with open(file_path, 'rt') as csvfile:
             csvfile = csv.reader(csvfile, delimiter=' ', quotechar='|')
             for row in csvfile:
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     freeze_support()
 
     # Enter the directory path where your FASTQ files are located
-    fastq_dir = '/Users/nishakamath/Downloads/eflib_amp'
+    fastq_dir = '/example/directory/'
 
     # Get the list of FASTQ files in the directory
     fastq_files = [os.path.join(fastq_dir, file) for file in os.listdir(fastq_dir) if file.endswith('.fastq')]
