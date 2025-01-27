@@ -1383,8 +1383,10 @@ bacteria_media_pca_scatterplot <- ggplot() +
 ggsave(file = "Plots/main/fig4f_Bacteria_media_pca_scatterplot.pdf", bacteria_media_pca_scatterplot, height = 2.5, width = 2)
 ```
 ```{r creating a final table with all scores}
-survival_scores = bac_score_10b %>% select(variant, endo_ratio, sko_ratio, bac_ratio, endo_ssv_ratio, sko_ssv_ratio, lb_10b, lb_dh5a, lb_bl21, mm_10b, mm_dh5a, mm_bl21, ca_10b, ca_dh5a, ca_bl21)
-write.csv(survival_scores, "data/survival_scores.csv")
+t1 = read.csv("data/dms_scores.csv") %>% select(variant, endo_ratio, sko_ratio, bac_ratio, endo_ssv_ratio, sko_ssv_ratio)
+t2 = read.csv("data/survival_scores.csv") %>% select(variant, lb_10b, lb_dh5a, lb_bl21, mm_10b, mm_dh5a, mm_bl21, ca_10b, ca_dh5a, ca_bl21)
+t3 = left_join(t1, t2)
+write.csv(t3, "data/final_table.csv")
 ```
 
 
