@@ -107,7 +107,7 @@ if __name__ == '__main__':
     freeze_support()
 
     # Enter the directory path where your FASTQ files are located
-    fastq_dir = '/Users/nishakamath/Library/CloudStorage/GoogleDrive-ndk39@case.edu/.shortcut-targets-by-id/1ikyBZtjysUIqxPHKYtt_te43Qd0t1esg/_MatreyekLab/Data/Illumina/Nextseq/NextSeq007_230921/working_dir_NK'
+    fastq_dir = '/example/directory'
 
     # Get the list of FASTQ files in the directory
     fastq_files = [os.path.join(fastq_dir, file) for file in os.listdir(fastq_dir) if file.endswith('.fastq')]

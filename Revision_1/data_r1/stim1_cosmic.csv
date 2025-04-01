@@ -1,0 +1,302 @@
+Position,CDS Mutation,AA Mutation,Legacy Mutation ID,Count,Type
+16,c.48C>T,p.L16=,COSM10376149,1,Substitution - coding silent
+17,c.51G>T,p.L17=,COSM6346178,1,Substitution - coding silent
+19,c.57G>A,p.Q19=,COSM6215896,2,Substitution - coding silent
+23,c.69C>T,p.L23=,COSM7680575,1,Substitution - coding silent
+26,c.78T>C,p.S26=,COSM7560571,1,Substitution - coding silent
+31,c.93G>A,p.A31=,COSM926828,1,Substitution - coding silent
+38,c.114C>G,p.A38=,COSM4574358,1,Substitution - coding silent
+44,c.132T>C,p.T44=,COSM6791827,1,Substitution - coding silent
+63,c.189C>G,p.L63=,COSM8390195,1,Substitution - coding silent
+65,c.195C>T,p.F65=,COSM8827068,1,Substitution - coding silent
+67,c.201A>G,p.A67=,COSM5970159,1,Substitution - coding silent
+70,c.210C>T,p.N70=,COSM4977157,3,Substitution - coding silent
+82,c.246T>C,p.D82=,COSM238250,1,Substitution - coding silent
+96,c.288C>G,p.L96=,COSM7143956,1,Substitution - coding silent
+108,c.324C>T,p.F108=,COSM7712283,1,Substitution - coding silent
+115,c.345C>A,p.I115=,COSM7482169,1,Substitution - coding silent
+115,c.345C>T,p.I115=,COSM6791840,1,Substitution - coding silent
+116,c.348C>T,p.S116=,COSM7277174,1,Substitution - coding silent
+129,c.387A>G,p.V129=,COSM5453081,2,Substitution - coding silent
+133,c.399C>T,p.T133=,COSM8141266,2,Substitution - coding silent
+138,c.414A>T,p.V138=,COSM7803627,1,Substitution - coding silent
+145,c.435G>T,p.V145=,COSM8374464,1,Substitution - coding silent
+154,c.462C>T,p.F154=,COSM5372459,1,Substitution - coding silent
+183,c.549C>T,p.D183=,COSM9460389,1,Substitution - coding silent
+184,c.552G>A,p.R184=,COSM10619357,1,Substitution - coding silent
+192,c.574C>T,p.L192=,COSM4032722,1,Substitution - coding silent
+198,c.594G>C,p.V198=,COSM8965287,1,Substitution - coding silent
+199,c.597C>T,p.L199=,COSM7862452,1,Substitution - coding silent
+204,c.612C>A,p.L204=,COSM7975150,1,Substitution - coding silent
+204,c.612C>T,p.L204=,COSM3447240,1,Substitution - coding silent
+211,c.633C>G,p.L211=,COSM9525841,1,Substitution - coding silent
+212,c.636G>A,p.K212=,COSM7529321,1,Substitution - coding silent
+217,c.651G>T,p.V217=,COSM247629,2,Substitution - coding silent
+219,c.657T>C,p.S219=,COSM7575222,1,Substitution - coding silent
+220,c.660C>T,p.I220=,COSM5557029,2,Substitution - coding silent
+236,c.708C>T,p.Y236=,COSM6791831,1,Substitution - coding silent
+237,c.711C>T,p.S237=,COSM688196,1,Substitution - coding silent
+269,c.807G>A,p.Q269=,COSM5372460,2,Substitution - coding silent
+270,c.810G>A,p.E270=,COSM1978821,1,Substitution - coding silent
+278,c.834G>A,p.E278=,COSM3447244,1,Substitution - coding silent
+282,c.846G>T,p.L282=,COSM7971963,1,Substitution - coding silent
+283,c.849A>G,p.E283=,COSM1266924,1,Substitution - coding silent
+294,c.882G>A,p.K294=,COSM4795144,1,Substitution - coding silent
+319,c.957G>A,p.E319=,COSM6132339,1,Substitution - coding silent
+360,c.1080A>G,p.Q360=,COSM428967,7,Substitution - coding silent
+369,c.1107T>C,p.A369=,COSM9634618,1,Substitution - coding silent
+404,c.1212T>C,p.D404=,COSM8166306,1,Substitution - coding silent
+418,c.1254G>A,p.E418=,COSM926856,1,Substitution - coding silent
+423,c.1267T>C,p.L423=,COSM1627964,1,Substitution - coding silent
+423,c.1269G>A,p.L423=,COSM6791829,2,Substitution - coding silent
+435,c.1305C>T,p.I435=,COSM4574359,1,Substitution - coding silent
+436,c.1308C>G,p.L436=,COSM7242263,1,Substitution - coding silent
+438,c.1314C>A,p.G438=,COSM7515638,1,Substitution - coding silent
+439,c.1317C>T,p.F439=,COSM3869143,1,Substitution - coding silent
+449,c.1347A>T,p.S449=,COSM333524,2,Substitution - coding silent
+458,c.1374C>A,p.P458=,COSM8131259,1,Substitution - coding silent
+475,c.1425C>T,p.D475=,COSM5452676,2,Substitution - coding silent
+500,c.1500G>A,p.R500=,COSM5970160,2,Substitution - coding silent
+503,c.1507C>T,p.L503=,COSM3447248,1,Substitution - coding silent
+504,c.1512G>T,p.T504=,COSM8242840,1,Substitution - coding silent
+515,c.1543T>C,p.L515=,COSM4448985,1,Substitution - coding silent
+518,c.1554C>T,p.G518=,COSN13322928,2,Substitution - coding silent
+569,c.1707T>C,p.T569=,COSN24303815,3,Substitution - coding silent
+625,c.1875C>T,p.S625=,COSM5050806,2,Substitution - coding silent
+627,c.1881G>A,p.S627=,COSM4032728,3,Substitution - coding silent
+651,c.1953C>T,p.D651=,COSM121963,1,Substitution - coding silent
+674,c.2020C>T,p.L674=,COSM3447250,1,Substitution - coding silent
+691,c.2073G>A,p.A691=,COSM926858,1,Substitution - coding silent
+699,c.2097C>A,p.A699=,COSM5456115,1,Substitution - coding silent
+702,c.2104C>T,p.L702=,COSM3447251,1,Substitution - coding silent
+707,c.2121C>A,p.P707=,COSM7161099,1,Substitution - coding silent
+727,c.2181C>T,p.S727=,COSM9209249,3,Substitution - coding silent
+742,c.2226G>A,p.L742=,COSM8847780,1,Substitution - coding silent
+753,c.2257C>T,p.L753=,COSM3809203,1,Substitution - coding silent
+760,c.2280T>A,p.A760=,COSM4032729,1,Substitution - coding silent
+767,c.2301T>C,p.I767=,COSM5469592,1,Substitution - coding silent
+768,c.2304C>G,p.G768=,COSM8747183,1,Substitution - coding silent
+771,c.2313A>G,p.T771=,COSM9980950,1,Substitution - coding silent
+777,c.2331G>A,p.R777=,COSM9200340,2,Substitution - coding silent
+778,c.2334G>A,p.K778=,COSM6574883,1,Substitution - coding silent
+781,c.2343C>A,p.P781=,COSM8158122,2,Substitution - coding silent
+5,c.13G>A,p.V5I,COSM4032709,1,Substitution - Missense
+6,c.16C>A,p.R6S,COSM9955499,1,Substitution - Missense
+14,c.40_41delinsAA,p.G14K,COSM10575301,2,Substitution - Missense
+19,c.55C>A,p.Q19K,COSM7512544,1,Substitution - Missense
+20,c.59G>A,p.G20D,COSM9634619,1,Substitution - Missense
+21,c.62A>G,p.Q21R,COSM4730514,2,Substitution - Missense
+28,c.83G>A,p.S28N,COSM1978645,1,Substitution - Missense
+33,c.98G>T,p.G33V,COSM10671095,2,Substitution - Missense
+38,c.112G>A,p.A38T,COSM687385,3,Substitution - Missense
+40,c.119C>A,p.S40Y,COSM6407777,2,Substitution - Missense
+46,c.136G>A,p.A46T,COSM1240331,1,Substitution - Missense
+48,c.142T>C,p.F48L,COSM6791834,1,Substitution - Missense
+49,c.147C>G,p.C49W,COSM7212774,1,Substitution - Missense
+52,c.154G>A,p.D52N,COSM1978660,2,Substitution - Missense
+52,c.154G>C,p.D52H,COSM7467357,1,Substitution - Missense
+54,c.161C>T,p.P54L,COSM9918830,1,Substitution - Missense
+55,c.164T>A,p.L55Q,COSM377406,1,Substitution - Missense
+57,c.169C>T,p.H57Y,COSM5517420,1,Substitution - Missense
+63,c.187C>G,p.L63V,COSM3359182,1,Substitution - Missense
+66,c.196G>A,p.E66K,COSM4730515,2,Substitution - Missense
+67,c.199G>A,p.A67T,COSM10117815,1,Substitution - Missense
+69,c.205C>T,p.R69C,COSM1978661,1,Substitution - Missense
+72,c.215A>G,p.H72R,COSM398425,1,Substitution - Missense
+76,c.226G>A,p.D76N,COSM9110371,1,Substitution - Missense
+76,c.226G>C,p.D76H,COSM3739042,1,Substitution - Missense
+76,c.226G>T,p.D76Y,COSM8783701,1,Substitution - Missense
+76,c.227A>G,p.D76G,COSM131102,1,Substitution - Missense
+76,c.227A>T,p.D76V,COSM6791836,1,Substitution - Missense
+77,c.229G>A,p.D77N,COSM9777930,1,Substitution - Missense
+79,c.235G>A,p.A79T,COSM7781658,1,Substitution - Missense
+80,c.240T>A,p.N80K,COSM4730516,2,Substitution - Missense
+81,c.242G>A,p.G81D,COSM10190423,1,Substitution - Missense
+81,c.242G>T,p.G81V,COSM5648863,1,Substitution - Missense
+82,c.244G>A,p.D82N,COSM4537707,1,Substitution - Missense
+83,c.248T>C,p.V83A,COSM224387,1,Substitution - Missense
+84,c.250G>A,p.D84N,COSM4444342,1,Substitution - Missense
+84,c.250G>C,p.D84H,COSM10323588,1,Substitution - Missense
+84,c.250G>T,p.D84Y,COSM5372448,1,Substitution - Missense
+84,c.252T>A,p.D84E,COSM5050804,1,Substitution - Missense
+87,c.259G>C,p.E87Q,COSM6132359,1,Substitution - Missense
+87,c.260A>G,p.E87G,COSM10413571,1,Substitution - Missense
+90,c.270G>T,p.E90D,COSM6306040,1,Substitution - Missense
+92,c.275T>C,p.L92P,COSM4032720,1,Substitution - Missense
+97,c.289A>T,p.N97Y,COSM4976520,3,Substitution - Missense
+106,c.317G>A,p.S106N,COSM8936453,1,Substitution - Missense
+112,c.334G>T,p.D112Y,COSM5001014,1,Substitution - Missense
+152,c.454G>A,p.E152K,COSM10172272,1,Substitution - Missense
+154,c.462C>A,p.F154L,COSM4921703,1,Substitution - Missense
+161,c.482G>T,p.G161V,COSM6331154,1,Substitution - Missense
+176,c.527G>T,p.G176V,COSM6791826,1,Substitution - Missense
+181,c.541A>G,p.M181V,COSM9895310,1,Substitution - Missense
+219,c.656C>G,p.S219C,COSM6579011,3,Substitution - Missense
+223,c.668G>T,p.G223V,COSM6260512,1,Substitution - Missense
+226,c.676G>A,p.G226S,COSM6791832,1,Substitution - Missense
+230,c.688G>C,p.A230P,COSM7152070,1,Substitution - Missense
+232,c.696C>G,p.I232M,COSM8678634,1,Substitution - Missense
+235,c.703C>A,p.R235S,COSM7585818,1,Substitution - Missense
+235,c.703C>T,p.R235C,COSM4746309,2,Substitution - Missense
+237,c.709T>C,p.S237P,COSM10280350,1,Substitution - Missense
+242,c.726G>T,p.K242N,COSM4748982,1,Substitution - Missense
+244,c.730A>G,p.M244V,COSM4938333,1,Substitution - Missense
+244,c.732G>A,p.M244I,COSM9331180,1,Substitution - Missense
+244,c.732G>T,p.M244I,COSM688195,1,Substitution - Missense
+250,c.749G>T,p.G250V,COSM8759639,1,Substitution - Missense
+252,c.755A>G,p.H252R,COSM6537191,1,Substitution - Missense
+253,c.758G>A,p.R253Q,COSM7480082,1,Substitution - Missense
+255,c.763G>A,p.E255K,COSM6292585,3,Substitution - Missense
+259,c.775C>T,p.H259Y,COSM7412210,1,Substitution - Missense
+259,c.776A>G,p.H259R,COSM428966,1,Substitution - Missense
+261,c.781C>A,p.L261I,COSM6518539,1,Substitution - Missense
+263,c.787G>A,p.E263K,COSM10159858,1,Substitution - Missense
+264,c.792G>T,p.R264S,COSM7952675,1,Substitution - Missense
+268,c.801_802delinsAA,p.A268T,COSM9652744,1,Substitution - Missense
+273,c.817C>T,p.R273C,COSM7283350,1,Substitution - Missense
+273,c.818G>A,p.R273H,COSM10671107,1,Substitution - Missense
+278,c.834G>T,p.E278D,COSM6415268,2,Substitution - Missense
+281,c.841C>T,p.H281Y,COSM8385833,2,Substitution - Missense
+287,c.859C>T,p.R287C,COSM8473166,1,Substitution - Missense
+292,c.874C>T,p.L292F,COSM4511617,1,Substitution - Missense
+298,c.892C>G,p.Q298E,COSM10016956,1,Substitution - Missense
+299,c.895C>T,p.R299W,COSM1561411,1,Substitution - Missense
+299,c.896G>A,p.R299Q,COSM6791825,1,Substitution - Missense
+299,c.896G>T,p.R299L,COSM1978824,1,Substitution - Missense
+301,c.903G>T,p.K301N,COSM6859364,1,Substitution - Missense
+304,c.910C>T,p.R304W,COSM6998007,1,Substitution - Missense
+304,c.911G>A,p.R304Q,COSM6852680,1,Substitution - Missense
+313,c.938G>A,p.R313H,COSM4441924,1,Substitution - Missense
+315,c.943A>C,p.K315Q,COSM4631986,1,Substitution - Missense
+327,c.979G>A,p.A327T,COSM8877779,1,Substitution - Missense
+332,c.994G>A,p.E332K,COSM3447245,2,Substitution - Missense
+336,c.1006G>C,p.E336Q,COSM7330837,1,Substitution - Missense
+343,c.1028C>T,p.A343V,COSM3447246,1,Substitution - Missense
+346,c.1037C>T,p.A346V,COSM10359614,1,Substitution - Missense
+350,c.1049G>T,p.W350L,COSM6068431,1,Substitution - Missense
+352,c.1054C>A,p.Q352K,COSM327526,2,Substitution - Missense
+361,c.1082A>G,p.Y361C,COSM1353759,1,Substitution - Missense
+363,c.1088A>G,p.N363S,COSM6371724,2,Substitution - Missense
+375,c.1124T>C,p.V375A,COSM10671108,1,Substitution - Missense
+379,c.1136G>A,p.G379E,COSM5753678,1,Substitution - Missense
+380,c.1138G>A,p.A380T,COSM5838518,1,Substitution - Missense
+381,c.1143G>T,p.E381D,COSM6791839,1,Substitution - Missense
+382,c.1146G>T,p.K382N,COSM7474148,1,Substitution - Missense
+384,c.1150A>C,p.K384Q,COSM1227850,1,Substitution - Missense
+385,c.1154A>C,p.K385T,COSM3415855,1,Substitution - Missense
+395,c.1183C>T,p.H395Y,COSM6068430,1,Substitution - Missense
+395,c.1185C>G,p.H395Q,COSM1604535,2,Substitution - Missense
+396,c.1186G>A,p.V396M,COSM926855,1,Substitution - Missense
+402,c.1205T>G,p.L402R,COSM3986151,1,Substitution - Missense
+407,c.1219C>T,p.H407Y,COSM5929345,1,Substitution - Missense
+408,c.1222A>C,p.K408Q,COSM3447247,1,Substitution - Missense
+408,c.1223A>C,p.K408T,COSM1227851,1,Substitution - Missense
+410,c.1229T>C,p.L410P,COSM6444229,1,Substitution - Missense
+414,c.1240C>A,p.Q414K,COSM4884585,1,Substitution - Missense
+414,c.1242A>T,p.Q414H,COSM5818122,1,Substitution - Missense
+418,c.1252G>A,p.E418K,COSM5494453,2,Substitution - Missense
+419,c.1255G>T,p.V419L,COSM9959828,1,Substitution - Missense
+419,c.1256T>C,p.V419A,COSM7569056,1,Substitution - Missense
+424,c.1270C>T,p.R424W,COSM4032726,2,Substitution - Missense
+426,c.1276C>T,p.R426C,COSM10393591,1,Substitution - Missense
+428,c.1283A>G,p.H428R,COSM9136716,1,Substitution - Missense
+429,c.1286G>A,p.R429H,COSM5483567,2,Substitution - Missense
+434,c.1300G>A,p.E434K,COSM3809201,1,Substitution - Missense
+438,c.1313G>C,p.G438A,COSM688192,1,Substitution - Missense
+442,c.1325T>A,p.V442D,COSM10152378,1,Substitution - Missense
+446,c.1336G>T,p.G446C,COSM7789058,1,Substitution - Missense
+446,c.1337G>T,p.G446V,COSM7760307,2,Substitution - Missense
+453,c.1358C>A,p.A453D,COSM9312983,1,Substitution - Missense
+453,c.1358C>T,p.A453V,COSM9175632,2,Substitution - Missense
+454,c.1361T>G,p.L454R,COSM9314074,1,Substitution - Missense
+457,c.1371C>G,p.D457E,COSM688191,1,Substitution - Missense
+465,c.1393C>T,p.R465C,COSM7451693,3,Substitution - Missense
+465,c.1394G>A,p.R465H,COSM9052605,1,Substitution - Missense
+473,c.1419G>T,p.M473I,COSM9281382,1,Substitution - Missense
+477,c.1429G>A,p.V477M,COSM10671109,1,Substitution - Missense
+480,c.1440G>C,p.M480I,COSM4607279,1,Substitution - Missense
+487,c.1460C>T,p.P487L,COSM9462790,1,Substitution - Missense
+492,c.1474T>C,p.S492P,COSM7545179,1,Substitution - Missense
+496,c.1488G>C,p.Q496H,COSM6844510,1,Substitution - Missense
+500,c.1498C>T,p.R500W,COSM1978832,2,Substitution - Missense
+500,c.1499G>A,p.R500Q,COSM926857,1,Substitution - Missense
+500,c.1499G>T,p.R500L,COSM8026157,1,Substitution - Missense
+502,c.1505G>A,p.R502H,COSM1353760,1,Substitution - Missense
+509,c.1526G>A,p.G509D,COSM10671110,1,Substitution - Missense
+510,c.1529T>G,p.L510R,COSM4441598,1,Substitution - Missense
+555,c.1664C>G,p.S555C,COSN22055028,3,Substitution - Missense
+586,c.1757A>T,p.Y586F,COSN5305277,1,Substitution - Missense
+616,c.1847C>T,p.S616L,COSN29513623,1,Substitution - Missense
+623,c.1868C>T,p.T623I,COSM3447249,1,Substitution - Missense
+624,c.1871A>G,p.H624R,COSM7324593,1,Substitution - Missense
+625,c.1874C>T,p.S625F,COSM9782367,1,Substitution - Missense
+626,c.1876G>A,p.D626N,COSM4032727,2,Substitution - Missense
+626,c.1877A>G,p.D626G,COSM9115162,1,Substitution - Missense
+627,c.1880C>T,p.S627L,COSM1703359,2,Substitution - Missense
+630,c.1889C>T,p.S630F,COSM9344634,1,Substitution - Missense
+636,c.1907G>A,p.R636H,COSM1978835,1,Substitution - Missense
+639,c.1915G>T,p.V639L,COSM1600050,1,Substitution - Missense
+640,c.1918G>A,p.A640T,COSM8963330,1,Substitution - Missense
+642,c.1925A>G,p.K642R,COSM1978836,1,Substitution - Missense
+645,c.1933C>A,p.Q645K,COSM8148696,1,Substitution - Missense
+645,c.1933C>G,p.Q645E,COSM7155719,1,Substitution - Missense
+648,c.1942C>T,p.R648C,COSM9104834,1,Substitution - Missense
+648,c.1943G>A,p.R648H,COSM428968,2,Substitution - Missense
+651,c.1952A>G,p.D651G,COSM1978837,1,Substitution - Missense
+654,c.1960C>T,p.L654F,COSM9634617,1,Substitution - Missense
+658,c.1973C>G,p.T658S,COSM5647802,1,Substitution - Missense
+659,c.1976C>G,p.S659C,COSM8574270,1,Substitution - Missense
+661,c.1982G>A,p.G661D,COSM8201297,2,Substitution - Missense
+662,c.1985G>A,p.S662N,COSM9261566,1,Substitution - Missense
+668,c.2002G>A,p.G668R,COSM6791828,1,Substitution - Missense
+670,c.2008C>T,p.H670Y,COSM5925642,1,Substitution - Missense
+670,c.2009A>C,p.H670P,COSM3809202,1,Substitution - Missense
+686,c.2058G>T,p.K686N,COSM9252862,1,Substitution - Missense
+698,c.2094G>C,p.K698N,COSM6194211,1,Substitution - Missense
+699,c.2095G>A,p.A699T,COSM8879509,1,Substitution - Missense
+699,c.2095G>T,p.A699S,COSM6194212,1,Substitution - Missense
+705,c.2113C>A,p.L705M,COSM6518540,1,Substitution - Missense
+707,c.2120C>A,p.P707H,COSM10431334,1,Substitution - Missense
+710,c.2128C>T,p.P710S,COSM9787180,1,Substitution - Missense
+712,c.2134G>C,p.G712R,COSM10638939,1,Substitution - Missense
+713,c.2138G>A,p.G713D,COSM10671111,1,Substitution - Missense
+715,c.2144C>T,p.P715L,COSM5577091,1,Substitution - Missense
+721,c.2162G>A,p.R721H,COSM268094,1,Substitution - Missense
+725,c.2174C>T,p.P725L,COSM1978841,1,Substitution - Missense
+726,c.2177G>A,p.S726N,COSM10560503,1,Substitution - Missense
+728,c.2183C>A,p.P728Q,COSM7494675,1,Substitution - Missense
+736,c.2207T>C,p.V736A,COSM301003,1,Substitution - Missense
+743,c.2228A>G,p.Q743R,COSM8835274,1,Substitution - Missense
+746,c.2237G>A,p.R746Q,COSM6791833,1,Substitution - Missense
+749,c.2245C>T,p.R749C,COSM4188955,1,Substitution - Missense
+749,c.2246G>A,p.R749H,COSM1353761,5,Substitution - Missense
+751,c.2252C>T,p.P751L,COSM5544265,4,Substitution - Missense
+752,c.2255A>C,p.H752P,COSM6791830,1,Substitution - Missense
+756,c.2267A>G,p.K756R,COSM10059261,1,Substitution - Missense
+758,c.2273C>A,p.A758D,COSM10493623,1,Substitution - Missense
+765,c.2294G>T,p.G765V,COSM4769635,1,Substitution - Missense
+768,c.2302G>A,p.G768S,COSM10384553,1,Substitution - Missense
+773,c.2318C>G,p.S773C,COSM129469,1,Substitution - Missense
+773,c.2318C>T,p.S773F,COSM10204277,1,Substitution - Missense
+775,c.2324C>A,p.P775Q,COSM8154774,1,Substitution - Missense
+776,c.2327G>A,p.G776D,COSM8225314,1,Substitution - Missense
+777,c.2330G>A,p.R777Q,COSM5628397,1,Substitution - Missense
+783,c.2348A>G,p.K783R,COSM84033,1,Substitution - Missense
+786,c.2357A>G,p.K786R,COSM10165670,1,Substitution - Missense
+788,c.2363C>T,p.P788L,COSM6791835,1,Substitution - Missense
+30,c.88A>T,p.K30*,COSM9634620,1,Substitution - Nonsense
+50,c.148C>T,p.R50*,COSM6791838,1,Substitution - Nonsense
+233,c.697C>T,p.Q233*,COSM9375171,1,Substitution - Nonsense
+243,c.727A>T,p.K243*,COSM5950903,1,Substitution - Nonsense
+267,c.799A>T,p.K267*,COSM6384804,2,Substitution - Nonsense
+278,c.832G>T,p.E278*,COSM3447243,1,Substitution - Nonsense
+336,c.1006G>T,p.E336*,COSM6068432,1,Substitution - Nonsense
+350,c.1050G>A,p.W350*,COSM4032725,1,Substitution - Nonsense
+381,c.1141G>T,p.E381*,COSM688194,1,Substitution - Nonsense
+418,c.1252G>T,p.E418*,COSM688193,1,Substitution - Nonsense
+440,c.1318C>T,p.Q440*,COSM6132338,1,Substitution - Nonsense
+496,c.1486C>T,p.Q496*,COSM8229049,1,Substitution - Nonsense
+513,c.1537C>T,p.Q513*,COSM4468298,1,Substitution - Nonsense
+532,c.1594C>T,p.R532*,COSN30645777,1,Substitution - Nonsense
+645,c.1933C>T,p.Q645*,COSM8287936,1,Substitution - Nonsense
+740,c.2218C>T,p.R740*,COSM9173014,2,Substitution - Nonsense
