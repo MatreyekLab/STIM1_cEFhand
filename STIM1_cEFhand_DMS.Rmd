@@ -2042,7 +2042,161 @@ ggsave("plots/main/fig9b_bax_bcl_er.pdf", bax_bcl_er, height = 1.5, width = 1.8)
 ggsave("plots/main/fig9c_bip_er.pdf", bip_er, height = 1.5, width = 1.8)
 ggsave("plots/main/fig9d_chop_er.pdf", chop_er,height = 1.5, width = 1.8)
 
+
+#Revision 1 - splitting the panels in Fig 9
+#ss = small-scale DMS with WT, R429C and R304W
+#dms = large-scale DMS with WT, L74P, D84G
+er_campari_ss = read.csv("Revision_1/data_r1/er_stress_campari_ss.csv")
+er_campari_dms = read.csv("Revision_1/data_r1/er_stress_campari_dms.csv")
+
+campari_ss_plot = ggplot(data = er_campari_ss %>% distinct(variant, endo_ratio, campari, disease), aes(y= log10(endo_ratio), x= campari, color = disease))+
+  geom_point(alpha = 0.5, size = 1.5)+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  geom_text_repel(aes(label = variant), size =2) + 
+  labs(y= "Standard score", x= "CaMPARI2 \nred:green ratio") + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; campari_ss_plot
+
+campari_dms_plot = ggplot(data = er_campari_dms %>% distinct(variant, endo_ratio, campari, disease), aes(y= log10(endo_ratio), x= campari, color = disease))+
+  geom_point(alpha = 0.5, size = 1.5)+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  geom_text_repel(aes(label = variant), size =2) + 
+  labs(y= "Standard score", x= "CaMPARI2 \nred:green ratio") + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3), limits = c(0.06, 0.09)) + scale_y_continuous(breaks = breaks_pretty(n = 5), limits = c(-0.6,-0.2)) +
+  NULL; campari_dms_plot
+
+ggsave("Revision_1/plots_r1/main_r1/fig9a_r1_campari_ss_plot.pdf", campari_ss_plot, height = 1.5, width = 1.8)
+ggsave("Revision_1/plots_r1/main_r1/fig9a_r1_campari_dms_plot.pdf", campari_dms_plot, height = 1.5, width = 1.8)
+
+bax_bcl_er_ss = ggplot(data = er_campari_ss, aes(y= log10(endo_ratio), x= mean_bax_bcl2_ratio, color = disease))+
+  labs(y= "Standard Score", x= "BAX / BCL-2 mRNA ratio")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; bax_bcl_er_ss
+
+bax_bcl_er_dms = ggplot(data = er_campari_dms, aes(y= log10(endo_ratio), x= mean_bax_bcl2_ratio, color = disease))+
+  labs(y= "Standard Score", x= "BAX / BCL-2 mRNA ratio")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; bax_bcl_er_dms
+
+bip_er_ss = ggplot(data = er_campari_ss %>% filter(Target == "bip"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
+  labs(y= "Standard Score", x= "BiP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; bip_er_ss
+bip_er_dms = ggplot(data = er_campari_dms %>% filter(Target == "bip"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
+  labs(y= "Standard Score", x= "BiP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) + 
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; bip_er_dms
+
+chop_er_ss = ggplot(data = er_campari_ss %>% filter(Target == "chop"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
+  labs(y= "Standard Score", x= "CHOP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) +
+  scale_x_continuous(breaks = c(0.002,0.006)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; chop_er_ss
+
+chop_er_dms = ggplot(data = er_campari_dms %>% filter(Target == "chop"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
+  labs(y= "Standard Score", x= "CHOP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_text_repel(aes(label = variant), size = 2) +
+  scale_x_continuous(breaks = c(0.002,0.006)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  NULL; chop_er_dms
+
+ggsave("Revision_1/plots_r1/main_r1/fig9b_r1_bax_bcl_er_ss.pdf", bax_bcl_er_ss, height = 1.5, width = 1.8)
+ggsave("Revision_1/plots_r1/main_r1/fig9b_r1_bax_bcl_er_dms.pdf", bax_bcl_er_dms, height = 1.5, width = 1.8)
+ggsave("Revision_1/plots_r1/main_r1/fig9c_r1_bip_er_ss.pdf", bip_er_ss, height = 1.5, width = 1.8)
+ggsave("Revision_1/plots_r1/main_r1/fig9c_r1_bip_er_dms.pdf", bip_er_dms, height = 1.5, width = 1.8)
+ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_ss.pdf", chop_er_ss, height = 1.5, width = 1.8)
+ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_dms.pdf", chop_er_dms, height = 1.5, width = 1.8)
+
 ```
+
+```{r}
+#Revision 1 = Survival scores vs foldx
+foldx = read.csv("Revision_1/data_r1/foldx.csv")
+foldx_ef = left_join(combined2, foldx)
+
+ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= total.energy))+
+  geom_point(alpha = 0.5) +
+  geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
+
+ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= BackbonEHbond))+
+  geom_point(alpha = 0.5) 
+# + geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
+
+ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= Sidechain.Hbond))+
+  geom_point(alpha = 0.5) 
+# + geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
+
+ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = total.energy))+
+  geom_point()+
+  scale_color_gradient2(high = "red", low = "blue")
+```
+```{r}
+#Revision 1 - Survival scores vs Alpha Missense
+am_ef = read.csv("Revision_1/data_r1/alpha_missense_ef.csv")
+am_ef = am_ef[-1]
+am_ef = am_ef %>% select(protein_variant, am_pathogenicity, am_class)
+colnames(am_ef)[1] = "variant"
+am_ef = left_join(combined2, am_ef)
+am_path_var = am_ef %>% filter(variant %in% c("H72Q", "L74P", "G81D", "D84G", "L92V", "L96V"))
+
+ggplot(data = am_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = am_pathogenicity))+
+  geom_point(alpha = 0.5) +
+  scale_color_gradient2(high = "blue", low = "red")
+
+ggplot(data = am_ef, aes(x= log10(endo_ratio), y = am_pathogenicity))+
+  geom_point(alpha = 0.5) +
+  geom_text_repel(data = am_path_var, aes(x= log10(endo_ratio), y= am_pathogenicity, label = variant))
+```
+
+```{r}
+#Revision 1 Survival scores vs ESM scores
+esm_scores = read.csv("Revision_1/data_r1/esm_scores_stim1.csv") %>% filter(pos %in% c(63:98))
+colnames(esm_scores)[2] = "esm_score"
+esm_scores = left_join(combined2, esm_scores)
+
+ggplot(data = esm_scores %>% filter(esm_score != 0), aes(x= log10(endo_ratio), y= esm_score))+
+  geom_point(alpha = 0.5)
+
+ggplot(data = esm_scores %>% filter(esm_score != 0), aes(x= log10(sko_ratio), y= esm_score))+
+  geom_point(alpha = 0.5)
+```
+
+```{r}
+#Revision 1 error bars on endo and sko scores
+endo_sd = endo_freq %>% select(variant, r1_ratio, r2_ratio, r4_ratio, r5_ratio, r6_ratio)
+colnames(endo_sd) = c("variant", "er1", "er2", "er4" ,"er5", "er6")
+endo_sd$endo_sd <- apply(endo_sd[, c("er1", "er2", "er4", "er5", "er6")], 1, sd)
+endo_sd$endo_se <- apply(endo_sd[, c("er1", "er2", "er4", "er5", "er6")], 1, function(x) sd(x) / sqrt(5))
+
+sko_sd = sko_freq %>% select(variant, r1_ratio, r2_ratio, r3_ratio, r4_ratio, r5_ratio, r6_ratio)
+colnames(sko_sd) = c("variant", "sr1", "sr2", "sr3", "sr4", "sr5", "sr6")
+sko_sd$sko_sd <- apply(sko_sd[, c("sr1", "sr2", "sr3", "sr4", "sr5", "sr6")], 1, sd)
+sko_sd$sko_se <- apply(sko_sd[, c("sr1", "sr2", "sr3", "sr4", "sr5", "sr6")], 1, function(x) sd(x) / sqrt(6))
+
+
+combined3 = combined2 %>% select(variant, endo_ratio, sko_ratio)
+combined3 = left_join(combined3, endo_sd)
+combined3 = left_join(combined3, sko_sd)
+
+ggplot(data = combined3 %>% filter(variant %in% c("L74P", "D84G", "F91Y", "G81D", "H72Q", "L92V", "L96V")), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+  geom_point(alpha = 0.5)+
+  geom_errorbarh(aes(xmin = log10(endo_ratio)-endo_se, xmax = log10(endo_ratio)+endo_se)) +
+  geom_errorbar(aes(ymin = log10(sko_ratio)-sko_se, ymax = log10(sko_ratio)+sko_se)) +
+  geom_text_repel(aes(label = variant)) +
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.10)
+```
+
+
+
 ```{r session info}
 sessionInfo()
 ```
