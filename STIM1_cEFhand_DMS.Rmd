@@ -2053,7 +2053,7 @@ campari_ss_plot = ggplot(data = er_campari_ss %>% distinct(variant, endo_ratio, 
   geom_point(alpha = 0.5, size = 1.5)+
   theme(legend.position = "none", panel.grid = element_blank())+
   geom_text_repel(aes(label = variant), size =2) + 
-  labs(y= "Standard score", x= "CaMPARI2 \nred:green ratio") + 
+  labs(y= "Standard score", x= "CaMPARI2 red:green ratio") + 
   scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; campari_ss_plot
 
@@ -2061,7 +2061,7 @@ campari_dms_plot = ggplot(data = er_campari_dms %>% distinct(variant, endo_ratio
   geom_point(alpha = 0.5, size = 1.5)+
   theme(legend.position = "none", panel.grid = element_blank())+
   geom_text_repel(aes(label = variant), size =2) + 
-  labs(y= "Standard score", x= "CaMPARI2 \nred:green ratio") + 
+  labs(y= "Standard score", x= "CaMPARI2 red:green ratio") + 
   scale_x_continuous(breaks = breaks_pretty(n = 3), limits = c(0.06, 0.09)) + scale_y_continuous(breaks = breaks_pretty(n = 5), limits = c(-0.6,-0.2)) +
   NULL; campari_dms_plot
 
@@ -2099,14 +2099,14 @@ chop_er_ss = ggplot(data = er_campari_ss %>% filter(Target == "chop"), aes(y= lo
   labs(y= "Standard Score", x= "CHOP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
   geom_point(alpha = 0.5, size = 1.5)+
   geom_text_repel(aes(label = variant), size = 2) +
-  scale_x_continuous(breaks = c(0.002,0.006)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; chop_er_ss
 
 chop_er_dms = ggplot(data = er_campari_dms %>% filter(Target == "chop"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
   labs(y= "Standard Score", x= "CHOP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
   geom_point(alpha = 0.5, size = 1.5)+
   geom_text_repel(aes(label = variant), size = 2) +
-  scale_x_continuous(breaks = c(0.002,0.006)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
+  scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; chop_er_dms
 
 ggsave("Revision_1/plots_r1/main_r1/fig9b_r1_bax_bcl_er_ss.pdf", bax_bcl_er_ss, height = 1.5, width = 1.8)
@@ -2123,16 +2123,34 @@ ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_dms.pdf", chop_er_dms, heig
 foldx = read.csv("Revision_1/data_r1/foldx.csv")
 foldx_ef = left_join(combined2, foldx)
 
-ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= total.energy))+
-  geom_point(alpha = 0.5) +
-  geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
+foldx_dms_plot = ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= total.energy))+
+  geom_point(alpha = 0.25) +
+  geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant)) +
+  # geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= total.energy), color = "red", alpha = 0.25) +
+  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25) +
+  labs(x= "Standard LP score", y= "Foldx Total Energy")+NULL; foldx_dms_plot
+ggsave("Revision_1/plots_r1/supplement_r1/foldx_flre_plot.pdf", foldx_flre_plot, height = 3, width = 3)
+
+foldx_flre_plot = ggplot(data = foldx_ef %>% filter(total.energy <= 10), aes(x= log10(endo_ratio), y= total.energy))+
+  geom_point(alpha = 0.25) +
+  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91:94)), aes(label = variant), size = 3) +
+  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= total.energy), color = "red", alpha = 0.25) +
+  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25) +
+  labs(x= "Standard LP score", y= "Foldx Total Energy")+NULL; foldx_flre_plot
+ggsave("Revision_1/plots_r1/supplement_r1/foldx_flre_plot.pdf", foldx_flre_plot, height = 3, width = 3)
+
+foldx_ef %>% filter(total.energy >= 10)
 
 ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= BackbonEHbond))+
-  geom_point(alpha = 0.5) 
+  geom_point(alpha = 0.5) +
+  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= BackbonEHbond), color = "red", alpha = 0.25) +
+  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91,92,93,94)), aes(label = variant))
 # + geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
 
 ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= Sidechain.Hbond))+
-  geom_point(alpha = 0.5) 
+  geom_point(alpha = 0.5) +
+  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= Sidechain.Hbond), color = "red", alpha = 0.25) +
+  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91,92,93,94)), aes(label = variant))
 # + geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
 
 ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = total.energy))+
@@ -2148,13 +2166,53 @@ colnames(am_ef)[1] = "variant"
 am_ef = left_join(combined2, am_ef)
 am_path_var = am_ef %>% filter(variant %in% c("H72Q", "L74P", "G81D", "D84G", "L92V", "L96V"))
 
+am_ef %>% filter(am_pathogenicity >= 0.90)
+
 ggplot(data = am_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = am_pathogenicity))+
   geom_point(alpha = 0.5) +
   scale_color_gradient2(high = "blue", low = "red")
 
-ggplot(data = am_ef, aes(x= log10(endo_ratio), y = am_pathogenicity))+
+am_ef = am_ef %>% mutate(std_score = log10(endo_ratio), knockout_score = log10(sko_ratio))
+ggplot(data = am_ef, aes(x= std_score, y = am_pathogenicity))+
+  geom_point(alpha = 0.5)
+ggplot(data = am_ef, aes(x= knockout_score, y = am_pathogenicity))+
+  geom_point(alpha = 0.5)
+
+#spearman correlation
+cor.test(am_ef$std_score, am_ef$am_pathogenicity, method = "spearman", data = am_ef)
+cor.test(am_ef$knockout_score, am_ef$am_pathogenicity, method = "spearman", data = am_ef)
+
+ggplot(data = am_ef %>% filter(am_pathogenicity >= 0.75), aes(x= log10(endo_ratio), y = am_pathogenicity))+
   geom_point(alpha = 0.5) +
   geom_text_repel(data = am_path_var, aes(x= log10(endo_ratio), y= am_pathogenicity, label = variant))
+
+ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+  geom_point(alpha = 0.25) +
+  geom_point(data = am_ef %>% filter(am_class == "benign"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "green", alpha = 0.5)+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)
+
+ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+  geom_point(alpha = 0.25) +
+  geom_point(data = am_ef %>% filter(am_class == "pathogenic"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "red", alpha = 0.5)+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)
+
+snv$position = as.character(snv$position)
+am_ef_snv = left_join(snv, am_ef) %>% filter(position %in% c(63:98))
+
+ggplot(data = am_ef_snv, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+  geom_point(alpha = 0.15) +
+  geom_point(data = am_ef_snv %>% filter(am_class == "pathogenic"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "red", alpha = 0.5)+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA) +
+  geom_text_repel(data = am_ef_snv %>% filter(std_score < -1 & knockout_score < -0.5), aes(x= log10(endo_ratio), y= log10(sko_ratio), label = variant))
+
+ggplot(data = am_ef_snv, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+  geom_point(alpha = 0.15) +
+  geom_point(data = am_ef_snv %>% filter(am_class == "benign"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "green", alpha = 0.5)+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)
+
+ggplot(data = am_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = am_class))+
+  geom_point(alpha = 0.15)+
+  geom_text_repel(data = am_path_var, aes(x = log10(endo_ratio), y= log10(sko_ratio), label = variant))
 ```
 
 ```{r}
@@ -2164,10 +2222,19 @@ colnames(esm_scores)[2] = "esm_score"
 esm_scores = left_join(combined2, esm_scores)
 
 ggplot(data = esm_scores %>% filter(esm_score != 0), aes(x= log10(endo_ratio), y= esm_score))+
-  geom_point(alpha = 0.5)
+  geom_point(alpha = 0.5)+
+  geom_point(data = esm_scores %>% filter(variant %in% c("L74P", "D84G", "L96V", "L92V", "H72Q", "G81D", "D84E", "N80T", "D84N", "D84A")), aes(x= log10(endo_ratio), y= esm_score), color = "red")
+  # stat_smooth (geom="line", alpha=0.3, size=1, span=0.5, method = lm) + stat_poly_eq(use_label(c("R2")))
 
-ggplot(data = esm_scores %>% filter(esm_score != 0), aes(x= log10(sko_ratio), y= esm_score))+
-  geom_point(alpha = 0.5)
+ggplot(data = esm_scores %>% filter(variant %in% c("L74P", "D84G", "L96V", "L92V", "H72Q", "G81D", "D84E", "N80T", "D84N", "D84A")), aes(x= log10(endo_ratio), y= esm_score)) +
+  geom_point(alpha = 0.5) +
+  geom_text_repel(aes(label = variant))
+
+#spearman correlation for ESM scores vs survival scores
+esm_scores = esm_scores %>% mutate(std_score = log10(endo_ratio), knockout_score = log10(sko_ratio))
+esm_scores_path = esm_scores %>% filter(variant %in% c("L74P", "D84G", "L96V", "L92V", "H72Q", "G81D", "D84E", "N80T", "D84N", "D84A"))
+cor.test(esm_scores$esm_score, esm_scores$std_score, method = "spearman", data = esm_scores)
+cor.test(esm_scores_path$esm_score, esm_scores_path$std_score, method = "spearman", data = esm_scores_path)
 ```
 
 ```{r}
@@ -2187,12 +2254,16 @@ combined3 = combined2 %>% select(variant, endo_ratio, sko_ratio)
 combined3 = left_join(combined3, endo_sd)
 combined3 = left_join(combined3, sko_sd)
 
-ggplot(data = combined3 %>% filter(variant %in% c("L74P", "D84G", "F91Y", "G81D", "H72Q", "L92V", "L96V")), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar) %>% filter(ClinVar != "CaseRep")
+clinvar_errorbar = left_join(clinvar_variants, combined3)
+
+ggplot(data = clinvar_errorbar, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
   geom_point(alpha = 0.5)+
-  geom_errorbarh(aes(xmin = log10(endo_ratio)-endo_se, xmax = log10(endo_ratio)+endo_se)) +
-  geom_errorbar(aes(ymin = log10(sko_ratio)-sko_se, ymax = log10(sko_ratio)+sko_se)) +
-  geom_text_repel(aes(label = variant)) +
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.10)
+  geom_errorbarh(aes(xmin = log10(endo_ratio)-endo_se, xmax = log10(endo_ratio)+endo_se), alpha = 0.3) +
+  geom_errorbar(aes(ymin = log10(sko_ratio)-sko_se, ymax = log10(sko_ratio)+sko_se), alpha = 0.3) +
+  geom_text_repel(data = clinvar_errorbar %>% filter(Disease1 == "Myopathy"), aes(label = variant), color = "purple") +
+  geom_text_repel(data = clinvar_errorbar %>% filter(is.na(Disease1)), aes(label = variant), color = "orange")+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.01)
 ```
 
 
