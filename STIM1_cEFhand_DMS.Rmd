@@ -5,7 +5,7 @@ date: "2024-12-31"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r}
 knitr::opts_chunk$set(include = FALSE)
 library(tidyverse)
 library(reshape)
@@ -2124,20 +2124,20 @@ foldx = read.csv("Revision_1/data_r1/foldx.csv")
 foldx_ef = left_join(combined2, foldx)
 
 foldx_dms_plot = ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= total.energy))+
-  geom_point(alpha = 0.25) +
-  geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant)) +
+  geom_point(alpha = 0.15, size = 1) +
+  geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant), size = 2) +
   # geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= total.energy), color = "red", alpha = 0.25) +
-  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25) +
+  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25, size = 1) +
   labs(x= "Standard LP score", y= "Foldx Total Energy")+NULL; foldx_dms_plot
-ggsave("Revision_1/plots_r1/supplement_r1/foldx_flre_plot.pdf", foldx_flre_plot, height = 3, width = 3)
+ggsave("Revision_1/plots_r1/supplement_r1/foldx_dms_plot.pdf", foldx_dms_plot, height = 2.5, width = 2.5)
 
 foldx_flre_plot = ggplot(data = foldx_ef %>% filter(total.energy <= 10), aes(x= log10(endo_ratio), y= total.energy))+
-  geom_point(alpha = 0.25) +
-  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91:94)), aes(label = variant), size = 3) +
-  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= total.energy), color = "red", alpha = 0.25) +
-  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25) +
+  geom_point(alpha = 0.15, size = 1) +
+  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91:94)), aes(label = variant), size = 2) +
+  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= total.energy), color = "red", alpha = 0.25, size = 1) +
+  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25, size = 1) +
   labs(x= "Standard LP score", y= "Foldx Total Energy")+NULL; foldx_flre_plot
-ggsave("Revision_1/plots_r1/supplement_r1/foldx_flre_plot.pdf", foldx_flre_plot, height = 3, width = 3)
+ggsave("Revision_1/plots_r1/supplement_r1/foldx_flre_plot.pdf", foldx_flre_plot, height = 2.5, width = 3)
 
 foldx_ef %>% filter(total.energy >= 10)
 
@@ -2168,10 +2168,6 @@ am_path_var = am_ef %>% filter(variant %in% c("H72Q", "L74P", "G81D", "D84G", "L
 
 am_ef %>% filter(am_pathogenicity >= 0.90)
 
-ggplot(data = am_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = am_pathogenicity))+
-  geom_point(alpha = 0.5) +
-  scale_color_gradient2(high = "blue", low = "red")
-
 am_ef = am_ef %>% mutate(std_score = log10(endo_ratio), knockout_score = log10(sko_ratio))
 ggplot(data = am_ef, aes(x= std_score, y = am_pathogenicity))+
   geom_point(alpha = 0.5)
@@ -2186,15 +2182,19 @@ ggplot(data = am_ef %>% filter(am_pathogenicity >= 0.75), aes(x= log10(endo_rati
   geom_point(alpha = 0.5) +
   geom_text_repel(data = am_path_var, aes(x= log10(endo_ratio), y= am_pathogenicity, label = variant))
 
-ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
-  geom_point(alpha = 0.25) +
-  geom_point(data = am_ef %>% filter(am_class == "benign"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "green", alpha = 0.5)+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)
+am_dms_benign_plot = ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+  labs(x= "Standard LP score", y= "Knockout LP score")+
+  geom_point(alpha = 0.15, size = 0.5) +
+  geom_point(data = am_ef %>% filter(am_class == "benign"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "green", alpha = 0.5, size = 0.5)+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)+NULL; am_dms_benign_plot
+ggsave("Revision_1/plots_r1/supplement_r1/am_dms_benign_plot.pdf", am_dms_benign_plot, height = 2.5, width = 2.5)
 
-ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
-  geom_point(alpha = 0.25) +
-  geom_point(data = am_ef %>% filter(am_class == "pathogenic"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "red", alpha = 0.5)+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)
+am_dms_path_plot = ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+  labs(x= "Standard LP score", y= "Knockout LP score")+
+  geom_point(alpha = 0.15, size = 0.5) +
+  geom_point(data = am_ef %>% filter(am_class == "pathogenic"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "red", alpha = 0.5, size = 0.5)+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)+NULL; am_dms_path_plot
+ggsave("Revision_1/plots_r1/supplement_r1/am_dms_path_plot.pdf", am_dms_path_plot, height = 2.5, width = 2.5)
 
 snv$position = as.character(snv$position)
 am_ef_snv = left_join(snv, am_ef) %>% filter(position %in% c(63:98))
@@ -2221,10 +2221,19 @@ esm_scores = read.csv("Revision_1/data_r1/esm_scores_stim1.csv") %>% filter(pos 
 colnames(esm_scores)[2] = "esm_score"
 esm_scores = left_join(combined2, esm_scores)
 
-ggplot(data = esm_scores %>% filter(esm_score != 0), aes(x= log10(endo_ratio), y= esm_score))+
-  geom_point(alpha = 0.5)+
-  geom_point(data = esm_scores %>% filter(variant %in% c("L74P", "D84G", "L96V", "L92V", "H72Q", "G81D", "D84E", "N80T", "D84N", "D84A")), aes(x= log10(endo_ratio), y= esm_score), color = "red")
+esm_scores_plot = ggplot(data = esm_scores %>% filter(esm_score != 0), aes(x= log10(endo_ratio), y= esm_score))+
+  geom_point(alpha = 0.15, size = 1)+
+  labs(x= "Standard LP score", y= "ESM scores")+
+  geom_point(data = esm_scores %>% filter(variant %in% c("L74P", "D84G", "L96V", "L92V", "H72Q", "G81D", "D84E", "N80T", "D84N", "D84A")), aes(x= log10(endo_ratio), y= esm_score), color = "red", alpha = 0.5, size = 1)+NULL; esm_scores_plot
   # stat_smooth (geom="line", alpha=0.3, size=1, span=0.5, method = lm) + stat_poly_eq(use_label(c("R2")))
+ggsave("Revision_1/plots_r1/supplement_r1/esm_scores_plot.pdf", esm_scores_plot, height = 2, width = 2)
+
+esm_scores_sko_plot = ggplot(data = esm_scores %>% filter(esm_score != 0), aes(x= log10(sko_ratio), y= esm_score))+
+  geom_point(alpha = 0.15, size = 1)+
+  labs(x= "Knockout LP score", y= "ESM scores")+
+  geom_point(data = esm_scores %>% filter(variant %in% c("L74P", "D84G", "L96V", "L92V", "H72Q", "G81D", "D84E", "N80T", "D84N", "D84A")), aes(x= log10(sko_ratio), y= esm_score), color = "red", alpha = 0.5, size = 1)+NULL; esm_scores_sko_plot
+ggsave("Revision_1/plots_r1/supplement_r1/esm_scores_sko_plot.pdf", esm_scores_sko_plot, height = 2, width = 2)
+
 
 ggplot(data = esm_scores %>% filter(variant %in% c("L74P", "D84G", "L96V", "L92V", "H72Q", "G81D", "D84E", "N80T", "D84N", "D84A")), aes(x= log10(endo_ratio), y= esm_score)) +
   geom_point(alpha = 0.5) +
@@ -2257,13 +2266,17 @@ combined3 = left_join(combined3, sko_sd)
 clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar) %>% filter(ClinVar != "CaseRep")
 clinvar_errorbar = left_join(clinvar_variants, combined3)
 
-ggplot(data = clinvar_errorbar, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
+clinvar_errorbar_plot = ggplot(data = clinvar_errorbar, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
   geom_point(alpha = 0.5)+
-  geom_errorbarh(aes(xmin = log10(endo_ratio)-endo_se, xmax = log10(endo_ratio)+endo_se), alpha = 0.3) +
-  geom_errorbar(aes(ymin = log10(sko_ratio)-sko_se, ymax = log10(sko_ratio)+sko_se), alpha = 0.3) +
-  geom_text_repel(data = clinvar_errorbar %>% filter(Disease1 == "Myopathy"), aes(label = variant), color = "purple") +
-  geom_text_repel(data = clinvar_errorbar %>% filter(is.na(Disease1)), aes(label = variant), color = "orange")+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.01)
+  scale_y_continuous(limits = c(-0.5, 0.5)) + scale_x_continuous(limits = c(-1.5, 1))+
+  labs(x= "Standard LP score", y= "Knockout LP score")+
+  geom_errorbarh(aes(xmin = log10(endo_ratio)-endo_se, xmax = log10(endo_ratio)+endo_se), alpha = 0.15) +
+  geom_errorbar(aes(ymin = log10(sko_ratio)-sko_se, ymax = log10(sko_ratio)+sko_se), alpha = 0.15) +
+  geom_text_repel(data = clinvar_errorbar %>% filter(Disease1 == "Myopathy"), aes(label = variant), color = "purple", size = 2) +
+  geom_text_repel(data = clinvar_errorbar %>% filter(is.na(Disease1)), aes(label = variant), color = "orange", size = 2)+
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.01)+NULL; clinvar_errorbar_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/clinvar_errorbar_plot.pdf",clinvar_errorbar_plot, height = 3, width = 3.5)
 ```
 
 
