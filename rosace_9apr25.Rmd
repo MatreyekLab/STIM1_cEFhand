@@ -1,0 +1,328 @@
+---
+title: "rosace_9Apr25"
+author: "Nisha D. Kamath"
+date: "2025-04-09"
+output: html_document
+---
+
+```{r}
+# if (!requireNamespace("devtools", quietly = TRUE)) {
+#   install.packages("devtools")
+# }
+# we recommend running this in a fresh R session or restarting your current session
+# install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
+
+# if (!require("BiocManager", quietly = TRUE)) {
+#     install.packages("BiocManager")
+# }
+library(tidyverse)
+# devtools::install_github("pimentellab/rosace", force = TRUE)
+library(rosace)
+library(ggrepel)
+```
+
+```{r}
+#load counts of individual replicates
+std_r1 = read.csv("Revision_1/data_r1/rosace/std_ct_r1.csv")
+std_r2 = read.csv("Revision_1/data_r1/rosace/std_ct_r2.csv")
+std_r3 = read.csv("Revision_1/data_r1/rosace/std_ct_r3.csv")
+std_r4 = read.csv("Revision_1/data_r1/rosace/std_ct_r4.csv")
+std_r5 = read.csv("Revision_1/data_r1/rosace/std_ct_r5.csv")
+
+ko_r1 = read.csv("Revision_1/data_r1/rosace/ko_ct_r1.csv")
+ko_r2 = read.csv("Revision_1/data_r1/rosace/ko_ct_r2.csv")
+ko_r3 = read.csv("Revision_1/data_r1/rosace/ko_ct_r3.csv")
+ko_r4 = read.csv("Revision_1/data_r1/rosace/ko_ct_r4.csv")
+ko_r5 = read.csv("Revision_1/data_r1/rosace/ko_ct_r5.csv")
+ko_r6 = read.csv("Revision_1/data_r1/rosace/ko_ct_r6.csv")
+```
+
+```{r}
+#creating assay objects
+key1 = "std"
+key2 = "ko"
+type = "growth"
+std1 <- CreateAssayObject(counts = as.matrix(std_r1[2:ncol(std_r1)]),
+                            var.names = std_r1$variant,
+                            key = key1, rep = 1, type = type)
+std2 <- CreateAssayObject(counts = as.matrix(std_r2[2:ncol(std_r2)]),
+                            var.names = std_r2$variant,
+                            key = key1, rep = 2, type = type)
+std3 <- CreateAssayObject(counts = as.matrix(std_r3[2:ncol(std_r3)]),
+                            var.names = std_r3$variant,
+                            key = key1, rep = 3, type = type)
+std4 <- CreateAssayObject(counts = as.matrix(std_r4[2:ncol(std_r4)]),
+                            var.names = std_r4$variant,
+                            key = key1, rep = 4, type = type)
+std5 <- CreateAssayObject(counts = as.matrix(std_r5[2:ncol(std_r5)]),
+                            var.names = std_r5$variant,
+                            key = key1, rep = 5, type = type)
+
+std_rosace = CreateRosaceObject(object = std1)
+std_rosace = AddAssayData(object = std_rosace, assay = std2)
+std_rosace = AddAssayData(object = std_rosace, assay = std3)
+std_rosace = AddAssayData(object = std_rosace, assay = std4)
+std_rosace = AddAssayData(object = std_rosace, assay = std5)
+GetAssayName(std_rosace)
+
+#filtering data 
+std_rosace <- FilterData(std_rosace, key = key1, na.rmax = 0.5, min.count = 20)
+#impute data
+std_rosace <- ImputeData(std_rosace, key = key1, impute.method = "knn", na.rmax = 0.5)
+
+#normalizing data
+std_rosace <- NormalizeData(std_rosace, key = key1,
+                        normalization.method = "wt", 
+                        wt.var.names = c("Z0Z"), wt.rm = TRUE)
+#integrate data
+std_rosace <- IntegrateData(object = std_rosace, key = key1)
+GetAssaySetName(std_rosace)
+```
+
+```{r}
+std_rosace@var.data <- std_rosace@var.data %>%
+  mutate(position = substr(variants, 2,3),
+         wildtype = substr(variants, 1, 1),
+         mutation = substr(variants, 4,4))
+
+func_map <- function(wt, mut) {
+  if (nchar(wt) == 0) {
+    return("NA")
+  }
+  
+  if (wt == mut) {
+    return("synonymous")
+  } else if (mut == "_") {
+    return("nonsense")
+  } else {
+    return("missense")
+  }
+}
+
+std_rosace@var.data <- std_rosace@var.data %>%
+  rowwise() %>%
+  mutate(type = func_map(wildtype, mutation)) %>%
+  ungroup()
+std_rosace@var.data
+```
+```{r}
+# running on an AssaySet (all five replicates)
+std_rosace@assay.sets$`std`@raw.counts <- std_rosace@assay.sets$`std`@raw.counts
+std_rosace@assay.sets$`std`@combined.counts <- std_rosace@assay.sets$`std`@combined.counts
+std_rosace@assay.sets$`std`@var.names <- std_rosace@assay.sets$`std`@var.names
+std_rosace <- RunRosace(object = std_rosace,
+                    name = "std",
+                    type = "AssaySet",
+                    savedir = "/Users/nishakamath/Documents/STIM1_manuscript/STIM1_cEFhand/Revision_1/rosace", #change directory
+                    pos.col = "position",
+                    ctrl.col = "type",
+                    ctrl.name = "synonymous",
+                    install = FALSE,
+                    cmdstan_ver = "2.35.0")
+```
+```{r}
+names(std_rosace@scores)
+std_scores.data <- OutputScore(std_rosace, pos.info = FALSE, name = "std_ROSACE")
+std_scores.data
+
+scoreDensity(std_scores.data, 
+             hist = FALSE,
+             savedir = "/Users/nishakamath/Documents/STIM1_manuscript/STIM1_cEFhand/Revision_1/rosace",
+             name = "DensityPlot_std")
+
+scoreHeatmap(data = std_scores.data,
+             ctrl.name = 'synonymous', # the control mutation name
+             score.col = "mean",
+             savedir = "/Users/nishakamath/Documents/STIM1_manuscript/STIM1_cEFhand/Revision_1/rosace", 
+             name = "Heatmap_std",
+             savepdf = TRUE,
+             show = TRUE)
+```
+```{r}
+#creating assay objects
+key1 = "ko"
+type = "growth"
+ko1 <- CreateAssayObject(counts = as.matrix(ko_r1[2:ncol(ko_r1)]),
+                            var.names = ko_r1$variant,
+                            key = key1, rep = 1, type = type)
+ko2 <- CreateAssayObject(counts = as.matrix(ko_r2[2:ncol(ko_r2)]),
+                            var.names = ko_r2$variant,
+                            key = key1, rep = 2, type = type)
+ko3 <- CreateAssayObject(counts = as.matrix(ko_r3[2:ncol(ko_r3)]),
+                            var.names = ko_r3$variant,
+                            key = key1, rep = 3, type = type)
+ko4 <- CreateAssayObject(counts = as.matrix(ko_r4[2:ncol(ko_r4)]),
+                            var.names = ko_r4$variant,
+                            key = key1, rep = 4, type = type)
+ko5 <- CreateAssayObject(counts = as.matrix(ko_r5[2:ncol(ko_r5)]),
+                            var.names = ko_r5$variant,
+                            key = key1, rep = 5, type = type)
+ko6 <- CreateAssayObject(counts = as.matrix(ko_r6[2:ncol(ko_r6)]),
+                            var.names = ko_r6$variant,
+                            key = key1, rep = 6, type = type)
+
+ko_rosace = CreateRosaceObject(object = ko1)
+ko_rosace = AddAssayData(object = ko_rosace, assay = ko2)
+ko_rosace = AddAssayData(object = ko_rosace, assay = ko3)
+ko_rosace = AddAssayData(object = ko_rosace, assay = ko4)
+ko_rosace = AddAssayData(object = ko_rosace, assay = ko5)
+ko_rosace = AddAssayData(object = ko_rosace, assay = ko6)
+GetAssayName(ko_rosace)
+
+#filtering data 
+ko_rosace <- FilterData(ko_rosace, key = key1, na.rmax = 0.5, min.count = 20)
+#impute data
+ko_rosace <- ImputeData(ko_rosace, key = key1, impute.method = "knn", na.rmax = 0.5)
+
+#normalizing data
+ko_rosace <- NormalizeData(ko_rosace, key = key1,
+                        normalization.method = "wt", 
+                        wt.var.names = c("Z0Z"), wt.rm = TRUE)
+#integrate data
+ko_rosace <- IntegrateData(object = ko_rosace, key = key1)
+GetAssaySetName(ko_rosace)
+```
+
+```{r}
+ko_rosace@var.data <- ko_rosace@var.data %>%
+  mutate(position = substr(variants, 2,3),
+         wildtype = substr(variants, 1, 1),
+         mutation = substr(variants, 4,4))
+
+func_map <- function(wt, mut) {
+  if (nchar(wt) == 0) {
+    return("NA")
+  }
+  
+  if (wt == mut) {
+    return("synonymous")
+  } else if (mut == "_") {
+    return("nonsense")
+  } else {
+    return("missense")
+  }
+}
+
+ko_rosace@var.data <- ko_rosace@var.data %>%
+  rowwise() %>%
+  mutate(type = func_map(wildtype, mutation)) %>%
+  ungroup()
+ko_rosace@var.data
+```
+```{r}
+# running on an AssaySet (all five replicates)
+ko_rosace@assay.sets$`ko`@raw.counts <- ko_rosace@assay.sets$`ko`@raw.counts
+ko_rosace@assay.sets$`ko`@combined.counts <- ko_rosace@assay.sets$`ko`@combined.counts
+ko_rosace@assay.sets$`ko`@var.names <- ko_rosace@assay.sets$`ko`@var.names
+ko_rosace <- RunRosace(object = ko_rosace,
+                    name = "ko",
+                    type = "AssaySet",
+                    savedir = "/Users/nishakamath/Documents/STIM1_manuscript/STIM1_cEFhand/Revision_1/rosace",
+                    pos.col = "position",
+                    ctrl.col = "type",
+                    ctrl.name = "synonymous",
+                    install = FALSE,
+                    cmdstan_ver = "2.35.0")
+```
+```{r}
+names(ko_rosace@scores)
+ko_scores.data <- OutputScore(ko_rosace, pos.info = FALSE, name = "ko_ROSACE")
+ko_scores.data
+
+scoreDensity(ko_scores.data, 
+             hist = FALSE,
+             savedir = "/Users/nishakamath/Documents/STIM1_manuscript/STIM1_cEFhand/Revision_1/rosace",
+             name = "DensityPlot_ko")
+
+scoreHeatmap(data = ko_scores.data,
+             ctrl.name = 'synonymous', # the control mutation name
+             score.col = "mean",
+             savedir = "/Users/nishakamath/Documents/STIM1_manuscript/STIM1_cEFhand/Revision_1/rosace", 
+             name = "Heatmap_ko",
+             savepdf = TRUE,
+             show = TRUE)
+```
+```{r}
+colnames(std_scores.data)[6] = "std_score"
+colnames(ko_scores.data)[6] = "ko_score"
+
+std_score1 = std_scores.data %>% select(variants, position, wildtype, mutation, type, std_score)
+ko_score1 = ko_scores.data %>% select(variants, position, wildtype, mutation, type, ko_score)
+
+scores = left_join(std_score1, ko_score1)
+colnames(scores)[1] = "variant"
+
+ggplot(data = scores, aes(x= std_score, y= ko_score))+
+  geom_point(alpha = 0.5)
+
+ggplot(data = scores, aes(x= position, y= mutation, fill = std_score))+
+  geom_tile()
+
+ggplot(data = scores, aes(x= position, y= mutation, fill = ko_score))+
+  geom_tile()
+
+score_endo = read.csv("Revision_1/rosace/score_endo.csv")
+colnames(score_endo)[2] = "endo_score"
+score_endo = score_endo %>% select(variant, endo_score)
+score_sko = read.csv("Revision_1/rosace/score_sko.csv")
+colnames(score_sko)[2] = "sko_score"
+score_sko = score_sko %>% select(variant, sko_score)
+
+scores = left_join(scores, score_endo)
+scores = left_join(scores, score_sko)
+
+dms_rosace_endo_plot = ggplot(data = scores, aes(x= endo_score, y= std_score))+ theme_bw()+
+  geom_point(alpha = 0.15)+
+  labs(x= "Standard LP score (DMS)", y= "Standard LP score (ROSACE)")+NULL; dms_rosace_endo_plot
+
+dms_rosace_sko_plot = ggplot(data = scores, aes(x= sko_score, y= ko_score))+ theme_bw()+
+  geom_point(alpha = 0.15)+
+  labs(x= "Knockout LP score (DMS)", y= "Knockout LP score (ROSACE)")+NULL; dms_rosace_sko_plot
+
+ggsave("Revision_1/rosace/dms_rosace_endo_plot.pdf", dms_rosace_endo_plot, height = 2, width = 2)
+ggsave("Revision_1/rosace/dms_rosace_sko_plot.pdf", dms_rosace_sko_plot, height = 2, width = 2)
+
+cor.test(scores$std_score, scores$endo_score, method = "spearman", data = scores)
+cor.test(scores$ko_score, scores$sko_score, method = "spearman", data = scores)
+```
+
+```{r}
+syn_rosace = scores %>% filter(type == "synonymous")
+
+syn_endo_range_rosace <- c(quantile(syn_rosace$std_score, 0.025, na.rm = T), quantile(syn_rosace$std_score, 0.975, na.rm = T))
+syn_sko_range_rosace <- c(quantile(syn_rosace$ko_score, 0.025, na.rm = T), quantile(syn_rosace$ko_score, 0.975, na.rm = T))
+
+
+clinvar = read.csv("Revision_1/data_r1/stim1_curated.csv")
+clinvar_variants = clinvar %>% select(variant, Disease1, Disease2, ClinVar) %>% filter(ClinVar != "CaseRep")
+clinvar_scores = left_join(clinvar_variants, scores)
+
+clinvar_rosace = ggplot(data = scores, aes(x= std_score, y= ko_score))+ theme_bw()+
+  labs(x= "Standard LP score", y= "Knockout LP score", title = "Rosace scores")+
+  geom_point(alpha = 0.15, size = 1) +
+  geom_rect(aes(xmin=syn_endo_range_rosace[1], xmax=syn_endo_range_rosace[2], ymin=syn_sko_range_rosace[1], ymax=syn_sko_range_rosace[2]), fill = "pink", alpha = 0.01) +
+  geom_point(data = clinvar_scores, aes(x= std_score, y= ko_score), color = "red", size = 1, alpha = 0.5)+
+  geom_point(data = clinvar_scores %>% filter(Disease1 == "Myopathy"), color = "purple", size = 1)+NULL; clinvar_rosace
+  # geom_text_repel(data = clinvar_scores, aes(x= std_score, y= ko_score, label = variant), size = 1)+
+
+ggsave("Revision_1/rosace/clinvar_rosace.pdf", clinvar_rosace, height = 3, width = 3)
+
+clinvar_dms = ggplot(data = scores, aes(x= endo_score, y= sko_score))+ theme_bw()+
+  labs(x= "Standard LP score", y= "Knockout LP score", title = "Survival scores")+
+  geom_point(alpha = 0.15, size = 1) +
+  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.01) +
+  geom_point(data = clinvar_scores, aes(x= endo_score, y= sko_score), color = "red", size = 1, alpha = 0.5)+
+  geom_point(data = clinvar_scores %>% filter(Disease1 == "Myopathy"), color = "purple", size = 1)+NULL; clinvar_dms
+  # geom_text_repel(data = clinvar_scores, aes(x= endo_score, y= sko_score, label = variant), size = 1)+
+
+ggsave("Revision_1/rosace/clinvar_dms.pdf", clinvar_dms, height = 3, width = 3)
+
+std_endo_cv_plot = ggplot(data = scores, aes(x= std_score, y= endo_score))+ theme_bw()+
+  geom_point(alpha = 0.15, size = 1) +
+  geom_rect(aes(xmin=syn_endo_range_rosace[1], xmax=syn_endo_range_rosace[2], ymin=syn_endo_range[1], ymax=syn_endo_range[2]), fill = "pink", alpha = 0.01) +
+  geom_point(data = clinvar_scores, aes(x= std_score, y= endo_score), color = "red", size = 1)+
+  geom_text_repel(data = clinvar_scores, aes(x= std_score, y= endo_score, label = variant), size = 1)+NULL; std_endo_cv_plot
+```
+
+
+

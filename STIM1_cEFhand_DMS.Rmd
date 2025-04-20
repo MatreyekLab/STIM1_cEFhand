@@ -21,6 +21,7 @@ library(patchwork)
 library(rstatix)
 library(ggtext)
 library(googlesheets4)
+library(rstatix)
 
 theme_set(theme_bw())
 theme_update(panel.grid.minor = element_blank())
@@ -2166,7 +2167,7 @@ colnames(am_ef)[1] = "variant"
 am_ef = left_join(combined2, am_ef)
 am_path_var = am_ef %>% filter(variant %in% c("H72Q", "L74P", "G81D", "D84G", "L92V", "L96V"))
 
-am_ef %>% filter(am_pathogenicity >= 0.90)
+am_ef %>% filter(am_class == "benign")
 
 am_ef = am_ef %>% mutate(std_score = log10(endo_ratio), knockout_score = log10(sko_ratio))
 ggplot(data = am_ef, aes(x= std_score, y = am_pathogenicity))+
@@ -2279,7 +2280,203 @@ clinvar_errorbar_plot = ggplot(data = clinvar_errorbar, aes(x= log10(endo_ratio)
 ggsave("Revision_1/plots_r1/supplement_r1/clinvar_errorbar_plot.pdf",clinvar_errorbar_plot, height = 3, width = 3.5)
 ```
 
+```{r bacteria growth over time}
+bac_growth = read.csv("Revision_1/data_r1/rev_bac_growth.csv")
+bac_growth_4hr_none = bac_growth %>% filter(time_point == "4" & plasmid == "none")
+bac_growth_4hr_mch = bac_growth %>% filter(time_point == "4" & plasmid == "mch")
+bac_growth_4hr_stim = bac_growth %>% filter(time_point == "4" & plasmid == "stim")
 
+bac_growth_8hr_none = bac_growth %>% filter(time_point == "8" & plasmid == "none")
+bac_growth_8hr_mch = bac_growth %>% filter(time_point == "8" & plasmid == "mch")
+bac_growth_8hr_stim = bac_growth %>% filter(time_point == "8" & plasmid == "stim")
+
+bac_growth_12hr_none = bac_growth %>% filter(time_point == "12" & plasmid == "none")
+bac_growth_12hr_mch = bac_growth %>% filter(time_point == "12" & plasmid == "mch")
+bac_growth_12hr_stim = bac_growth %>% filter(time_point == "12" & plasmid == "stim")
+
+bac_growth_24hr_none = bac_growth %>% filter(time_point == "24" & plasmid == "none")
+bac_growth_24hr_mch = bac_growth %>% filter(time_point == "24" & plasmid == "mch")
+bac_growth_24hr_stim = bac_growth %>% filter(time_point == "24" & plasmid == "stim")
+
+#4hr_none
+anova_results_4hr_none <- bac_growth_4hr_none %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_4hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_4hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_4hr_none <- anova_results_4hr_none %>%
+  mutate(tukey = map(aov_model_4hr_none, ~ TukeyHSD(.x)))
+anova_results_4hr_none$tukey[[1]]
+
+#4hr_mch
+anova_results_4hr_mch <- bac_growth_4hr_mch %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_4hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_4hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_4hr_mch <- anova_results_4hr_mch %>%
+  mutate(tukey = map(aov_model_4hr_mch, ~ TukeyHSD(.x)))
+anova_results_4hr_mch$tukey[[1]]
+
+#4hr_stim
+anova_results_4hr_stim <- bac_growth_4hr_stim %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_4hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_4hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_4hr_stim <- anova_results_4hr_stim %>%
+  mutate(tukey = map(aov_model_4hr_stim, ~ TukeyHSD(.x)))
+anova_results_4hr_stim$tukey[[1]]
+
+#8hr_none
+anova_results_8hr_none <- bac_growth_8hr_none %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_8hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_8hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_8hr_none <- anova_results_8hr_none %>%
+  mutate(tukey = map(aov_model_8hr_none, ~ TukeyHSD(.x)))
+anova_results_8hr_none$tukey[[1]]
+
+#8hr_mch
+anova_results_8hr_mch <- bac_growth_8hr_mch %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_8hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_8hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_8hr_mch <- anova_results_8hr_mch %>%
+  mutate(tukey = map(aov_model_8hr_mch, ~ TukeyHSD(.x)))
+anova_results_8hr_mch$tukey[[1]]
+
+#8hr_stim
+anova_results_8hr_stim <- bac_growth_8hr_stim %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_8hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_8hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_8hr_stim <- anova_results_8hr_stim %>%
+  mutate(tukey = map(aov_model_8hr_stim, ~ TukeyHSD(.x)))
+anova_results_8hr_stim$tukey[[1]]
+
+#12hr_none
+anova_results_12hr_none <- bac_growth_12hr_none %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_12hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_12hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_12hr_none <- anova_results_12hr_none %>%
+  mutate(tukey = map(aov_model_12hr_none, ~ TukeyHSD(.x)))
+anova_results_12hr_none$tukey[[1]]
+
+#12hr_mch
+anova_results_12hr_mch <- bac_growth_12hr_mch %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_12hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_12hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_12hr_mch <- anova_results_12hr_mch %>%
+  mutate(tukey = map(aov_model_12hr_mch, ~ TukeyHSD(.x)))
+anova_results_12hr_mch$tukey[[1]]
+
+#12hr_stim
+anova_results_12hr_stim <- bac_growth_12hr_stim %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_12hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_12hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_12hr_stim <- anova_results_12hr_stim %>%
+  mutate(tukey = map(aov_model_12hr_stim, ~ TukeyHSD(.x)))
+anova_results_12hr_stim$tukey[[1]]
+
+#24hr_none
+anova_results_24hr_none <- bac_growth_24hr_none %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_24hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_24hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_24hr_none <- anova_results_24hr_none %>%
+  mutate(tukey = map(aov_model_24hr_none, ~ TukeyHSD(.x)))
+anova_results_24hr_none$tukey[[1]]
+
+#24hr_mch
+anova_results_24hr_mch <- bac_growth_24hr_mch %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_24hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_24hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_24hr_mch <- anova_results_24hr_mch %>%
+  mutate(tukey = map(aov_model_24hr_mch, ~ TukeyHSD(.x)))
+anova_results_24hr_mch$tukey[[1]]
+
+#24hr_stim
+anova_results_24hr_stim <- bac_growth_24hr_stim %>%
+  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
+  nest() %>%
+  mutate(
+    aov_model_24hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
+    p_value = map_dbl(aov_model_24hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
+anova_results_24hr_stim <- anova_results_24hr_stim %>%
+  mutate(tukey = map(aov_model_24hr_stim, ~ TukeyHSD(.x)))
+anova_results_24hr_stim$tukey[[1]]
+
+
+bac_growth_none_plot = ggplot(data = bac_growth %>% filter(plasmid == "none"), aes(x= time_point, y= A600, color = strain))+ theme_bw()+
+  geom_quasirandom(alpha = 0.5) +
+  labs(x= "Time point (hours after transformation)", y= "OD600", title = "No plasmid") +
+  theme(legend.position = "none")+NULL; bac_growth_none_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_none_plot.pdf", bac_growth_none_plot, height = 2, width = 2)
+
+bac_growth_mch_plot = ggplot(data = bac_growth %>% filter(plasmid == "mch"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
+  geom_quasirandom(alpha = 0.5) +
+  labs(x= "Time point (hours after transformation)", y= "OD600", title = "attB-mCherry") +
+  theme(legend.position = "none")+NULL; bac_growth_mch_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_mch_plot.pdf", bac_growth_mch_plot, height = 2, width = 2)
+
+bac_growth_stim_plot = ggplot(data = bac_growth %>% filter(plasmid == "stim"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
+  geom_quasirandom(alpha = 0.5) +
+  labs(x= "Time point (hours after transformation)", y= "OD600", title = "STIM1") +
+  theme(legend.position = "none")+NULL; bac_growth_stim_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_stim_plot.pdf", bac_growth_stim_plot, height = 2, width = 2)
+```
+```{r}
+revision_mgl = read.csv("Revision_1/data_r1/mGL_mfi.csv")
+revision_mgl = revision_mgl %>% group_by(variant, rep) %>% mutate(mean_norm = exp(mean(log(norm_wt))))
+revision_mgl = revision_mgl %>% group_by(variant) %>% mutate(mean = exp(mean(log(mean_norm))))
+revision_mgl$variant = factor(revision_mgl$variant, c("WT", "F91D", "L92K", "R93W", "E94P"))
+
+mgl_norm_f91d = revision_mgl %>% filter(variant == "F91D") %>% distinct(variant, norm_wt)
+mgl_norm_l92k = revision_mgl %>% filter(variant == "L92K") %>% distinct(variant, norm_wt)
+mgl_norm_r93w = revision_mgl %>% filter(variant == "R93W") %>% distinct(variant, norm_wt)
+mgl_norm_e94p = revision_mgl %>% filter(variant == "E94P") %>% distinct(variant, norm_wt)
+mgl_norm_wt = revision_mgl %>% filter(variant == "WT") %>% distinct(variant, norm_wt)
+
+
+mgl_abundance_plot = ggplot(data = revision_mgl, aes(x= variant, y= norm_wt))+ theme_bw()+
+  geom_quasirandom(alpha = 0.5) + scale_y_continuous(limits = c(0,3)) +
+  geom_point(data = revision_mgl, aes(x= variant, y= mean), color = "red") +
+  labs(x= "STIM1 cEFhand variant", y= "Normalized Green MFI")+NULL; mgl_abundance_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/mgl_abundance_plot.pdf", mgl_abundance_plot, height = 3, width = 3)
+
+t.test(mgl_norm_f91d$norm_wt, mgl_norm_wt$norm_wt)
+t.test(mgl_norm_l92k$norm_wt, mgl_norm_wt$norm_wt)
+t.test(mgl_norm_r93w$norm_wt, mgl_norm_wt$norm_wt)
+t.test(mgl_norm_e94p$norm_wt, mgl_norm_wt$norm_wt)
+
+revision_mgl_dms = revision_mgl %>% select(variant, mean)
+revision_mgl_dms = left_join(revision_mgl, combined2)
+```
 
 ```{r session info}
 sessionInfo()
