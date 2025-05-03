@@ -216,8 +216,8 @@ plasmid_cor_plot = ggpairs(plasmid_cor, aes(alpha = 0.15))
 
 
 ggsave("plots/supplement/supp2c_plasmid_cor_plot.pdf", plasmid_cor_plot, height = 5, width = 5)
-ggsave("Revision_1/plots/supplement/supp2c_plasmid_cor_plot_liba.pdf", plasmid_cor_plot_liba, height = 2.5, width = 2.5)
-ggsave("Revision_1/plots/supplement/supp2c_plasmid_cor_plot_libb.pdf", plasmid_cor_plot_libb, height = 2.5, width = 2.5)
+ggsave("Revision_1/plots_r1/supplement_r1/supp2c_plasmid_cor_plot_liba.pdf", plasmid_cor_plot_liba, height = 2.5, width = 2.5)
+ggsave("Revision_1/plots_r1/supplement_r1/supp2c_plasmid_cor_plot_libb.pdf", plasmid_cor_plot_libb, height = 2.5, width = 2.5)
 ```
 
 ```{r simulation to determine cells required for full coverage of library}
@@ -1567,8 +1567,10 @@ non_ko_v_bac_scatterplot <- ggplot(data = non_scores, aes(x= log10(sko_ratio), y
   labs(x= "Knockout score", y= "Bacterial score") +
   NULL; non_ko_v_bac_scatterplot
 ```
-```{r Compile all of the r-squared values from above to figure out inter-dataset relationships}
+```{r Compile all of the r-squared values from above to figure out inter-dataset relationships, fig.height = 6, fig.width = 5}
 method2 <- "spearman"
+
+mut_residue_plotting <- mut_residue_scores %>% group_by(end) %>% summarize(endo_avg = unique(endo_avg), sko_avg = unique(sko_avg), bac_avg = unique(bac_avg))
 
 dataset_correlations <- data.frame("label" = c("Endo_v_KO", "Endo_v_Bac", "KO_v_Bac"),
   "missense" = c(cor(log10(combined2$endo_ratio), log10(combined2$sko_ratio), use = "complete", method = method2)^2,
@@ -1577,9 +1579,9 @@ dataset_correlations <- data.frame("label" = c("Endo_v_KO", "Endo_v_Bac", "KO_v_
   "position" = c(cor(log10(positional_scores$endo_avg), log10(positional_scores$sko_avg), use = "complete", method = method2)^2,
                  cor(log10(positional_scores$endo_avg), log10(positional_scores$bac_avg), use = "complete", method = method2)^2,
                  cor(log10(positional_scores$sko_avg), log10(positional_scores$bac_avg), use = "complete", method = method2)^2),
-  "mutated" = c(cor(log10(mut_residue_scores$endo_avg), log10(mut_residue_scores$sko_avg), use = "complete", method = method2)^2,
-                 cor(log10(mut_residue_scores$endo_avg), log10(mut_residue_scores$bac_avg), use = "complete", method = method2)^2,
-                 cor(log10(mut_residue_scores$sko_avg), log10(mut_residue_scores$bac_avg), use = "complete", method = method2)^2),
+  "mutated" = c(cor(log10(mut_residue_plotting$endo_avg), log10(mut_residue_plotting$sko_avg), use = "complete", method = method2)^2,
+                 cor(log10(mut_residue_plotting$endo_avg), log10(mut_residue_plotting$bac_avg), use = "complete", method = method2)^2,
+                 cor(log10(mut_residue_plotting$sko_avg), log10(mut_residue_plotting$bac_avg), use = "complete", method = method2)^2),
   "synonymous" = c(cor(log10(syn_scores$endo_ratio), log10(syn_scores$sko_ratio), use = "complete", method = method2)^2,
                  cor(log10(syn_scores$endo_ratio), log10(syn_scores$bac_ratio), use = "complete", method = method2)^2,
                  cor(log10(syn_scores$sko_ratio), log10(syn_scores$bac_ratio), use = "complete", method = method2)^2),
@@ -1588,7 +1590,7 @@ dataset_correlations <- data.frame("label" = c("Endo_v_KO", "Endo_v_Bac", "KO_v_
                  cor(log10(non_scores$sko_ratio), log10(non_scores$bac_ratio), use = "complete", method = method2)^2)
 )
 
-dataset_correlations_melt <- melt(dataset_correlations)
+dataset_correlations_melt <- melt(dataset_correlations, id = "label")
 dataset_correlations_melt$label <- factor(dataset_correlations_melt$label, levels = rev(unique(dataset_correlations_melt$label)))
 
 Dataset_spearman_comparison_plot <- ggplot() + 
@@ -1600,12 +1602,36 @@ Dataset_spearman_comparison_plot <- ggplot() +
   NULL; Dataset_spearman_comparison_plot
 ggsave(file = "Plots/main/fig5a_Dataset_spearman_comparison_plot.pdf", Dataset_spearman_comparison_plot, height = 2, width = 4)
 
+## Perhaps show all the pairwise correlations as a supp figure
+
+mis_es <- ggplot() + geom_point(data = combined2, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.1) + labs(x = "Endogenous", y = "Knockout") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1, 0.5))
+mis_eb <- ggplot() + geom_point(data = combined2, aes(x = log10(endo_ratio), y = log10(bac_ratio)), alpha = 0.1) + labs(x = "Endogenous", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+mis_sb <- ggplot() + geom_point(data = combined2, aes(x = log10(sko_ratio), y = log10(bac_ratio)), alpha = 0.1) + labs(x = "Knockout", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-1, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+pos_es <- ggplot() + geom_point(data = positional_scores, aes(x = log10(endo_avg), y = log10(sko_avg)), alpha = 0.2) + labs(x = "Endogenous", y = "Knockout") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1, 0.5))
+pos_eb <- ggplot() + geom_point(data = positional_scores, aes(x = log10(endo_avg), y = log10(bac_avg)), alpha = 0.2) + labs(x = "Endogenous", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+pos_sb <- ggplot() + geom_point(data = positional_scores, aes(x = log10(sko_avg), y = log10(bac_avg)), alpha = 0.2) + labs(x = "Knockout", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-1, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+mut_es <- ggplot() + geom_point(data = mut_residue_plotting, aes(x = log10(endo_avg), y = log10(sko_avg)), alpha = 0.2) + labs(x = "Endogenous", y = "Knockout") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1, 0.5))
+mut_eb <- ggplot() + geom_point(data = mut_residue_plotting, aes(x = log10(endo_avg), y = log10(bac_avg)), alpha = 0.2) + labs(x = "Endogenous", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+mut_sb <- ggplot() + geom_point(data = mut_residue_plotting, aes(x = log10(sko_avg), y = log10(bac_avg)), alpha = 0.2) + labs(x = "Knockout", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-1, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+syn_es <- ggplot() + geom_point(data = syn_scores, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.2) + labs(x = "Endogenous", y = "Knockout") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1, 0.5))
+syn_eb <- ggplot() + geom_point(data = syn_scores, aes(x = log10(endo_ratio), y = log10(bac_ratio)), alpha = 0.2) + labs(x = "Endogenous", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+syn_sb <- ggplot() + geom_point(data = syn_scores, aes(x = log10(sko_ratio), y = log10(bac_ratio)), alpha = 0.2) + labs(x = "Knockout", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-1, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+non_es <- ggplot() + geom_point(data = non_scores, aes(x = log10(endo_ratio), y = log10(sko_ratio)), alpha = 0.2) + labs(x = "Endogenous", y = "Knockout") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1, 0.5))
+non_eb <- ggplot() + geom_point(data = non_scores, aes(x = log10(endo_ratio), y = log10(bac_ratio)), alpha = 0.2) + labs(x = "Endogenous", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-2.5, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+non_sb <- ggplot() + geom_point(data = non_scores, aes(x = log10(sko_ratio), y = log10(bac_ratio)), alpha = 0.2) + labs(x = "Knockout", y = "Bacterial") + theme(panel.grid = element_blank()) + scale_x_continuous(limits = c(-1, 0.5)) + scale_y_continuous(limits = c(-1.5, 0.5))
+
+pairwise_scatterplots <- (mis_es | mis_eb | mis_sb) / (pos_es | pos_eb | pos_sb) / (mut_es | mut_eb | mut_sb) / (syn_es | syn_eb | syn_sb) / (non_es | non_eb | non_sb) 
+pairwise_scatterplots
+
+ggsave("Revision_1/plots_r1/supplement_r1/Supp_fig_pairwise_correlations.pdf", pairwise_scatterplots, height = 7, width = 5)
 ```
+
 Synonymous distribution - to make the pink box for the rest of the figures
 ```{r}
 syn_endo_range <- c(log10(quantile(syn_scores$endo_ratio, 0.025, na.rm = T)),log10(quantile(syn_scores$endo_ratio, 0.975, na.rm = T)))
 syn_sko_range <- c(log10(quantile(syn_scores$sko_ratio, 0.025, na.rm = T)),log10(quantile(syn_scores$sko_ratio, 0.975, na.rm = T)))
 ```
+
 2. EF-hand motif
 ```{r Compare mutational signatures for coordination residues in the EF-hand motif}
 
