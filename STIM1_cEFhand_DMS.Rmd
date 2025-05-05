@@ -1624,6 +1624,8 @@ pairwise_scatterplots <- (mis_es | mis_eb | mis_sb) / (pos_es | pos_eb | pos_sb)
 pairwise_scatterplots
 
 ggsave("Revision_1/plots_r1/supplement_r1/Supp_fig_pairwise_correlations.pdf", pairwise_scatterplots, height = 7, width = 5)
+
+
 ```
 
 Synonymous distribution - to make the pink box for the rest of the figures
@@ -2184,6 +2186,42 @@ ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = t
   geom_point()+
   scale_color_gradient2(high = "red", low = "blue")
 ```
+
+```{r Kenny trying FoldX data}
+
+annots[annots$value == "0.98","annot"] <- "1_alpha1"
+annots[annots$value == "0.99","annot"] <- "2_EFhand"
+annots[annots$value == "1","annot"] <- "3_alpha2"
+
+foldx_kam <- foldx
+foldx_kam$position <- gsub("[^0-9]","",foldx_kam$variant)
+foldx_kam_pos <- merge(foldx_kam %>% group_by(position) %>% summarize(pos_tot_energy = mean(total.energy)), endo_positional_ratios3, by = "position")
+foldx_kam_pos2 <- merge(foldx_kam_pos, annots[,c("position","annot")], by = "position")
+
+
+ggplot() + theme(panel.grid = element_blank()) + 
+  scale_x_log10() + 
+  geom_point(data = foldx_kam_pos2, aes(x = missense_geomean, y = pos_tot_energy, color = annot), alpha = 0.5) +
+  geom_text_repel(data = foldx_kam_pos2, aes(x = missense_geomean, y = pos_tot_energy, label = position), color = "red") +
+  labs(x = "Endogenous score", y = "FoldX total energy")
+
+foldx_ef_kam <- foldx_ef
+
+
+ggplot() + theme(panel.grid = element_blank()) + 
+  #scale_x_log10() + 
+  #scale_y_log10(limits = c(1,100)) +
+  geom_hline(yintercept = 0) +
+  geom_point(data = foldx_ef_kam, aes(x = log10(endo_ratio), y = total.energy), alpha = 0.25) +
+  geom_point(data = foldx_ef_kam %>% filter(position %in% c(91,92,93,94)), aes(x = log10(endo_ratio), y = total.energy), color = "blue", alpha = 0.5) +
+  geom_point(data = foldx_ef_kam %>% filter(position %in% c(76,78)), aes(x = log10(endo_ratio), y = total.energy), color = "green", alpha = 0.5) +
+  geom_point(data = foldx_ef_kam %>% filter(position == 70), aes(x = log10(endo_ratio), y = total.energy), color = "red", alpha = 0.5) +
+  labs(x = "Endogenous score", y = "FoldX total energy")
+
+
+```
+
+
 ```{r}
 #Revision 1 - Survival scores vs Alpha Missense
 am_ef = read.csv("Revision_1/data_r1/alpha_missense_ef.csv")
