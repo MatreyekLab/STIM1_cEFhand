@@ -2199,28 +2199,29 @@ foldx_kam_pos <- merge(foldx_kam %>% group_by(position) %>% summarize(pos_tot_en
 foldx_kam_pos2 <- merge(foldx_kam_pos, annots[,c("position","annot")], by = "position")
 
 
-ggplot() + theme(panel.grid = element_blank()) + 
+Positional_foldx_plot <- ggplot() + theme(panel.grid = element_blank(), legend.position = "none") + 
   scale_x_log10() + 
   geom_point(data = foldx_kam_pos2, aes(x = missense_geomean, y = pos_tot_energy, color = annot), alpha = 0.5) +
-  geom_text_repel(data = foldx_kam_pos2, aes(x = missense_geomean, y = pos_tot_energy, label = position), color = "red") +
-  labs(x = "Endogenous score", y = "FoldX total energy")
+  geom_text_repel(data = foldx_kam_pos2, aes(x = missense_geomean, y = pos_tot_energy, label = position), color = "red", alpha = 0.75, size = 2) +
+  labs(x = "Standard score", y = "FoldX total energy") +
+  NULL; Positional_foldx_plot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/Positional_foldx_plot.pdf", Positional_foldx_plot, height = 2.25, width = 3.25)
 
 foldx_ef_kam <- foldx_ef
 
-
-ggplot() + theme(panel.grid = element_blank()) + 
+Variant_foldx_plot <- ggplot() + theme(panel.grid = element_blank(), legend.position = "none") + 
   #scale_x_log10() + 
   #scale_y_log10(limits = c(1,100)) +
   geom_hline(yintercept = 0) +
   geom_point(data = foldx_ef_kam, aes(x = log10(endo_ratio), y = total.energy), alpha = 0.25) +
-  geom_point(data = foldx_ef_kam %>% filter(position %in% c(91,92,93,94)), aes(x = log10(endo_ratio), y = total.energy), color = "blue", alpha = 0.5) +
-  geom_point(data = foldx_ef_kam %>% filter(position %in% c(76,78)), aes(x = log10(endo_ratio), y = total.energy), color = "green", alpha = 0.5) +
-  geom_point(data = foldx_ef_kam %>% filter(position == 70), aes(x = log10(endo_ratio), y = total.energy), color = "red", alpha = 0.5) +
-  labs(x = "Endogenous score", y = "FoldX total energy")
-
+  geom_point(data = foldx_ef_kam %>% filter(position %in% c(91,92,93,94)), aes(x = log10(endo_ratio), y = total.energy), color = "purple", alpha = 0.5) +
+  geom_point(data = foldx_ef_kam %>% filter(position %in% c(76,78)), aes(x = log10(endo_ratio), y = total.energy), color = "darkgreen", alpha = 0.5) +
+  geom_point(data = foldx_ef_kam %>% filter(position == 70), aes(x = log10(endo_ratio), y = total.energy), color = "pink", alpha = 0.5) +
+  labs(x = "Standard score", y = "FoldX total energy") +
+  NULL; Variant_foldx_plot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/Variant_foldx_plot.pdf", Variant_foldx_plot, height = 2.25, width = 3.25)
 
 ```
-
 
 ```{r}
 #Revision 1 - Survival scores vs Alpha Missense
@@ -2279,6 +2280,43 @@ ggplot(data = am_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = am_c
   geom_point(alpha = 0.15)+
   geom_text_repel(data = am_path_var, aes(x = log10(endo_ratio), y= log10(sko_ratio), label = variant))
 ```
+
+```{r KAM comparing our scores with Alpha Missense}
+
+kam_am_ef <- am_ef
+
+Alpha_missense_all <- ggplot() + geom_point(data = kam_am_ef %>% filter(!(is.na(am_class))), aes(x = endo_ratio, y = am_pathogenicity, color = am_class), alpha = 0.4) +
+  scale_x_log10() + scale_y_log10() + 
+  labs(x = "Standard score", y = "AlphaMissense score", color = "Patients and general population", shape = "AlphaMissense prediction") +
+  theme(panel.grid = element_blank(), legend.position = "right") + 
+  NULL; Alpha_missense_all
+ggsave("Revision_1/plots_r1/supplement_r1/Alpha_missense_all.pdf", Alpha_missense_all, height = 2.5, width = 5.25)
+
+gnomad4 <- merge(gnomad3, kam_am_ef[,c("variant","am_pathogenicity", "am_class")], by = "variant") %>% mutate(ground_truth = "healthy")
+clinvar3 <- merge(clinvar2, kam_am_ef[,c("variant","am_pathogenicity", "am_class")], by = "variant") %>% filter(Disease1 == "Myopathy") %>% mutate(ground_truth = "myopathy")
+  
+kam_am_comparison <- rbind(gnomad4[,c("variant","am_pathogenicity", "am_class","ground_truth","endo_ratio","sko_ratio")], clinvar3[,c("variant","am_pathogenicity", "am_class","ground_truth", "endo_ratio","sko_ratio")])
+
+am_class_counts <- data.frame(table(kam_am_ef$am_class))
+am_class_counts$freq2 <- am_class_counts$Freq / sum(am_class_counts$Freq)
+
+table(kam_am_comparison[,c("ground_truth","am_class")])
+
+Alpha_missense_controls <- ggplot() + geom_point(data = kam_am_comparison, aes(x = endo_ratio, y = am_pathogenicity, color = ground_truth, shape = am_class)) +
+  scale_x_log10() + scale_y_log10() + 
+  labs(x = "Standard score", y = "AlphaMissense score", color = "Patients and general population", shape = "AlphaMissense prediction") +
+  theme(panel.grid = element_blank(), legend.position = "right") + 
+  NULL; Alpha_missense_controls
+ggsave("Revision_1/plots_r1/supplement_r1/Alpha_missense_controls.pdf", Alpha_missense_controls, height = 2.5, width = 5.25)
+
+
+
+
+```
+
+
+
+
 
 ```{r}
 #Revision 1 Survival scores vs ESM scores
