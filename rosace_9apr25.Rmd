@@ -241,6 +241,9 @@ scoreHeatmap(data = ko_scores.data,
              name = "Heatmap_ko",
              savepdf = TRUE,
              show = TRUE)
+
+write.csv(ko_scores.data, "Revision_1/rosace/rosace_knockout_score.csv")
+write.csv(std_scores.data, "Revision_1/rosace/rosace_standard_score.csv")
 ```
 ```{r}
 colnames(std_scores.data)[6] = "std_score"

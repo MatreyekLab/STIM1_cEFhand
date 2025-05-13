@@ -2147,6 +2147,63 @@ ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_dms.pdf", chop_er_dms, heig
 
 ```
 
+Raw data for low-throughput functional assays
+
+```{r}
+bip_chop_manuscript = read.csv("Revision_1/data_r1/chop_bip_12dec24_edit.csv")
+bip_chop_manuscript = bip_chop_manuscript %>% group_by(Target, variant) %>% mutate(mean_deltacq = exp(mean(log(delta_cq), na.rm = T)))
+
+bip_chop_manuscript$replicate = as.character(bip_chop_manuscript$replicate)
+bip_chop_manuscript1 = bip_chop_manuscript %>% filter(variant != "vif")
+bip_chop_manuscript1$variant = factor(bip_chop_manuscript1$variant, c("WT", "D84G", "L74P", "R429C", "R304W"))
+#BiP
+
+bip_manu_plot = ggplot(data = bip_chop_manuscript1 %>% filter(Target == "bip"), aes(x= variant, y= delta_cq, color = replicate))+ theme(legend.position = "bottom")+ labs(x= "Variant", y= "BiP gene expression")+
+  geom_quasirandom(alpha = 0.5) +
+  geom_point(data = bip_chop_manuscript1 %>% filter(Target == "bip"), aes(x= variant, y= mean_deltacq), color = "red")+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; bip_manu_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/bip_manu_plot.pdf", bip_manu_plot, height = 3, width = 3)
+  # geom_errorbar(data = bip_chop_manuscript %>% filter(Target == "bip"), aes(ymin= mean_deltacq-sd, ymax= mean_deltacq+sd), width=.05, alpha = 0.05)
+
+#CHOP
+chop_manu_plot = ggplot(data = bip_chop_manuscript1 %>% filter(Target == "chop"), aes(x= variant, y= delta_cq, color = replicate))+ theme(legend.position = "bottom")+ labs(x= "Variant", y= "CHOP gene expression")+
+  geom_quasirandom(alpha = 0.5) +
+  geom_point(data = bip_chop_manuscript1 %>% filter(Target == "chop"), aes(x= variant, y= mean_deltacq), color = "red")+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; chop_manu_plot
+ggsave("Revision_1/plots_r1/supplement_r1/chop_manu_plot.pdf", chop_manu_plot, height = 3, width = 3)
+  
+#BAX/BCL-2
+bax_bcl2_manuscript = read.csv("Revision_1/data_r1/bcl2_bax_12dec24.csv")
+bax_bcl2_ratio = bax_bcl2_manuscript %>% select(variant, ratio, replicate)
+bax_bcl2_manuscript$replicate = as.character(bax_bcl2_manuscript$replicate)
+bax_bcl2_manuscript1 = bax_bcl2_manuscript %>% filter(variant %in% c("WT", "D84G", "L74P", "R429C", "R304W")) %>% group_by(variant) %>% mutate(mean = exp(mean(log(ratio), na.rm = T)))
+bax_bcl2_manuscript1$variant = factor(bax_bcl2_manuscript1$variant, c("WT", "D84G", "L74P", "R429C", "R304W"))
+
+
+bax_bcl2_manu_plot = ggplot(data = bax_bcl2_manuscript1, aes(x= variant, y= ratio, color = replicate))+
+  geom_quasirandom(alpha = 0.5) + theme(legend.position = "bottom")+ labs(x= "Variant", y= "BAX/BCL-2 Ratio")+
+  geom_point(data = bax_bcl2_manuscript1, aes(x= variant, y= mean), color = "red") +
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; bax_bcl2_manu_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/bax_bcl2_manu_plot.pdf", bax_bcl2_manu_plot, height = 3, width = 3)
+```
+
+```{r}
+campari = read.csv("Revision_1/data_r1/campari_data.csv")
+campari = campari %>% group_by(variant) %>% mutate(mean_campari = exp(mean(log(campari), na.rm = T)))
+campari$replicate = as.character(campari$replicate)
+
+campari_manu_plot = ggplot(data = campari %>% filter(variant %in% c("WT", "R429C", "R304W", "L74P", "D84G")), aes(x= variant, y = campari, color = replicate))+ theme(legend.position = "bottom")+ labs(x= "Variant", y= "CaMPARI2 red:green \nratio")+
+  geom_quasirandom(alpha = 0.5) + scale_y_continuous(limits = c(0,0.2))+
+  geom_point(data = campari %>% filter(variant %in% c("WT", "R429C", "R304W", "L74P", "D84G")), aes(x= variant, y= mean_campari), color = "red")+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; campari_manu_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/campari_manu_plot.pdf", campari_manu_plot, height = 3, width = 3)
+```
+
+
+
 ```{r}
 #Revision 1 = Survival scores vs foldx
 foldx = read.csv("Revision_1/data_r1/foldx.csv")
@@ -2579,6 +2636,48 @@ t.test(mgl_norm_e94p$norm_wt, mgl_norm_wt$norm_wt)
 revision_mgl_dms = revision_mgl %>% select(variant, mean)
 revision_mgl_dms = left_join(revision_mgl, combined2)
 ```
+
+Rosace - Full script can be found in Github repo as rosace_9apr25.rmd
+score tables read in here 
+```{r}
+rosace_std = read.csv("Revision_1/rosace/rosace_standard_score.csv")
+rosace_ko = read.csv("Revision_1/rosace/rosace_knockout_score.csv")
+
+rosace_std = rosace_std %>% select(variants, wildtype, mutation, type, std_score)
+rosace_ko = rosace_ko %>% select(variants, wildtype, mutation, type, ko_score)
+
+rosace_scores = left_join(rosace_std, rosace_ko)
+colnames(rosace_scores)[1] = "variant"
+
+ggplot(data = rosace_scores, aes(x= std_score, y= ko_score))+
+  geom_point(alpha = 0.5)
+
+ggplot(data = scores, aes(x= position, y= mutation, fill = std_score))+
+  geom_tile()
+
+ggplot(data = scores, aes(x= position, y= mutation, fill = ko_score))+
+  geom_tile()
+
+combined4 = left_join(combined3, rosace_scores)
+
+dms_rosace_endo_plot = ggplot(data = combined4, aes(x= log10(endo_ratio), y= std_score))+ theme_bw()+
+  geom_point(alpha = 0.25)+
+  labs(x= "Standard score (DMS)", y= "Standard score \n(ROSACE)")+NULL; dms_rosace_endo_plot
+
+dms_rosace_sko_plot = ggplot(data = combined4, aes(x= log10(sko_ratio), y= ko_score))+ theme_bw()+
+  geom_point(alpha = 0.25)+
+  labs(x= "Knockout score (DMS)", y= "Knockout score \n(ROSACE)")+NULL; dms_rosace_sko_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/dms_rosace_endo_plot.pdf", dms_rosace_endo_plot, height = 2, width = 2)
+ggsave("Revision_1/plots_r1/supplement_r1/dms_rosace_sko_plot.pdf", dms_rosace_sko_plot, height = 2, width = 2)
+
+cor.test(combined4$std_score, log10(combined4$endo_ratio), method = "spearman", data = scores)
+cor.test(combined4$ko_score, log10(combined4$sko_ratio), method = "spearman", data = scores)
+
+```
+
+
+
 
 ```{r session info}
 sessionInfo()
