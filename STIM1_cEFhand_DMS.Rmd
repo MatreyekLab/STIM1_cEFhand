@@ -2203,7 +2203,6 @@ ggsave("Revision_1/plots_r1/supplement_r1/campari_manu_plot.pdf", campari_manu_p
 ```
 
 
-
 ```{r}
 #Revision 1 = Survival scores vs foldx
 foldx = read.csv("Revision_1/data_r1/foldx.csv")
@@ -2370,9 +2369,6 @@ ggsave("Revision_1/plots_r1/supplement_r1/Alpha_missense_controls.pdf", Alpha_mi
 
 
 ```
-
-
-
 
 
 ```{r}
@@ -2622,11 +2618,12 @@ mgl_norm_wt = revision_mgl %>% filter(variant == "WT") %>% distinct(variant, nor
 
 
 mgl_abundance_plot = ggplot(data = revision_mgl, aes(x= variant, y= norm_wt))+ theme_bw()+
-  geom_quasirandom(alpha = 0.5) + scale_y_continuous(limits = c(0,3)) +
+  geom_quasirandom(alpha = 0.5) + scale_y_continuous(limits = c(0,2.5)) +
   geom_point(data = revision_mgl, aes(x= variant, y= mean), color = "red") +
-  labs(x= "STIM1 cEFhand variant", y= "Normalized Green MFI")+NULL; mgl_abundance_plot
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
+  labs(x= "Variant", y= "Normalized \nGreen MFI")+NULL; mgl_abundance_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/mgl_abundance_plot.pdf", mgl_abundance_plot, height = 3, width = 3)
+ggsave("Revision_1/plots_r1/supplement_r1/mgl_abundance_plot.pdf", mgl_abundance_plot, height = 2, width = 2)
 
 t.test(mgl_norm_f91d$norm_wt, mgl_norm_wt$norm_wt)
 t.test(mgl_norm_l92k$norm_wt, mgl_norm_wt$norm_wt)
@@ -2675,8 +2672,6 @@ cor.test(combined4$std_score, log10(combined4$endo_ratio), method = "spearman", 
 cor.test(combined4$ko_score, log10(combined4$sko_ratio), method = "spearman", data = scores)
 
 ```
-
-
 
 
 ```{r session info}
