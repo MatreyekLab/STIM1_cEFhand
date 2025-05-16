@@ -2521,22 +2521,21 @@ cor.test(esm_scores_path$esm_score, esm_scores_path$std_score, method = "spearma
 
 ```{r}
 #Revision 1 error bars on endo and sko scores
-endo_sd = endo_freq %>% select(variant, r1_ratio, r2_ratio, r4_ratio, r5_ratio, r6_ratio)
-colnames(endo_sd) = c("variant", "er1", "er2", "er4" ,"er5", "er6")
-endo_sd$endo_sd <- apply(endo_sd[, c("er1", "er2", "er4", "er5", "er6")], 1, sd)
-endo_sd$endo_se <- apply(endo_sd[, c("er1", "er2", "er4", "er5", "er6")], 1, function(x) sd(x) / sqrt(5))
+eb_endo = endo_freq %>% select(variant, r1_ratio, r2_ratio, r4_ratio, r5_ratio, r6_ratio)
+colnames(eb_endo) = c("variant", "er1", "er2", "er4" ,"er5", "er6")
+clinvar_errorbar_endo = eb_endo %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% melt(id = 'variant')
+vus_errorbar_endo = eb_endo %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% melt(id = "variant")
 
-sko_sd = sko_freq %>% select(variant, r1_ratio, r2_ratio, r3_ratio, r4_ratio, r5_ratio, r6_ratio)
-colnames(sko_sd) = c("variant", "sr1", "sr2", "sr3", "sr4", "sr5", "sr6")
-sko_sd$sko_sd <- apply(sko_sd[, c("sr1", "sr2", "sr3", "sr4", "sr5", "sr6")], 1, sd)
-sko_sd$sko_se <- apply(sko_sd[, c("sr1", "sr2", "sr3", "sr4", "sr5", "sr6")], 1, function(x) sd(x) / sqrt(6))
-
+eb_sko = sko_freq %>% select(variant, r1_ratio, r2_ratio, r3_ratio, r4_ratio, r5_ratio, r6_ratio)
+colnames(eb_sko) = c("variant", "sr1", "sr2", "sr3", "sr4", "sr5", "sr6")
+clinvar_errorbar_sko = eb_sko %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% melt(id = 'variant')
+vus_errorbar_sko = eb_sko %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% melt(id = "variant")
 
 combined3 = combined2 %>% select(variant, endo_ratio, sko_ratio)
 combined3 = left_join(combined3, endo_sd)
 combined3 = left_join(combined3, sko_sd)
 
-clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar) %>% filter(ClinVar != "CaseRep")
+clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar)
 clinvar_errorbar = left_join(clinvar_variants, combined3)
 
 clinvar_errorbar_plot = ggplot(data = clinvar_errorbar, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
@@ -2550,10 +2549,53 @@ clinvar_errorbar_plot = ggplot(data = clinvar_errorbar, aes(x= log10(endo_ratio)
   geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.01)+NULL; clinvar_errorbar_plot
 
 ggsave("Revision_1/plots_r1/supplement_r1/clinvar_errorbar_plot.pdf",clinvar_errorbar_plot, height = 3, width = 3.5)
+
+clinvar_eb_endo_plot = ggplot(data = clinvar_errorbar_endo, aes(x= variant, y= log10(value), color = variable))+
+  geom_quasirandom(alpha = 0.5) + theme_bw()+
+  geom_hline(yintercept = syn_endo_range[1], linetype = "dotted")+
+  geom_hline(yintercept = syn_endo_range[2], linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= "Variant", y= "Standard Score", color = "Replicate")+NULL; clinvar_eb_endo_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_endo_plot.png", clinvar_eb_endo_plot ,height = 3, width = 3)
+
+clinvar_eb_sko_plot = ggplot(data = clinvar_errorbar_sko, aes(x= variant, y= log10(value), color = variable))+
+  geom_quasirandom(alpha = 0.5) + theme_bw()+
+  geom_hline(yintercept = syn_sko_range[1], linetype = "dotted")+
+  geom_hline(yintercept = syn_sko_range[2], linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(sko_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= "Variant", y= "Knockout Score", color = "Replicate")+NULL; clinvar_eb_sko_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_sko_plot.png", clinvar_eb_sko_plot ,height = 3, width = 3)
+
+
+vus_eb_endo_plot = ggplot(data = vus_errorbar_endo, aes(x= variant, y= log10(value), color = variable))+
+  geom_quasirandom(alpha = 0.5) + theme_bw()+
+  geom_hline(yintercept = syn_endo_range[1], linetype = "dotted")+
+  geom_hline(yintercept = syn_endo_range[2], linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= "Variant", y= "Standard Score", color = "Replicate")+NULL; vus_eb_endo_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_endo_plot.png", vus_eb_endo_plot ,height = 3, width = 3)
+
+
+vus_eb_sko_plot = ggplot(data = vus_errorbar_sko, aes(x= variant, y= log10(value), color = variable))+
+  geom_quasirandom(alpha = 0.5) + theme_bw()+
+  geom_hline(yintercept = syn_sko_range[1], linetype = "dotted")+
+  geom_hline(yintercept = syn_sko_range[2], linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(sko_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= "Variant", y= "Knockout Score", color = "Replicate")+NULL; vus_eb_sko_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_sko_plot.png", vus_eb_sko_plot ,height = 3, width = 3)
 ```
 
 ```{r bacteria growth over time}
 bac_growth = read.csv("Revision_1/data_r1/rev_bac_growth.csv")
+bac_growth = bac_growth %>% group_by(strain, plasmid, time_point) %>% mutate(mean = exp(mean(log(A600), na.rm = T)))
 bac_growth_4hr_none = bac_growth %>% filter(time_point == "4" & plasmid == "none")
 bac_growth_4hr_mch = bac_growth %>% filter(time_point == "4" & plasmid == "mch")
 bac_growth_4hr_stim = bac_growth %>% filter(time_point == "4" & plasmid == "stim")
@@ -2570,138 +2612,13 @@ bac_growth_24hr_none = bac_growth %>% filter(time_point == "24" & plasmid == "no
 bac_growth_24hr_mch = bac_growth %>% filter(time_point == "24" & plasmid == "mch")
 bac_growth_24hr_stim = bac_growth %>% filter(time_point == "24" & plasmid == "stim")
 
-#4hr_none
-anova_results_4hr_none <- bac_growth_4hr_none %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_4hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_4hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_4hr_none <- anova_results_4hr_none %>%
-  mutate(tukey = map(aov_model_4hr_none, ~ TukeyHSD(.x)))
-anova_results_4hr_none$tukey[[1]]
-
-#4hr_mch
-anova_results_4hr_mch <- bac_growth_4hr_mch %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_4hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_4hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_4hr_mch <- anova_results_4hr_mch %>%
-  mutate(tukey = map(aov_model_4hr_mch, ~ TukeyHSD(.x)))
-anova_results_4hr_mch$tukey[[1]]
-
-#4hr_stim
-anova_results_4hr_stim <- bac_growth_4hr_stim %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_4hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_4hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_4hr_stim <- anova_results_4hr_stim %>%
-  mutate(tukey = map(aov_model_4hr_stim, ~ TukeyHSD(.x)))
-anova_results_4hr_stim$tukey[[1]]
-
-#8hr_none
-anova_results_8hr_none <- bac_growth_8hr_none %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_8hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_8hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_8hr_none <- anova_results_8hr_none %>%
-  mutate(tukey = map(aov_model_8hr_none, ~ TukeyHSD(.x)))
-anova_results_8hr_none$tukey[[1]]
-
-#8hr_mch
-anova_results_8hr_mch <- bac_growth_8hr_mch %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_8hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_8hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_8hr_mch <- anova_results_8hr_mch %>%
-  mutate(tukey = map(aov_model_8hr_mch, ~ TukeyHSD(.x)))
-anova_results_8hr_mch$tukey[[1]]
-
-#8hr_stim
-anova_results_8hr_stim <- bac_growth_8hr_stim %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_8hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_8hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_8hr_stim <- anova_results_8hr_stim %>%
-  mutate(tukey = map(aov_model_8hr_stim, ~ TukeyHSD(.x)))
-anova_results_8hr_stim$tukey[[1]]
-
-#12hr_none
-anova_results_12hr_none <- bac_growth_12hr_none %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_12hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_12hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_12hr_none <- anova_results_12hr_none %>%
-  mutate(tukey = map(aov_model_12hr_none, ~ TukeyHSD(.x)))
-anova_results_12hr_none$tukey[[1]]
-
-#12hr_mch
-anova_results_12hr_mch <- bac_growth_12hr_mch %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_12hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_12hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_12hr_mch <- anova_results_12hr_mch %>%
-  mutate(tukey = map(aov_model_12hr_mch, ~ TukeyHSD(.x)))
-anova_results_12hr_mch$tukey[[1]]
-
-#12hr_stim
-anova_results_12hr_stim <- bac_growth_12hr_stim %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_12hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_12hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_12hr_stim <- anova_results_12hr_stim %>%
-  mutate(tukey = map(aov_model_12hr_stim, ~ TukeyHSD(.x)))
-anova_results_12hr_stim$tukey[[1]]
-
-#24hr_none
-anova_results_24hr_none <- bac_growth_24hr_none %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_24hr_none = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_24hr_none, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_24hr_none <- anova_results_24hr_none %>%
-  mutate(tukey = map(aov_model_24hr_none, ~ TukeyHSD(.x)))
-anova_results_24hr_none$tukey[[1]]
-
-#24hr_mch
-anova_results_24hr_mch <- bac_growth_24hr_mch %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_24hr_mch = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_24hr_mch, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_24hr_mch <- anova_results_24hr_mch %>%
-  mutate(tukey = map(aov_model_24hr_mch, ~ TukeyHSD(.x)))
-anova_results_24hr_mch$tukey[[1]]
-
-#24hr_stim
-anova_results_24hr_stim <- bac_growth_24hr_stim %>%
-  filter(n_distinct(strain) >= 3) %>%  # Ensure there are at least 3 strains
-  nest() %>%
-  mutate(
-    aov_model_24hr_stim = map(data, ~ aov(A600 ~ strain, data = .x)),
-    p_value = map_dbl(aov_model_24hr_stim, ~ summary(.x)[[1]][["Pr(>F)"]][1]))
-anova_results_24hr_stim <- anova_results_24hr_stim %>%
-  mutate(tukey = map(aov_model_24hr_stim, ~ TukeyHSD(.x)))
-anova_results_24hr_stim$tukey[[1]]
-
+library(tidyverse)
+library(ggbeeswarm)
+bac_growth_plot = ggplot(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= A600))+ theme_bw()+
+  geom_quasirandom(alpha = 0.5)+
+  geom_point(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= mean), color = "red") +
+  labs(x= "Strain", y= "OD600")+ scale_y_continuous(limits = c(1, 5))+NULL; bac_growth_mch_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.png", bac_growth_plot, height = 2, width = 2)
 
 bac_growth_none_plot = ggplot(data = bac_growth %>% filter(plasmid == "none"), aes(x= time_point, y= A600, color = strain))+ theme_bw()+
   geom_quasirandom(alpha = 0.5) +
@@ -2721,6 +2638,8 @@ bac_growth_stim_plot = ggplot(data = bac_growth %>% filter(plasmid == "stim"), a
   theme(legend.position = "none")+NULL; bac_growth_stim_plot
 ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_stim_plot.pdf", bac_growth_stim_plot, height = 2, width = 2)
 ```
+
+
 ```{r}
 revision_mgl = read.csv("Revision_1/data_r1/mGL_mfi.csv")
 revision_mgl = revision_mgl %>% group_by(variant, rep) %>% mutate(mean_norm = exp(mean(log(norm_wt))))
@@ -2790,6 +2709,20 @@ cor.test(combined4$ko_score, log10(combined4$sko_ratio), method = "spearman", da
 
 ```
 
+```{r}
+wb_intensity = read.csv("Revision_1/data_r1/wb_intensity.csv")
+wb_intensity$rep = as.character(wb_intensity$rep)
+wb_intensity = wb_intensity %>% group_by(sample, band) %>% mutate(mean = exp(mean(log(norm_int), na.rm = T)))
+wb_intensity$sample = factor(wb_intensity$sample, c("Standard", "Knockout"))
+
+wb_intensity_plot = ggplot(data = wb_intensity, aes(x= sample, y= norm_int, color = rep))+ theme_bw()+
+  geom_quasirandom(alpha = 0.5, dodge.width = 0.5) + 
+  geom_point(data = wb_intensity, aes(x= sample, y= mean), color = "red")+
+  theme(legend.position = "bottom", axis.title.x=element_blank()) +
+  labs(y= "Band intensity \nnormalized to actin", color = "Replicate")+NULL; wb_intensity_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/wb_intensity_plot.pdf", wb_intensity_plot, height = 2, width = 2.5)
+```
 
 ```{r session info}
 sessionInfo()
