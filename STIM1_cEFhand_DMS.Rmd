@@ -2086,7 +2086,8 @@ campari_ss_plot = ggplot(data = er_campari_ss %>% distinct(variant, endo_ratio, 
   scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; campari_ss_plot
 
-campari_dms_plot = ggplot(data = er_campari_dms %>% distinct(variant, endo_ratio, campari, disease), aes(y= log10(endo_ratio), x= campari, color = disease))+
+campari_dms_plot <- 
+  ggplot(data = er_campari_dms %>% distinct(variant, endo_ratio, campari, disease), aes(y= log10(endo_ratio), x= campari, color = disease))+
   geom_point(alpha = 0.5, size = 1.5)+
   theme(legend.position = "none", panel.grid = element_blank())+
   geom_text_repel(aes(label = variant), size =2) + 
@@ -2096,6 +2097,19 @@ campari_dms_plot = ggplot(data = er_campari_dms %>% distinct(variant, endo_ratio
 
 ggsave("Revision_1/plots_r1/main_r1/fig9a_r1_campari_ss_plot.pdf", campari_ss_plot, height = 1.5, width = 1.8)
 ggsave("Revision_1/plots_r1/main_r1/fig9a_r1_campari_dms_plot.pdf", campari_dms_plot, height = 1.5, width = 1.8)
+
+
+campari_scatterplot_set <- rbind(er_campari_ss %>% filter(Target == "chop") %>% select(variant, endo_ratio, campari, disease) %>% mutate(shape = "1"),
+                                 er_campari_dms %>% filter(Target == "chop") %>% select(variant, endo_ratio, campari, disease) %>% mutate(shape = "2"))
+
+campari_er_plot <- ggplot() + 
+  labs(x = "CaMPARI ratio", y = "Standard score") +
+  theme(panel.grid.major = element_blank(), legend.position = "none") +
+  geom_point(data = campari_scatterplot_set, aes(y= log10(endo_ratio), x= campari, color = disease, shape = shape)) +
+  geom_text_repel(data = campari_scatterplot_set, aes(y= log10(endo_ratio), x= campari, label = variant)) +
+  NULL; campari_er_plot
+ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_campari_er_plot.pdf", campari_er_plot, height = 2, width = 2.25)
+
 
 bax_bcl_er_ss = ggplot(data = er_campari_ss, aes(y= log10(endo_ratio), x= mean_bax_bcl2_ratio, color = disease))+
   labs(y= "Standard Score", x= "BAX / BCL-2 mRNA ratio")+ theme(legend.position = "none", panel.grid = element_blank())+
@@ -2111,18 +2125,45 @@ bax_bcl_er_dms = ggplot(data = er_campari_dms, aes(y= log10(endo_ratio), x= mean
   scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; bax_bcl_er_dms
 
+bax_bcl_scatterplot_set <- rbind(er_campari_ss %>% filter(Target == "BAX/BCL-2") %>% select(variant, endo_ratio, mean_bax_bcl2_ratio, disease) %>% mutate(shape = "1"),
+                                 er_campari_dms %>% filter(Target == "BAX/BCL-2") %>% select(variant, endo_ratio, mean_bax_bcl2_ratio, disease) %>% mutate(shape = "2"))
+
+bax_bcl_er_plot <- ggplot() + 
+  labs(x = "Bax:Bcl2 ratio", y = "Standard score") +
+  theme(panel.grid.major = element_blank(), legend.position = "none") +
+  geom_point(data = bax_bcl_scatterplot_set, aes(y= log10(endo_ratio), x= mean_bax_bcl2_ratio, color = disease, shape = shape)) +
+  geom_text_repel(data = bax_bcl_scatterplot_set, aes(y= log10(endo_ratio), x= mean_bax_bcl2_ratio, label = variant)) +
+  NULL; bax_bcl_er_plot
+ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_bax_bcl_er_plot.pdf", bax_bcl_er_plot, height = 2, width = 2.25)
+
+  
+  
+
 bip_er_ss = ggplot(data = er_campari_ss %>% filter(Target == "bip"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
   labs(y= "Standard Score", x= "BiP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
   geom_point(alpha = 0.5, size = 1.5)+
   geom_text_repel(aes(label = variant), size = 2) + 
   scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; bip_er_ss
+
 bip_er_dms = ggplot(data = er_campari_dms %>% filter(Target == "bip"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
   labs(y= "Standard Score", x= "BiP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
   geom_point(alpha = 0.5, size = 1.5)+
   geom_text_repel(aes(label = variant), size = 2) + 
   scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; bip_er_dms
+
+bip_scatterplot_set <- rbind(er_campari_ss %>% filter(Target == "bip") %>% select(variant, endo_ratio, mean_exp, disease) %>% mutate(shape = "1"),
+                                 er_campari_dms %>% filter(Target == "bip") %>% select(variant, endo_ratio, mean_exp, disease) %>% mutate(shape = "2"))
+
+bip_er_plot <- ggplot() + 
+  labs(x = "Bip Cq", y = "Standard score") +
+  theme(panel.grid = element_blank(), legend.position = "none") +
+  geom_point(data = bip_scatterplot_set, aes(y= log10(endo_ratio), x= mean_exp, color = disease, shape = shape)) +
+  geom_text_repel(data = bip_scatterplot_set, aes(y= log10(endo_ratio), x= mean_exp, label = variant)) +
+  NULL; bip_er_plot
+ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_bip_er_plot.pdf", bip_er_plot, height = 2, width = 2.25)
+
 
 chop_er_ss = ggplot(data = er_campari_ss %>% filter(Target == "chop"), aes(y= log10(endo_ratio), x= mean_exp, color = disease))+
   labs(y= "Standard Score", x= "CHOP mRNA Expression")+ theme(legend.position = "none", panel.grid = element_blank())+
@@ -2138,6 +2179,18 @@ chop_er_dms = ggplot(data = er_campari_dms %>% filter(Target == "chop"), aes(y= 
   scale_x_continuous(breaks = breaks_pretty(n = 3)) + scale_y_continuous(breaks = breaks_pretty(n = 5)) +
   NULL; chop_er_dms
 
+chop_scatterplot_set <- rbind(er_campari_ss %>% filter(Target == "chop") %>% select(variant, endo_ratio, mean_exp, disease) %>% mutate(shape = "1"),
+                                 er_campari_dms %>% filter(Target == "chop") %>% select(variant, endo_ratio, mean_exp, disease) %>% mutate(shape = "2"))
+
+chop_er_plot <- ggplot() + 
+  labs(x = "CHOP Cq", y = "Standard score") +
+  theme(panel.grid.major = element_blank(), legend.position = "none") +
+  geom_point(data = chop_scatterplot_set, aes(y= log10(endo_ratio), x= mean_exp, color = disease, shape = shape)) +
+  geom_text_repel(data = chop_scatterplot_set, aes(y= log10(endo_ratio), x= mean_exp, label = variant)) +
+  NULL; chop_er_plot
+ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_plot.pdf", chop_er_plot, height = 2, width = 2.25)
+
+
 ggsave("Revision_1/plots_r1/main_r1/fig9b_r1_bax_bcl_er_ss.pdf", bax_bcl_er_ss, height = 1.5, width = 1.8)
 ggsave("Revision_1/plots_r1/main_r1/fig9b_r1_bax_bcl_er_dms.pdf", bax_bcl_er_dms, height = 1.5, width = 1.8)
 ggsave("Revision_1/plots_r1/main_r1/fig9c_r1_bip_er_ss.pdf", bip_er_ss, height = 1.5, width = 1.8)
@@ -2150,56 +2203,121 @@ ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_dms.pdf", chop_er_dms, heig
 Raw data for low-throughput functional assays
 
 ```{r}
-bip_chop_manuscript = read.csv("Revision_1/data_r1/chop_bip_12dec24_edit.csv")
-bip_chop_manuscript = bip_chop_manuscript %>% group_by(Target, variant) %>% mutate(mean_deltacq = exp(mean(log(delta_cq), na.rm = T)))
+bip_chop_manuscript0 = read.csv("Revision_1/data_r1/chop_bip_12dec24_edit.csv")
+bip_chop_manuscript <- bip_chop_manuscript0 %>% filter(Content != "NTC") %>% group_by(variant, Target, replicate) %>% summarize(Cq = 10^mean(log10(Cq)), delta_cq = 10^mean(log10(delta_cq))) %>% mutate(mean_deltacq = exp(mean(log(delta_cq), na.rm = T)))
 
 bip_chop_manuscript$replicate = as.character(bip_chop_manuscript$replicate)
-bip_chop_manuscript1 = bip_chop_manuscript %>% filter(variant != "vif")
-bip_chop_manuscript1$variant = factor(bip_chop_manuscript1$variant, c("WT", "D84G", "L74P", "R429C", "R304W"))
+bip_chop_manuscript1 = bip_chop_manuscript %>% filter(Target != "Actin")
+bip_chop_manuscript1[bip_chop_manuscript1$variant == "vif","variant"] <- "Control"
+bip_chop_manuscript1$variant = factor(bip_chop_manuscript1$variant, c("Control","WT", "D84G", "L74P", "R429C", "R304W"))
 #BiP
 
-bip_manu_plot = ggplot(data = bip_chop_manuscript1 %>% filter(Target == "bip"), aes(x= variant, y= delta_cq, color = replicate))+ theme(legend.position = "bottom")+ labs(x= "Variant", y= "BiP gene expression")+
-  geom_quasirandom(alpha = 0.5) +
-  geom_point(data = bip_chop_manuscript1 %>% filter(Target == "bip"), aes(x= variant, y= mean_deltacq), color = "red")+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; bip_manu_plot
+bip_chop_manuscript1$wt_norm <- NA
+for(x in 1:nrow(bip_chop_manuscript1)){
+  temp_rep <- bip_chop_manuscript1$replicate[x]
+  temp_target <- bip_chop_manuscript1$Target[x]
+  control_val <- (bip_chop_manuscript1 %>% filter(variant == "Control" & replicate == temp_rep & Target == temp_target))$delta_cq
+  bip_chop_manuscript1$wt_norm[x] <- bip_chop_manuscript1$delta_cq[x] / control_val
+}
+bip_chop_manuscript_summary <- bip_chop_manuscript1 %>% group_by(variant, Target) %>% summarize(mean_wt_norm = exp(mean(log(wt_norm), na.rm = T)))
 
-ggsave("Revision_1/plots_r1/supplement_r1/bip_manu_plot.pdf", bip_manu_plot, height = 3, width = 3)
+bip_manu_plot = ggplot()+ 
+  theme(legend.position = "bottom")+ 
+  labs(x= NULL, y= "Relative\nBip\nexpression")+
+  geom_hline(yintercept = 1, alpha = 0.4) + 
+  geom_quasirandom(data = bip_chop_manuscript1 %>% filter(Target == "bip" & variant != "Control"), aes(x= variant, y= wt_norm, color = replicate), alpha = 0.5) +
+  scale_y_log10() + 
+  geom_point(data = bip_chop_manuscript_summary %>% filter(Target == "bip" & variant != "Control"), aes(x= variant, y= mean_wt_norm), color = "Black", shape = 95, size = 5) +
+  theme(panel.grid.major = element_blank(), axis.text.x = element_text(angle = -90, hjust = 0.5, vjust = 0.5)) + 
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; bip_manu_plot
+  NULL; bip_manu_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bip_manu_plot.pdf", bip_manu_plot, height = 1.75, width = 1.75)
   # geom_errorbar(data = bip_chop_manuscript %>% filter(Target == "bip"), aes(ymin= mean_deltacq-sd, ymax= mean_deltacq+sd), width=.05, alpha = 0.05)
 
 #CHOP
-chop_manu_plot = ggplot(data = bip_chop_manuscript1 %>% filter(Target == "chop"), aes(x= variant, y= delta_cq, color = replicate))+ theme(legend.position = "bottom")+ labs(x= "Variant", y= "CHOP gene expression")+
+chop_manu_plot = ggplot(data = bip_chop_manuscript1 %>% filter(Target == "chop" & variant != "Control"), aes(x= variant, y= wt_norm, color = replicate))+ 
+  theme(legend.position = "bottom")+ labs(x= NULL, y= "Relative\nChop\nexpression")+
   geom_quasirandom(alpha = 0.5) +
-  geom_point(data = bip_chop_manuscript1 %>% filter(Target == "chop"), aes(x= variant, y= mean_deltacq), color = "red")+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; chop_manu_plot
-ggsave("Revision_1/plots_r1/supplement_r1/chop_manu_plot.pdf", chop_manu_plot, height = 3, width = 3)
+  scale_y_log10() + 
+  geom_hline(yintercept = 1, alpha = 0.4) + 
+  geom_point(data = bip_chop_manuscript_summary %>% filter(Target == "chop" & variant != "Control"), aes(x= variant, y= mean_wt_norm), color = "black", shape = 95, size = 5)+
+  theme(panel.grid.major = element_blank(), axis.text.x = element_text(angle = -90, hjust = 0.5, vjust = 0.5)) + 
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  NULL; chop_manu_plot
+ggsave("Revision_1/plots_r1/supplement_r1/chop_manu_plot.pdf", chop_manu_plot, height = 1.75, width = 1.75)
   
 #BAX/BCL-2
-bax_bcl2_manuscript = read.csv("Revision_1/data_r1/bcl2_bax_12dec24.csv")
-bax_bcl2_ratio = bax_bcl2_manuscript %>% select(variant, ratio, replicate)
-bax_bcl2_manuscript$replicate = as.character(bax_bcl2_manuscript$replicate)
-bax_bcl2_manuscript1 = bax_bcl2_manuscript %>% filter(variant %in% c("WT", "D84G", "L74P", "R429C", "R304W")) %>% group_by(variant) %>% mutate(mean = exp(mean(log(ratio), na.rm = T)))
-bax_bcl2_manuscript1$variant = factor(bax_bcl2_manuscript1$variant, c("WT", "D84G", "L74P", "R429C", "R304W"))
+bax_bcl2_manuscript0 = read.csv("Revision_1/data_r1/bcl2_bax_12dec24.csv")
+bax_bcl2_manuscript <- bax_bcl2_manuscript0 %>% filter(Content != "NTC") %>% group_by(variant, Target, replicate) %>% summarize(Cq = 10^mean(log10(Cq)), delta_cq = 10^mean(log10(delta_cq))) %>% mutate(mean_deltacq = exp(mean(log(delta_cq), na.rm = T)))
+bax_bcl2_manuscript = bax_bcl2_manuscript %>% filter(Target != "Actin")
+bax_bcl2_manuscript[bax_bcl2_manuscript$variant == "vif","variant"] <- "Control"
 
+bax_bcl2_ratio <- bax_bcl2_manuscript %>% filter(!is.na(replicate)) %>% group_by(variant, replicate) %>% select(variant, replicate) %>% distinct()
 
-bax_bcl2_manu_plot = ggplot(data = bax_bcl2_manuscript1, aes(x= variant, y= ratio, color = replicate))+
-  geom_quasirandom(alpha = 0.5) + theme(legend.position = "bottom")+ labs(x= "Variant", y= "BAX/BCL-2 Ratio")+
-  geom_point(data = bax_bcl2_manuscript1, aes(x= variant, y= mean), color = "red") +
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; bax_bcl2_manu_plot
+bax_bcl2_ratio$ratio <- NA
+for(x in 1:nrow(bax_bcl2_ratio)){
+  temp_rep <- bax_bcl2_ratio$replicate[x]
+  temp_variant <- bax_bcl2_ratio$variant[x]
+  bax_bcl2_ratio$ratio[x] <- (bax_bcl2_manuscript %>% filter(variant == temp_variant, replicate == temp_rep, Target == "bax"))$delta_cq / (bax_bcl2_manuscript %>% filter(variant == temp_variant, replicate == temp_rep, Target == "bcl2"))$delta_cq
+}
 
-ggsave("Revision_1/plots_r1/supplement_r1/bax_bcl2_manu_plot.pdf", bax_bcl2_manu_plot, height = 3, width = 3)
+bax_bcl2_ratio$wt_norm <- NA
+for(x in 1:nrow(bax_bcl2_ratio)){
+  temp_rep <- as.numeric(bax_bcl2_ratio$replicate[x])
+  control_val <- (bax_bcl2_ratio %>% filter(variant == "Control" & replicate == temp_rep))$ratio
+  bax_bcl2_ratio$wt_norm[x] <- bax_bcl2_ratio$ratio[x] / control_val
+}
+bax_bcl2_ratio_summary <- bax_bcl2_ratio %>% group_by(variant) %>% summarize(mean_wt_norm = exp(mean(log(wt_norm), na.rm = T)))
+
+#bax_bcl2_ratio = bax_bcl2_manuscript %>% select(variant, ratio, replicate)
+bax_bcl2_ratio$replicate = as.character(bax_bcl2_ratio$replicate)
+bax_bcl2_ratio = bax_bcl2_ratio %>% filter(variant %in% c("Control","WT", "D84G", "L74P", "R429C", "R304W")) %>% group_by(variant) %>% mutate(mean = exp(mean(log(ratio), na.rm = T)))
+bax_bcl2_ratio$variant = factor(bax_bcl2_ratio$variant, c("Control","WT", "D84G", "L74P", "R429C", "R304W"))
+
+bax_bcl2_manu_plot = ggplot() +
+  geom_hline(yintercept = 1, alpha = 0.4) + 
+  geom_quasirandom(data = bax_bcl2_ratio %>% filter(variant != "Control"), aes(x= variant, y= wt_norm, color = replicate), alpha = 0.5) + 
+  theme(legend.position = "bottom")+ labs(x= NULL, y= "Relative\nBAX/BCL2\nratio")+
+  scale_y_log10() + 
+  geom_point(data = bax_bcl2_ratio_summary %>% filter(variant != "Control"), aes(x= variant, y= mean_wt_norm), color = "black", shape = 95, size = 5) +
+  theme(panel.grid.major = element_blank(), axis.text.x = element_text(angle = -90, hjust = 0.5, vjust = 0.5)) + 
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  NULL; bax_bcl2_manu_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bax_bcl2_manu_plot.pdf", bax_bcl2_manu_plot, height = 1.75, width = 1.85)
 ```
 
 ```{r}
-campari = read.csv("Revision_1/data_r1/campari_data.csv")
-campari = campari %>% group_by(variant) %>% mutate(mean_campari = exp(mean(log(campari), na.rm = T)))
+campari0 = read.csv("Revision_1/data_r1/campari_data2.csv")
+
+campari <- campari0 %>% group_by(variant, replicate) %>% summarize(green_mfi = exp(mean(log(green_mfi))), red_mfi = exp(mean(log(red_mfi))), red_mfi = exp(mean(log(red_mfi))), campari = exp(mean(log(campari))), endo_ratio = exp(mean(log(endo_ratio)))) %>% mutate(redgrnratio = red_mfi / green_mfi) 
+
+campari$wt_norm <- NA
+for(x in 1:nrow(campari)){
+  temp_rep <- as.numeric(campari$replicate[x])
+  control_val <- (campari %>% filter(variant == "pep" & replicate == temp_rep))$redgrnratio
+  campari$wt_norm[x] <- campari$redgrnratio[x] / control_val
+}
+campari_summary <- campari %>% group_by(variant) %>% summarize(mean_wt_norm = exp(mean(log(wt_norm), na.rm = T)))
+
 campari$replicate = as.character(campari$replicate)
 
-campari_manu_plot = ggplot(data = campari %>% filter(variant %in% c("WT", "R429C", "R304W", "L74P", "D84G")), aes(x= variant, y = campari, color = replicate))+ theme(legend.position = "bottom")+ labs(x= "Variant", y= "CaMPARI2 red:green \nratio")+
-  geom_quasirandom(alpha = 0.5) + scale_y_continuous(limits = c(0,0.2))+
-  geom_point(data = campari %>% filter(variant %in% c("WT", "R429C", "R304W", "L74P", "D84G")), aes(x= variant, y= mean_campari), color = "red")+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; campari_manu_plot
+campari_plot_set <- campari %>% filter(variant %in% c("WT", "R429C", "R304W", "L74P", "D84G"))
+campari_plot_set$variant = factor(campari_plot_set$variant, c("WT", "D84G", "L74P", "R429C", "R304W"))
+campari_plot_set2 <- campari_summary %>% filter(variant %in% c("WT", "R429C", "R304W", "L74P", "D84G"))
+campari_plot_set2$variant = factor(campari_plot_set2$variant, c("WT", "D84G", "L74P", "R429C", "R304W"))
 
-ggsave("Revision_1/plots_r1/supplement_r1/campari_manu_plot.pdf", campari_manu_plot, height = 3, width = 3)
+campari_manu_plot <- ggplot() + 
+  geom_hline(yintercept = 1, alpha = 0.4) + 
+  theme(legend.position = "bottom", panel.grid = element_blank(), axis.text.x = element_text(angle = -90, hjust = 0.5, vjust = 0.5))+ 
+  labs(x= NULL, y= "Relative\nCaMPARI\nred:green")+
+  scale_y_log10() +
+  geom_quasirandom(data = campari_plot_set, aes(x= variant, y = wt_norm, color = replicate), alpha = 0.5) + 
+  geom_point(data = campari_plot_set2, aes(x= variant, y= mean_wt_norm), shape = 45, size = 5)+
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+NULL; campari_manu_plot
+  NULL; campari_manu_plot
+
+ggsave("Revision_1/plots_r1/supplement_r1/campari_manu_plot.pdf", campari_manu_plot, height = 1.75, width = 1.85)
+
 ```
 
 
@@ -2207,7 +2325,6 @@ ggsave("Revision_1/plots_r1/supplement_r1/campari_manu_plot.pdf", campari_manu_p
 #Revision 1 = Survival scores vs foldx
 foldx = read.csv("Revision_1/data_r1/foldx.csv")
 foldx_ef = left_join(combined2, foldx)
-
 foldx_dms_plot = ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= total.energy))+
   geom_point(alpha = 0.15, size = 1) +
   geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant), size = 2) +
