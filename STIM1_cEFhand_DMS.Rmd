@@ -894,12 +894,12 @@ ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.0
 #  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
 
 ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = endo_positional_ratios3, aes(x = missense_geomean, y = synonymous)) +
-  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+  geom_point(data = endo_positional_ratios4, aes(x = missense_geomean, y = synonymous, color = annot)) +
+  geom_text_repel(data = endo_positional_ratios4, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
 
 ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = endo_positional_ratios3, aes(x = nonsense, y = synonymous)) +
-  geom_text_repel(data = endo_positional_ratios3, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+  geom_point(data = endo_positional_ratios4, aes(x = nonsense, y = synonymous, color = annot)) +
+  geom_text_repel(data = endo_positional_ratios4, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
 ```
 
 ```{r Standard LP heatmap}
@@ -950,21 +950,23 @@ sko_positional_ratios2 <- merge(sko_positional_ratios, sko_non[,c("position","sk
 sko_positional_ratios3 <- merge(sko_positional_ratios2, sko_syn[,c("position","sko_ratio")], by = "position", all.x = T)
 colnames(sko_positional_ratios3) <- c("position", "missense_geomean","missense_min", "nonsense","synonymous")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
-  geom_point(data = sko_positional_ratios3, aes(x = missense_geomean, y = nonsense)) +
-  geom_text_repel(data = sko_positional_ratios3, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+sko_positional_ratios4 <- merge(sko_positional_ratios3, annots[,c("position","annot")], by = "position")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
-  geom_point(data = sko_positional_ratios3, aes(x = missense_min, y = nonsense)) +
-  geom_text_repel(data = sko_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = sko_positional_ratios4, aes(x = missense_geomean, y = nonsense, color = annot)) +
+  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
-  geom_point(data = sko_positional_ratios3, aes(x = missense_geomean, y = synonymous)) +
-  geom_text_repel(data = sko_positional_ratios3, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = sko_positional_ratios4, aes(x = missense_min, y = nonsense, color = annot)) +
+  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
-  geom_point(data = sko_positional_ratios3, aes(x = nonsense, y = synonymous)) +
-  geom_text_repel(data = sko_positional_ratios3, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = sko_positional_ratios4, aes(x = missense_geomean, y = synonymous, color = annot)) +
+  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = sko_positional_ratios4, aes(x = nonsense, y = synonymous, color = annot)) +
+  geom_text_repel(data = sko_positional_ratios4, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
 ```
 
 ```{r STIM1 KO heatmap}
