@@ -880,19 +880,24 @@ endo_positional_ratios2 <- merge(endo_positional_ratios, endo_non[,c("position",
 endo_positional_ratios3 <- merge(endo_positional_ratios2, endo_syn[,c("position","endo_ratio")], by = "position", all.x = T)
 colnames(endo_positional_ratios3) <- c("position", "missense_geomean","missense_min", "nonsense","synonymous")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
-  geom_point(data = endo_positional_ratios3, aes(x = missense_geomean, y = nonsense)) +
-  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+endo_positional_ratios4 <- merge(endo_positional_ratios3, annots[,c("position","annot")], by = "position")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
-  geom_point(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense)) +
-  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = endo_positional_ratios4, aes(x = missense_geomean, y = nonsense, color = annot)) +
+  geom_text_repel(data = endo_positional_ratios4, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+
+
+
+#ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+#  geom_point(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense)) +
+#  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+
+ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
   geom_point(data = endo_positional_ratios3, aes(x = missense_geomean, y = synonymous)) +
   geom_text_repel(data = endo_positional_ratios3, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
 
-ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
+ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
   geom_point(data = endo_positional_ratios3, aes(x = nonsense, y = synonymous)) +
   geom_text_repel(data = endo_positional_ratios3, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
 ```
@@ -2523,17 +2528,27 @@ cor.test(esm_scores_path$esm_score, esm_scores_path$std_score, method = "spearma
 #Revision 1 error bars on endo and sko scores
 eb_endo = endo_freq %>% select(variant, r1_ratio, r2_ratio, r4_ratio, r5_ratio, r6_ratio)
 colnames(eb_endo) = c("variant", "er1", "er2", "er4" ,"er5", "er6")
-clinvar_errorbar_endo = eb_endo %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% melt(id = 'variant')
-vus_errorbar_endo = eb_endo %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% melt(id = "variant")
+for(x in 1:nrow(eb_endo)){
+ eb_endo$mean[x] <- mean(unlist(eb_endo[x,c(2,3,4,5,6)]), na.rm = T)
+ eb_endo$count[x] <- sum(!is.na(unlist(eb_endo[x,c(2,3,4,5,6)])))
+ eb_endo$endo_se[x] <- sd(unlist(eb_endo[x,c(2,3,4,5,6)]), na.rm = T) / sqrt(eb_endo$count[x])
+}
+clinvar_errorbar_endo = eb_endo %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = 'variant')
+vus_errorbar_endo = eb_endo %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = "variant")
 
 eb_sko = sko_freq %>% select(variant, r1_ratio, r2_ratio, r3_ratio, r4_ratio, r5_ratio, r6_ratio)
 colnames(eb_sko) = c("variant", "sr1", "sr2", "sr3", "sr4", "sr5", "sr6")
-clinvar_errorbar_sko = eb_sko %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% melt(id = 'variant')
-vus_errorbar_sko = eb_sko %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% melt(id = "variant")
+for(x in 1:nrow(eb_sko)){
+ eb_sko$mean[x] <- mean(unlist(eb_sko[x,c(2,3,4,5,6)]), na.rm = T)
+ eb_sko$count[x] <- sum(!is.na(unlist(eb_sko[x,c(2,3,4,5,6)])))
+ eb_sko$sko_se[x] <- sd(unlist(eb_sko[x,c(2,3,4,5,6)]), na.rm = T) / sqrt(eb_sko$count[x])
+}
+clinvar_errorbar_sko = eb_sko %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = 'variant')
+vus_errorbar_sko = eb_sko %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = "variant")
 
 combined3 = combined2 %>% select(variant, endo_ratio, sko_ratio)
-combined3 = left_join(combined3, endo_sd)
-combined3 = left_join(combined3, sko_sd)
+combined3 = left_join(combined3, eb_endo)
+combined3 = left_join(combined3, eb_sko)
 
 clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar)
 clinvar_errorbar = left_join(clinvar_variants, combined3)
@@ -2555,7 +2570,7 @@ clinvar_eb_endo_plot = ggplot(data = clinvar_errorbar_endo, aes(x= variant, y= l
   geom_hline(yintercept = syn_endo_range[1], linetype = "dotted")+
   geom_hline(yintercept = syn_endo_range[2], linetype = "dotted")+
   geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= "Variant", y= "Standard Score", color = "Replicate")+NULL; clinvar_eb_endo_plot
 
 ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_endo_plot.png", clinvar_eb_endo_plot ,height = 3, width = 3)
@@ -2565,7 +2580,7 @@ clinvar_eb_sko_plot = ggplot(data = clinvar_errorbar_sko, aes(x= variant, y= log
   geom_hline(yintercept = syn_sko_range[1], linetype = "dotted")+
   geom_hline(yintercept = syn_sko_range[2], linetype = "dotted")+
   geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(sko_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= "Variant", y= "Knockout Score", color = "Replicate")+NULL; clinvar_eb_sko_plot
 
 ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_sko_plot.png", clinvar_eb_sko_plot ,height = 3, width = 3)
