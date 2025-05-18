@@ -2537,6 +2537,24 @@ for(x in 1:nrow(eb_endo)){
 }
 clinvar_errorbar_endo = eb_endo %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = 'variant')
 vus_errorbar_endo = eb_endo %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = "variant")
+evus_syn = eb_endo %>% mutate(start = substr(variant, 1,1),
+                             end = substr(variant, 4,4),
+                             position = substr(variant, 2,3))
+evus_syn = evus_syn %>% mutate(type = case_when(start == end ~ "syn",
+                                              end == "_" ~ "non",
+                                              start != end & end != "_" ~ "mis"))
+colnames(evus_syn)[1] = "mut"
+evus_syn = evus_syn %>% filter(type == "syn") %>% mutate(variant = "syn")
+evus_syn = evus_syn %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = 'variant')
+# evus_syn_all = syn_scores %>% select(variant, endo_ratio)
+# evus_syn_all = data.frame(evus_syn_all)
+# evus_syn_all = evus_syn_all %>% select(variant, endo_ratio)
+# colnames(evus_syn_all)[2] = "value"
+# clinvar_errorbar_endo1 = bind_rows(clinvar_errorbar_endo, evus_syn_all)
+clinvar_errorbar_endo = bind_rows(clinvar_errorbar_endo, evus_syn)
+vus_errorbar_endo = bind_rows(vus_errorbar_endo, evus_syn)
+
+
 
 eb_sko = sko_freq %>% select(variant, r1_ratio, r2_ratio, r3_ratio, r4_ratio, r5_ratio, r6_ratio)
 colnames(eb_sko) = c("variant", "sr1", "sr2", "sr3", "sr4", "sr5", "sr6")
@@ -2547,6 +2565,22 @@ for(x in 1:nrow(eb_sko)){
 }
 clinvar_errorbar_sko = eb_sko %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = 'variant')
 vus_errorbar_sko = eb_sko %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = "variant")
+svus_syn = eb_sko %>% mutate(start = substr(variant, 1,1),
+                             end = substr(variant, 4,4),
+                             position = substr(variant, 2,3))
+svus_syn = svus_syn %>% mutate(type = case_when(start == end ~ "syn",
+                                              end == "_" ~ "non",
+                                              start != end & end != "_" ~ "mis"))
+colnames(svus_syn)[1] = "mut"
+svus_syn = svus_syn %>% filter(type == "syn") %>% mutate(variant = "syn")
+svus_syn = svus_syn %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = 'variant')
+# svus_syn_all = syn_scores %>% select(variant, sko_ratio)
+# svus_syn_all = data.frame(svus_syn_all)
+# svus_syn_all = svus_syn_all %>% select(variant, sko_ratio)
+# colnames(svus_syn_all)[2] = "value"
+# clinvar_errorbar_sko1 = bind_rows(clinvar_errorbar_sko, svus_syn_all)
+clinvar_errorbar_sko = bind_rows(clinvar_errorbar_sko, svus_syn)
+vus_errorbar_sko = bind_rows(vus_errorbar_sko, svus_syn)
 
 combined3 = combined2 %>% select(variant, endo_ratio, sko_ratio)
 combined3 = left_join(combined3, eb_endo)
@@ -2555,59 +2589,52 @@ combined3 = left_join(combined3, eb_sko)
 clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar)
 clinvar_errorbar = left_join(clinvar_variants, combined3)
 
-clinvar_errorbar_plot = ggplot(data = clinvar_errorbar, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
-  geom_point(alpha = 0.5)+
-  scale_y_continuous(limits = c(-0.5, 0.5)) + scale_x_continuous(limits = c(-1.5, 1))+
-  labs(x= "Standard LP score", y= "Knockout LP score")+
-  geom_errorbarh(aes(xmin = log10(endo_ratio)-endo_se, xmax = log10(endo_ratio)+endo_se), alpha = 0.15) +
-  geom_errorbar(aes(ymin = log10(sko_ratio)-sko_se, ymax = log10(sko_ratio)+sko_se), alpha = 0.15) +
-  geom_text_repel(data = clinvar_errorbar %>% filter(Disease1 == "Myopathy"), aes(label = variant), color = "purple", size = 2) +
-  geom_text_repel(data = clinvar_errorbar %>% filter(is.na(Disease1)), aes(label = variant), color = "orange", size = 2)+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), fill = "pink", alpha = 0.01)+NULL; clinvar_errorbar_plot
-
-ggsave("Revision_1/plots_r1/supplement_r1/clinvar_errorbar_plot.pdf",clinvar_errorbar_plot, height = 3, width = 3.5)
+clinvar_errorbar_endo$variant = factor(clinvar_errorbar_endo$variant, c("syn","H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
+clinvar_errorbar_sko$variant = factor(clinvar_errorbar_sko$variant, c("syn","H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
 
 clinvar_eb_endo_plot = ggplot(data = clinvar_errorbar_endo, aes(x= variant, y= log10(value), color = variable))+
   geom_quasirandom(alpha = 0.5) + theme_bw()+
   geom_hline(yintercept = syn_endo_range[1], linetype = "dotted")+
   geom_hline(yintercept = syn_endo_range[2], linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
-  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+  theme(panel.grid = element_blank()) +
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= "Variant", y= "Standard Score", color = "Replicate")+NULL; clinvar_eb_endo_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_endo_plot.png", clinvar_eb_endo_plot ,height = 3, width = 3)
+ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_endo_plot.png", clinvar_eb_endo_plot ,height = 2, width = 3.5)
 
 clinvar_eb_sko_plot = ggplot(data = clinvar_errorbar_sko, aes(x= variant, y= log10(value), color = variable))+
-  geom_quasirandom(alpha = 0.5) + theme_bw()+
+  geom_quasirandom(alpha = 0.5) + theme_bw()+theme(panel.grid = element_blank()) +
   geom_hline(yintercept = syn_sko_range[1], linetype = "dotted")+
   geom_hline(yintercept = syn_sko_range[2], linetype = "dotted")+
   geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(sko_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
-  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= "Variant", y= "Knockout Score", color = "Replicate")+NULL; clinvar_eb_sko_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_sko_plot.png", clinvar_eb_sko_plot ,height = 3, width = 3)
+ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_sko_plot.png", clinvar_eb_sko_plot ,height = 2, width = 3.5)
 
+vus_errorbar_endo$variant = factor(vus_errorbar_endo$variant, c("syn", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
+vus_errorbar_sko$variant = factor(vus_errorbar_sko$variant, c("syn", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
 
 vus_eb_endo_plot = ggplot(data = vus_errorbar_endo, aes(x= variant, y= log10(value), color = variable))+
-  geom_quasirandom(alpha = 0.5) + theme_bw()+
+  geom_quasirandom(alpha = 0.5) + theme_bw()+theme(panel.grid = element_blank()) +
   geom_hline(yintercept = syn_endo_range[1], linetype = "dotted")+
   geom_hline(yintercept = syn_endo_range[2], linetype = "dotted")+
   geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
   stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= "Variant", y= "Standard Score", color = "Replicate")+NULL; vus_eb_endo_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_endo_plot.png", vus_eb_endo_plot ,height = 3, width = 3)
+ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_endo_plot.png", vus_eb_endo_plot ,height = 2, width = 3.5)
 
 
 vus_eb_sko_plot = ggplot(data = vus_errorbar_sko, aes(x= variant, y= log10(value), color = variable))+
-  geom_quasirandom(alpha = 0.5) + theme_bw()+
+  geom_quasirandom(alpha = 0.5) + theme_bw()+theme(panel.grid = element_blank()) +
   geom_hline(yintercept = syn_sko_range[1], linetype = "dotted")+
   geom_hline(yintercept = syn_sko_range[2], linetype = "dotted")+
   geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(sko_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
   stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= "Variant", y= "Knockout Score", color = "Replicate")+NULL; vus_eb_sko_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_sko_plot.png", vus_eb_sko_plot ,height = 3, width = 3)
+ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_sko_plot.png", vus_eb_sko_plot ,height = 2, width = 3.5)
 ```
 
 ```{r bacteria growth over time}
