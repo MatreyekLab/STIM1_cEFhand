@@ -2804,6 +2804,68 @@ wb_intensity_plot = ggplot(data = wb_intensity, aes(x= sample, y= norm_int, colo
 ggsave("Revision_1/plots_r1/supplement_r1/wb_intensity_plot.pdf", wb_intensity_plot, height = 2, width = 2.5)
 ```
 
+Cell counts - Revision
+```{r}
+cell_ct_rev = read.csv("Revision_1/data_r1/cell_ct_rev.csv")
+cell_ct_r1 = cell_ct_rev %>% filter(rep == 1) %>% mutate(lag_slp_ct = lag(slp_ct),
+                                                         lag_sko_ct = lag(sko_ct))
+cell_ct_r1 = cell_ct_r1 %>% mutate(Standard = log(slp_ct/lag(slp_ct))/48,
+                                   Knockout = log(sko_ct/lag(sko_ct))/48)
+
+cell_ct_r2 = cell_ct_rev %>% filter(rep == 2) %>% mutate(lag_slp_ct = lag(slp_ct),
+                                                         lag_sko_ct = lag(sko_ct))
+cell_ct_r2 = cell_ct_r2 %>% mutate(Standard = log(slp_ct/lag(slp_ct))/48,
+                                   Knockout = log(sko_ct/lag(sko_ct))/48)
+cell_ct_r3 = cell_ct_rev %>% filter(rep == 3) %>% mutate(lag_slp_ct = lag(slp_ct),
+                                                         lag_sko_ct = lag(sko_ct))
+cell_ct_r3 = cell_ct_r3 %>% mutate(Standard = log(slp_ct/lag(slp_ct))/48,
+                                   Knockout = log(sko_ct/lag(sko_ct))/48)
+
+db_r1 = cell_ct_r1 %>% select(hrs, Standard, Knockout) %>% melt(id = 'hrs')
+db_r2 = cell_ct_r2 %>% select(hrs, Standard, Knockout) %>% melt(id = 'hrs')
+db_r3 = cell_ct_r3 %>% select(hrs, Standard, Knockout) %>% melt(id = 'hrs')
+
+db = bind_rows(db_r1, db_r2, db_r3)
+db = db %>% group_by(hrs, variable) %>% mutate(mean_gr = mean(value))
+
+cell_growth_rate = ggplot(data = db, aes(x= hrs, y= value, color = variable))+ 
+  geom_quasirandom(alpha = 0.5, dodge.width = 25)+ theme(panel.grid = element_blank()) +
+  geom_quasirandom(data = db %>% distinct(hrs, mean_gr, variable), aes(x= hrs, y= mean_gr, color = variable), shape = 45, size = 5, dodge.width = 25) + theme(legend.position = "bottom")+
+  scale_x_continuous(breaks = c(48, 96, 144))+
+  labs(x= "Hours", y = "Growth Rate", color = "Cell Type")+NULL; cell_growth_rate
+ggsave("Revision_1/plots_r1/supplement_r1/cell_growth_rate.pdf", cell_growth_rate, height = 2, width = 4)
+```
+
+```{r bacteria growth over time}
+bac_growth = read.csv("Revision_1/data_r1/rev_bac_growth.csv")
+bac_growth = bac_growth %>% mutate(cell_number = A600*8*10^8)
+bac_growth = bac_growth %>% group_by(strain, plasmid, time_point) %>% mutate(mean = exp(mean(log(cell_number), na.rm = T)))
+
+bac_growth_plot = ggplot(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= A600))+ theme_bw()+
+  geom_quasirandom(alpha = 0.5)+
+  geom_point(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= mean), color = "red") +
+  labs(x= "Strain", y= "OD600")+ scale_y_continuous(limits = c(1, 5))+NULL; bac_growth_mch_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.png", bac_growth_plot, height = 2, width = 2)
+
+bac_growth_none_plot = ggplot(data = bac_growth %>% filter(plasmid == "none"), aes(x= time_point, y= A600, color = strain))+ theme_bw()+
+  geom_quasirandom(alpha = 0.5) +
+  labs(x= "Time point (hours after transformation)", y= "OD600", title = "No plasmid") +
+  theme(legend.position = "none")+NULL; bac_growth_none_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_none_plot.pdf", bac_growth_none_plot, height = 2, width = 2)
+
+bac_growth_mch_plot = ggplot(data = bac_growth %>% filter(plasmid == "mch"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
+  geom_quasirandom(alpha = 0.5) +
+  labs(x= "Time point (hours after transformation)", y= "OD600", title = "attB-mCherry") +
+  theme(legend.position = "none")+NULL; bac_growth_mch_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_mch_plot.pdf", bac_growth_mch_plot, height = 2, width = 2)
+
+bac_growth_stim_plot = ggplot(data = bac_growth %>% filter(plasmid == "stim"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
+  geom_quasirandom(alpha = 0.5) +
+  labs(x= "Time point (hours after transformation)", y= "OD600", title = "STIM1") +
+  theme(legend.position = "none")+NULL; bac_growth_stim_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_stim_plot.pdf", bac_growth_stim_plot, height = 2, width = 2)
+```
+
 ```{r session info}
 sessionInfo()
 ```
