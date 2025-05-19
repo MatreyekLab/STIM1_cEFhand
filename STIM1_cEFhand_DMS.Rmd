@@ -2841,6 +2841,35 @@ bac_growth = read.csv("Revision_1/data_r1/rev_bac_growth.csv")
 bac_growth = bac_growth %>% mutate(cell_number = A600*8*10^8)
 bac_growth = bac_growth %>% group_by(strain, plasmid, time_point) %>% mutate(mean = exp(mean(log(cell_number), na.rm = T)))
 
+bac_growth_10b = bac_growth %>% filter(plasmid == "none" & strain == "10b") 
+bac_growth_10b = data.frame(bac_growth_10b)
+bac_growth_10b = bac_growth_10b %>% select(rep, cell_number, time_point) %>% group_by(rep) %>% mutate(lag_cell_number = lag(cell_number), lag_timept = lag(time_point))
+bac_growth_10b = bac_growth_10b %>% mutate(gr_10b = log(cell_number/lag_cell_number) / (time_point-lag_timept))
+bac_growth_10b1 = bac_growth_10b %>% select(time_point, rep, gr_10b)
+
+bac_growth_5a = bac_growth %>% filter(plasmid == "none" & strain == "5a") 
+bac_growth_5a = data.frame(bac_growth_5a)
+bac_growth_5a = bac_growth_5a %>% select(rep, cell_number, time_point) %>% group_by(rep) %>% mutate(lag_cell_number = lag(cell_number), lag_timept = lag(time_point))
+bac_growth_5a = bac_growth_5a %>% mutate(gr_5a = log(cell_number/lag_cell_number) / (time_point-lag_timept))
+bac_growth_5a1 = bac_growth_5a %>% select(time_point, rep, gr_5a)
+
+bac_growth_BL21 = bac_growth %>% filter(plasmid == "none" & strain == "BL21") 
+bac_growth_BL21 = data.frame(bac_growth_BL21)
+bac_growth_BL21 = bac_growth_BL21 %>% select(rep, cell_number, time_point) %>% group_by(rep) %>% mutate(lag_cell_number = lag(cell_number), lag_timept = lag(time_point))
+bac_growth_BL21 = bac_growth_BL21 %>% mutate(gr_BL21 = log(cell_number/lag_cell_number) / (time_point-lag_timept))
+bac_growth_BL211 = bac_growth_BL21 %>% select(time_point, rep, gr_BL21)
+
+bac_growth_rate = left_join(bac_growth_10b1, bac_growth_5a1)
+bac_growth_rate = left_join(bac_growth_rate, bac_growth_BL211)
+bac_growth_rate = data.frame(bac_growth_rate)
+bac_growth_rate = bac_growth_rate %>% melt(id = c('time_point', 'rep'))
+bac_growth_rate = bac_growth_rate %>% group_by(time_point, variable) %>% mutate(mean_gr = mean(value, na.rm = T)) 
+
+ggplot(data = bac_growth_rate, aes(x= time_point, y= value, color = variable))+
+  geom_quasirandom(alpha = 0.5, dodge.width = 2.5)+
+  geom_quasirandom(data = bac_growth_rate %>% distinct(time_point, mean_gr, variable), aes(x= time_point, y= mean_gr, color = variable), shape = 45, size = 5)+
+  scale_x_continuous(breaks = c(8, 12, 16, 24)) 
+
 bac_growth_plot = ggplot(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= A600))+ theme_bw()+
   geom_quasirandom(alpha = 0.5)+
   geom_point(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= mean), color = "red") +
