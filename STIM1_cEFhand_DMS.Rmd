@@ -1091,6 +1091,8 @@ Bacterial_missense_geomean_nonsense_scatterplot <- ggplot() +
   NULL; Bacterial_missense_geomean_nonsense_scatterplot
 ggsave(file = "Plots/main/fig4c_Bacterial_missense_geomean_nonsense_scatterplot.pdf", Bacterial_missense_geomean_nonsense_scatterplot, height = 1.4, width = 2)
 
+paste("Speamean rho, knockout LP nonsense vs synonymous:",round(cor(bac_positional_ratios3$missense_geomean, bac_positional_ratios3$nonsense, method = "spearman", use = "complete"),2))
+
 ggplot() + scale_x_log10(limits  = c(0.0001,5.1)) + scale_y_log10(limits  = c(0.0001,5.1)) + 
   geom_point(data = bac_positional_ratios3, aes(x = missense_min, y = nonsense)) +
   geom_text_repel(data = bac_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
