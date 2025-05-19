@@ -882,25 +882,41 @@ colnames(endo_positional_ratios3) <- c("position", "missense_geomean","missense_
 
 endo_positional_ratios4 <- merge(endo_positional_ratios3, annots[,c("position","annot")], by = "position")
 
+Missense_nonsense_scatterplot <- ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = endo_positional_ratios4, aes(x = missense_geomean, y = nonsense, color = annot), alpha = 0.75) +
+  geom_text_repel(data = endo_positional_ratios4, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange",
+                  segment.alpha = 0.5) +
+  theme(panel.grid = element_blank()) + 
+  labs(x = "Missense (geomean),\nstandard LP score", y = "Nonsense,\nstandard LP score") +
+  NULL; Missense_nonsense_scatterplot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/Missense_nonsense_scatterplot.pdf", Missense_nonsense_scatterplot, height = 2, width = 3.5)
 
-ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = endo_positional_ratios4, aes(x = missense_geomean, y = nonsense, color = annot)) +
-  geom_text_repel(data = endo_positional_ratios4, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+paste("Speamean rho, standard LP missense vs nonsense:",round(cor(endo_positional_ratios4$missense_geomean, endo_positional_ratios4$nonsense, method = "spearman", use = "complete"),2))
 
+Missense_synonymous_scatterplot <- ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = endo_positional_ratios4, aes(x = missense_geomean, y = synonymous, color = annot), alpha = 0.75) +
+  geom_text_repel(data = endo_positional_ratios4, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange",
+                  segment.alpha = 0.5) +
+  theme(panel.grid = element_blank()) + 
+  labs(x = "Missense (geomean),\nstandard LP score", y = "Synonymous,\nstandard LP score") +
+  NULL; Missense_synonymous_scatterplot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/Missense_synonymous_scatterplot.pdf", Missense_synonymous_scatterplot, height = 2, width = 3.5)
 
+paste("Speamean rho, standard LP missense vs synonymous:",round(cor(endo_positional_ratios4$missense_geomean, endo_positional_ratios4$synonymous, method = "spearman", use = "complete"),2))
 
-#ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-#  geom_point(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense)) +
-#  geom_text_repel(data = endo_positional_ratios3, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+Nonsense_synonymous_scatterplot <- ggplot() + 
+  scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = endo_positional_ratios4, aes(x = nonsense, y = synonymous, color = annot), alpha = 0.75) +
+  geom_text_repel(data = endo_positional_ratios4, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange",
+                  segment.alpha = 0.5) +
+  theme(panel.grid = element_blank()) + 
+  labs(x = "Nonsense,\nstandard LP score", y = "Synonymous,\nstandard LP score") +
+  NULL; Nonsense_synonymous_scatterplot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/Nonsense_synonymous_scatterplot.pdf", Nonsense_synonymous_scatterplot, height = 2, width = 3.5)
 
-ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = endo_positional_ratios4, aes(x = missense_geomean, y = synonymous, color = annot)) +
-  geom_text_repel(data = endo_positional_ratios4, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
-
-ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = endo_positional_ratios4, aes(x = nonsense, y = synonymous, color = annot)) +
-  geom_text_repel(data = endo_positional_ratios4, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+paste("Speamean rho, standard LP nonsense vs synonymous:",round(cor(endo_positional_ratios4$nonsense, endo_positional_ratios4$synonymous, method = "spearman", use = "complete"),2))
 ```
+
 
 ```{r Standard LP heatmap}
 
@@ -952,21 +968,39 @@ colnames(sko_positional_ratios3) <- c("position", "missense_geomean","missense_m
 
 sko_positional_ratios4 <- merge(sko_positional_ratios3, annots[,c("position","annot")], by = "position")
 
-ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = sko_positional_ratios4, aes(x = missense_geomean, y = nonsense, color = annot)) +
-  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+SKO_missense_nonsense_scatterplot <- ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = sko_positional_ratios4, aes(x = missense_geomean, y = nonsense, color = annot), alpha = 0.75) +
+  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_geomean, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange",
+                  segment.alpha = 0.5) +
+  theme(panel.grid = element_blank()) + 
+  labs(x = "Missense (geomean),\nknockout LP score", y = "Nonsense,\nknockout LP score") +
+  NULL; SKO_missense_nonsense_scatterplot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/SKO_missense_nonsense_scatterplot.pdf", SKO_missense_nonsense_scatterplot, height = 2, width = 3.5)
 
-ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = sko_positional_ratios4, aes(x = missense_min, y = nonsense, color = annot)) +
-  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_min, y = nonsense, label = position), color = "red", size = 2, segment.color = "orange")
+paste("Speamean rho, knockout LP missense vs nonsense:",round(cor(sko_positional_ratios4$missense_geomean, sko_positional_ratios4$nonsense, method = "spearman", use = "complete"),2))
 
-ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = sko_positional_ratios4, aes(x = missense_geomean, y = synonymous, color = annot)) +
-  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+SKO_missense_synonymous_scatterplot <- ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = sko_positional_ratios4, aes(x = missense_geomean, y = synonymous, color = annot), alpha = 0.75) +
+  geom_text_repel(data = sko_positional_ratios4, aes(x = missense_geomean, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange",
+                  segment.alpha = 0.5) +
+  theme(panel.grid = element_blank()) + 
+  labs(x = "Missense (geomean),\nknockout LP score", y = "Synonymous,\nknockout LP score") +
+  NULL; SKO_missense_synonymous_scatterplot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/SKO_missense_synonymous_scatterplot.pdf", SKO_missense_synonymous_scatterplot, height = 2, width = 3.5)
 
-ggplot() + scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
-  geom_point(data = sko_positional_ratios4, aes(x = nonsense, y = synonymous, color = annot)) +
-  geom_text_repel(data = sko_positional_ratios4, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange")
+paste("Speamean rho, knockout LP missense vs synonymous:",round(cor(sko_positional_ratios4$missense_geomean, sko_positional_ratios4$synonymous, method = "spearman", use = "complete"),2))
+
+SKO_nonsense_synonymous_scatterplot <- ggplot() + 
+  scale_x_log10(limits  = c(0.001,5.1)) + scale_y_log10(limits  = c(0.001,5.1)) + 
+  geom_point(data = sko_positional_ratios4, aes(x = nonsense, y = synonymous, color = annot), alpha = 0.75) +
+  geom_text_repel(data = sko_positional_ratios4, aes(x = nonsense, y = synonymous, label = position), color = "red", size = 2, segment.color = "orange",
+                  segment.alpha = 0.5) +
+  theme(panel.grid = element_blank()) + 
+  labs(x = "Nonsense,\nknockout LP score", y = "Synonymous,\nknockout LP score") +
+  NULL; SKO_nonsense_synonymous_scatterplot
+ggsave(file = "Revision_1/plots_r1/supplement_r1/SKO_nonsense_synonymous_scatterplot.pdf", SKO_nonsense_synonymous_scatterplot, height = 2, width = 3.5)
+
+paste("Speamean rho, knockout LP nonsense vs synonymous:",round(cor(sko_positional_ratios4$nonsense, sko_positional_ratios4$synonymous, method = "spearman", use = "complete"),2))
 ```
 
 ```{r STIM1 KO heatmap}
