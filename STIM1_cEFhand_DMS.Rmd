@@ -2970,13 +2970,18 @@ ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_stim_plot.pdf", bac_growth_
 ## KAM mods
 
 bac_growth2 <- bac_growth %>% group_by(rep, strain, plasmid, time_point) %>% summarize(cell_number = mean(cell_number))
+bac_growth_geomean <- bac_growth %>% group_by(strain, plasmid, time_point) %>% summarize(cell_number = 10^mean(log10(cell_number), na.rm = T))
 
 bac_growth2$rep <- as.factor(bac_growth2$rep)
 bac_growth2$log2_cells <- log(bac_growth2$cell_number,2)
+bac_growth_geomean$log2_cells <- log(bac_growth_geomean$cell_number,2)
 
 ggplot() + 
+  theme(panel.grid = element_blank()) + 
   #geom_smooth(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid)) +
-  geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid)) +
+  geom_line(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2) +
+  geom_point(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2) +
+  geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid), alpha = 0.4) +
   facet_grid(cols = vars(strain))
 ```
 
