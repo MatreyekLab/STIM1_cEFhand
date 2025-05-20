@@ -2813,13 +2813,14 @@ wb_intensity$rep = as.character(wb_intensity$rep)
 wb_intensity = wb_intensity %>% group_by(sample, band) %>% mutate(mean = exp(mean(log(norm_int), na.rm = T)))
 wb_intensity$sample = factor(wb_intensity$sample, c("Standard", "Knockout"))
 
-wb_intensity_plot = ggplot(data = wb_intensity, aes(x= sample, y= norm_int, color = rep))+ theme_bw()+
+wb_intensity_plot = ggplot(data = wb_intensity, aes(x= sample, y= norm_int, color = rep)) +
   geom_quasirandom(alpha = 0.5, dodge.width = 0.5) + 
-  geom_point(data = wb_intensity, aes(x= sample, y= mean), color = "red")+
-  theme(legend.position = "bottom", axis.title.x=element_blank()) +
-  labs(y= "Band intensity \nnormalized to actin", color = "Replicate")+NULL; wb_intensity_plot
+  geom_point(data = wb_intensity, aes(x= sample, y= mean), color = "black", shape = 45, size = 5)+
+  theme(legend.position = "bottom", axis.title.x=element_blank(), panel.grid = element_blank(), axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0.5)) +
+  labs(y= "Band intensity \nnormalized to actin", color = "Replicate") + 
+  NULL; wb_intensity_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/wb_intensity_plot.pdf", wb_intensity_plot, height = 2, width = 2.5)
+ggsave("Revision_1/plots_r1/supplement_r1/wb_intensity_plot.pdf", wb_intensity_plot, height = 2, width = 1.5)
 ```
 
 Cell counts - Revision
@@ -2914,7 +2915,6 @@ Cell_growth_plot <- ggplot() + scale_y_log10() +
   NULL; Cell_growth_plot
 ggsave(file = "Revision_1/plots_r1/supplement_r1/Cell_growth_plot.pdf", Cell_growth_plot, height = 2, width = 3)
 
-
 ```
 
 ```{r bacteria growth over time}
@@ -2991,50 +2991,6 @@ ggplot() +
   geom_point(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2) +
   geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid), alpha = 0.4) +
   facet_grid(cols = vars(strain))
-```
-
-
-```{r TEMPORARY SCRATCH}
-log2_sko_lm <- lm(cell_ct_rev2$log2_sko_ct ~ cell_ct_rev2$days)
-2^log2_sko_lm$coefficients[1]
-2^log2_sko_lm$coefficients[2]
-
-log2_slp_lm <- lm(cell_ct_rev2$log2_slp_ct ~ cell_ct_rev2$days)
-2^log2_slp_lm$coefficients[1]
-2^log2_slp_lm$coefficients[2]
-
-ggplot() + 
-  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
-  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
-  geom_abline(intercept = log2_sko_lm$coefficients[1], slope = log2_sko_lm$coefficients[2], color = "blue", size = 3, alpha = 0.3) +
-  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), linetype = 2) +
-  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), shape = 3) +
-  geom_abline(intercept = log2_slp_lm$coefficients[1], slope = log2_slp_lm$coefficients[2], size =3, alpha =0.3)
-
-model_frame <- data.frame("days" = seq(0,6, 1), "sko_fit" = NA, "slp_fit" = NA)
-model_frame$sko_fit[1] <- 5e5 #2^log2_sko_lm$coefficients[1]
-model_frame$slp_fit[1] <- 5e5 #2^log2_slp_lm$coefficients[1]
-for(x in 2:nrow(model_frame)){
-  model_frame$sko_fit[x] <- model_frame$sko_fit[x-1] * 2^log2_sko_lm$coefficients[2]
-  model_frame$slp_fit[x] <- model_frame$slp_fit[x-1] * 2^log2_slp_lm$coefficients[2]
-}
-
-ggplot() + scale_y_log10() +
-  geom_line(data = cell_ct_rev2, aes(x = days, y = sko_ct, color = rep)) +
-  geom_point(data = cell_ct_rev2, aes(x = days, y = sko_ct, color = rep)) +
-  geom_line(data = model_frame, aes(x = days, y = sko_fit), color = "blue") +
-  geom_line(data = cell_ct_rev2, aes(x = days, y = slp_ct, color = rep), linetype = 2) +
-  geom_point(data = cell_ct_rev2, aes(x = days, y = slp_ct, color = rep), shape = 2) +
-  geom_line(data = model_frame, aes(x = days, y = slp_fit), color = "black")
-
-## Try flipping the equation around
-log2_sko_lm2 <- lm(cell_ct_rev2$days ~ cell_ct_rev2$log2_sko_ct)
-paste("The knockout cells seem to double every ~", round(log2_sko_lm2$coefficients[2],1),"days")
-
-log2_slp_lm2 <- lm(cell_ct_rev2$days ~ cell_ct_rev2$log2_slp_ct)
-paste("The knockout cells seem to double every ~", round(log2_slp_lm2$coefficients[2],1),"days")
-
-
 ```
 
 ```{r session info}
