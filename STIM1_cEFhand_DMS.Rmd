@@ -1362,17 +1362,19 @@ bac_cor_ns_plot = bac_cor_ns %>% ggpairs(aes(alpha = 0.15))
 bac_cor_ns_plot
 
 #correlation plots for bacteria strain + media
-cor_10b_lb = bac_freq %>% mutate(R1 = log10(f_r1_10b_lb), R2 = log10(f_r2_10b_lb), R3 = log10(f_r3_10b_lb)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
-cor_10b_mm = bac_freq %>% mutate(R1 = log10(f_r1_10b_mm), R2 = log10(f_r2_10b_mm), R3 = log10(f_r3_10b_mm)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
-cor_10b_ca = bac_freq %>% mutate(R1 = log10(f_r1_10b_ca), R2 = log10(f_r2_10b_ca), R3 = log10(f_r3_10b_ca)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
+cor_10b_lb = bac_freq %>% mutate(R1 = log10(f_r1_10b_lb), R2 = log10(f_r2_10b_lb), R3 = log10(f_r3_10b_lb)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
+cor_10b_mm = bac_freq %>% mutate(R1 = log10(f_r1_10b_mm), R2 = log10(f_r2_10b_mm), R3 = log10(f_r3_10b_mm)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
+cor_10b_ca = bac_freq %>% mutate(R1 = log10(f_r1_10b_ca), R2 = log10(f_r2_10b_ca), R3 = log10(f_r3_10b_ca)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
 
-cor_dh5a_lb = bac_freq %>% mutate(R1 = log10(f_r1_dh5a_lb), R2 = log10(f_r2_dh5a_lb), R3 = log10(f_r3_dh5a_lb)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
-cor_dh5a_mm = bac_freq %>% mutate(R1 = log10(f_r1_dh5a_mm), R2 = log10(f_r2_dh5a_mm), R3 = log10(f_r3_dh5a_mm)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
-cor_dh5a_ca = bac_freq %>% mutate(R1 = log10(f_r1_dh5a_ca), R2 = log10(f_r2_dh5a_ca), R3 = log10(f_r3_dh5a_ca)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
+cor_dh5a_lb = bac_freq %>% mutate(R1 = log10(f_r1_dh5a_lb), R2 = log10(f_r2_dh5a_lb), R3 = log10(f_r3_dh5a_lb)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
+cor_dh5a_mm = bac_freq %>% mutate(R1 = log10(f_r1_dh5a_mm), R2 = log10(f_r2_dh5a_mm), R3 = log10(f_r3_dh5a_mm)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
+cor_dh5a_ca = bac_freq %>% mutate(R1 = log10(f_r1_dh5a_ca), R2 = log10(f_r2_dh5a_ca), R3 = log10(f_r3_dh5a_ca)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
 
-cor_bl21_lb = bac_freq %>% mutate(R1 = log10(f_r1_bl21_lb), R2 = log10(f_r2_bl21_lb), R3 = log10(f_r3_bl21_lb)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
-cor_bl21_mm = bac_freq %>% mutate(R1 = log10(f_r1_bl21_mm), R2 = log10(f_r2_bl21_mm), R3 = log10(f_r3_bl21_mm)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
-cor_bl21_ca = bac_freq %>% mutate(R1 = log10(f_r1_bl21_ca), R2 = log10(f_r2_bl21_ca), R3 = log10(f_r3_bl21_ca)) %>% select(R1, R2, R3) %>% ggpairs(aes(alpha = 0.15))
+cor_bl21_lb = bac_freq %>% mutate(R1 = log10(f_r1_bl21_lb), R2 = log10(f_r2_bl21_lb), R3 = log10(f_r3_bl21_lb)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
+cor_bl21_mm = bac_freq %>% mutate(R1 = log10(f_r1_bl21_mm), R2 = log10(f_r2_bl21_mm), R3 = log10(f_r3_bl21_mm)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
+cor_bl21_ca = bac_freq %>% mutate(R1 = log10(f_r1_bl21_ca), R2 = log10(f_r2_bl21_ca), R3 = log10(f_r3_bl21_ca)) %>% select(R1, R2, R3) %>% ggpairs(lower = list(continuous = wrap("points", alpha = 0.15, size = 1)))
+
+
 
 #revision1 - exporting correlation plot for bacteria scores as supplement
 ggsave("Revision_1/plots_r1/supplement_r1/supp4d_cor_10b_lb.pdf", cor_10b_lb, height = 2.5, width = 2.5)
