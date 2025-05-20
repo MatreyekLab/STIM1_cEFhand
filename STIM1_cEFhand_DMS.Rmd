@@ -2590,8 +2590,6 @@ evus_syn = evus_syn %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = '
 clinvar_errorbar_endo = bind_rows(clinvar_errorbar_endo, evus_syn)
 vus_errorbar_endo = bind_rows(vus_errorbar_endo, evus_syn)
 
-
-
 eb_sko = sko_freq %>% select(variant, r1_ratio, r2_ratio, r3_ratio, r4_ratio, r5_ratio, r6_ratio)
 colnames(eb_sko) = c("variant", "sr1", "sr2", "sr3", "sr4", "sr5", "sr6")
 for(x in 1:nrow(eb_sko)){
@@ -2625,52 +2623,72 @@ combined3 = left_join(combined3, eb_sko)
 clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar)
 clinvar_errorbar = left_join(clinvar_variants, combined3)
 
-clinvar_errorbar_endo$variant = factor(clinvar_errorbar_endo$variant, c("syn","H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
-clinvar_errorbar_sko$variant = factor(clinvar_errorbar_sko$variant, c("syn","H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
+clinvar_errorbar_endo$log10_value <- log10(clinvar_errorbar_endo$value)
+clinvar_errorbar_endo <- rbind(clinvar_errorbar_endo, c("",NA, NA, NA))
+clinvar_errorbar_endo$variant = factor(clinvar_errorbar_endo$variant, c("syn", "", "H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
+clinvar_errorbar_sko$log10_value <- log10(clinvar_errorbar_sko$value)
+clinvar_errorbar_sko <- rbind(clinvar_errorbar_sko, c("",NA, NA, NA))
+clinvar_errorbar_sko$variant = factor(clinvar_errorbar_sko$variant, c("syn", "", "H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
 
-clinvar_eb_endo_plot = ggplot(data = clinvar_errorbar_endo, aes(x= variant, y= log10(value), color = variable))+
-  geom_quasirandom(alpha = 0.5) + theme_bw()+
-  geom_hline(yintercept = syn_endo_range[1], linetype = "dotted")+
-  geom_hline(yintercept = syn_endo_range[2], linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+  theme(panel.grid = element_blank()) +
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
-  labs(x= "Variant", y= "Standard Score", color = "Replicate")+NULL; clinvar_eb_endo_plot
+clinvar_eb_endo_plot <- ggplot()+ 
+  geom_quasirandom(data = clinvar_errorbar_endo %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
+  geom_quasirandom(data = clinvar_errorbar_endo %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) + 
+  geom_hline(yintercept = c(syn_endo_range[1],syn_endo_range[2]), linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")),
+             aes(x= variant, y= log10(endo_ratio)), color = "black", shape = 45, size = 6)+
+  theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
+  scale_y_continuous(limits = c(-2.2,1.1)) +
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= NULL, y= "Standard Score", color = "Replicate")+
+  NULL; clinvar_eb_endo_plot
+ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_endo_plot.pdf", clinvar_eb_endo_plot ,height = 1.5, width = 3.3)
 
-ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_endo_plot.png", clinvar_eb_endo_plot ,height = 2, width = 3.5)
-
-clinvar_eb_sko_plot = ggplot(data = clinvar_errorbar_sko, aes(x= variant, y= log10(value), color = variable))+
-  geom_quasirandom(alpha = 0.5) + theme_bw()+theme(panel.grid = element_blank()) +
-  geom_hline(yintercept = syn_sko_range[1], linetype = "dotted")+
-  geom_hline(yintercept = syn_sko_range[2], linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")), aes(x= variant, y= log10(sko_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
-  labs(x= "Variant", y= "Knockout Score", color = "Replicate")+NULL; clinvar_eb_sko_plot
-
-ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_sko_plot.png", clinvar_eb_sko_plot ,height = 2, width = 3.5)
-
-vus_errorbar_endo$variant = factor(vus_errorbar_endo$variant, c("syn", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
-vus_errorbar_sko$variant = factor(vus_errorbar_sko$variant, c("syn", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
-
-vus_eb_endo_plot = ggplot(data = vus_errorbar_endo, aes(x= variant, y= log10(value), color = variable))+
-  geom_quasirandom(alpha = 0.5) + theme_bw()+theme(panel.grid = element_blank()) +
-  geom_hline(yintercept = syn_endo_range[1], linetype = "dotted")+
-  geom_hline(yintercept = syn_endo_range[2], linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(endo_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
-  labs(x= "Variant", y= "Standard Score", color = "Replicate")+NULL; vus_eb_endo_plot
-
-ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_endo_plot.png", vus_eb_endo_plot ,height = 2, width = 3.5)
+clinvar_eb_sko_plot <- ggplot()+ 
+  geom_quasirandom(data = clinvar_errorbar_sko %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
+  geom_quasirandom(data = clinvar_errorbar_sko %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) + 
+  geom_hline(yintercept = c(syn_sko_range[1],syn_sko_range[2]), linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")),
+             aes(x= variant, y= log10(sko_ratio)), color = "black", shape = 45, size = 6)+
+  theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= NULL, y= "Knockout Score", color = "Replicate")+
+  scale_y_continuous(limits = c(-1,0.6)) +
+  NULL; clinvar_eb_sko_plot
+ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_sko_plot.pdf", clinvar_eb_sko_plot ,height = 1.5, width = 3.3)
 
 
-vus_eb_sko_plot = ggplot(data = vus_errorbar_sko, aes(x= variant, y= log10(value), color = variable))+
-  geom_quasirandom(alpha = 0.5) + theme_bw()+theme(panel.grid = element_blank()) +
-  geom_hline(yintercept = syn_sko_range[1], linetype = "dotted")+
-  geom_hline(yintercept = syn_sko_range[2], linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(sko_ratio)), color = "red")+ theme(legend.position = "none")+theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
-  labs(x= "Variant", y= "Knockout Score", color = "Replicate")+NULL; vus_eb_sko_plot
+vus_errorbar_endo$log10_value <- log10(vus_errorbar_endo$value)
+vus_errorbar_endo <- rbind(vus_errorbar_endo, c("",NA, NA, NA))
+vus_errorbar_endo$variant = factor(vus_errorbar_endo$variant, c("syn", "","E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
+vus_errorbar_sko$log10_value <- log10(vus_errorbar_sko$value)
+vus_errorbar_sko <- rbind(vus_errorbar_sko, c("",NA, NA, NA))
+vus_errorbar_sko$variant = factor(vus_errorbar_sko$variant, c("syn", "", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
 
-ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_sko_plot.png", vus_eb_sko_plot ,height = 2, width = 3.5)
+vus_eb_endo_plot <- ggplot()+ 
+  geom_quasirandom(data = vus_errorbar_endo %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
+  geom_quasirandom(data = vus_errorbar_endo %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) +
+  geom_hline(yintercept = c(syn_endo_range[1],syn_endo_range[2]), linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(endo_ratio)), color = "black", shape = 45, size = 6)+
+  theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
+  scale_y_continuous(limits = c(-2.2,1.1)) +
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= NULL, y= "Standard Score", color = "Replicate")+
+  NULL; vus_eb_endo_plot
+ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_endo_plot.pdf", vus_eb_endo_plot ,height = 1.5, width = 3.3)
+
+vus_eb_sko_plot = ggplot() +
+  geom_quasirandom(data = vus_errorbar_sko %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
+  geom_quasirandom(data = vus_errorbar_sko %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) +
+  geom_hline(yintercept = c(syn_sko_range[1], syn_sko_range[2]), linetype = "dotted")+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")),
+             aes(x= variant, y= log10(sko_ratio)), color = "black", shape = 45, size = 6)+ 
+  theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
+  #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
+  labs(x= NULL, y= "Knockout Score", color = "Replicate")+
+  scale_y_continuous(limits = c(-1,0.6)) +
+  NULL; vus_eb_sko_plot
+ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_sko_plot.pdf", vus_eb_sko_plot ,height = 1.5, width = 3.3)
+
 ```
 
 ```{r bacteria growth over time}
@@ -2834,6 +2852,61 @@ cell_growth_rate = ggplot(data = db, aes(x= hrs, y= value, color = variable))+
   scale_x_continuous(breaks = c(48, 96, 144))+
   labs(x= "Hours", y = "Growth Rate", color = "Cell Type")+NULL; cell_growth_rate
 ggsave("Revision_1/plots_r1/supplement_r1/cell_growth_rate.pdf", cell_growth_rate, height = 2, width = 4)
+
+## KAM try this analysis too
+
+cell_ct_rev2 <- cell_ct_rev %>% filter(rep != 1) %>% mutate(days = hrs / 24)
+cell_ct_rev2$rep <- as.factor(cell_ct_rev2$rep)
+cell_ct_rev2$log2_slp_ct <- log(cell_ct_rev2$slp_ct,2)
+cell_ct_rev2$log2_sko_ct <- log(cell_ct_rev2$sko_ct,2)
+
+ggplot() + 
+  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
+  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), linetype = 2) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), shape = 3)
+
+# https://stackoverflow.com/questions/31851936/exponential-curve-fitting-in-r
+
+log2_sko_lm <- lm(cell_ct_rev2$log2_sko_ct ~ cell_ct_rev2$days)
+2^log2_sko_lm$coefficients[1]
+2^log2_sko_lm$coefficients[2]
+
+log2_slp_lm <- lm(cell_ct_rev2$log2_slp_ct ~ cell_ct_rev2$days)
+2^log2_slp_lm$coefficients[1]
+2^log2_slp_lm$coefficients[2]
+
+ggplot() + 
+  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
+  geom_abline(intercept = log2_sko_lm$coefficients[1], slope = log2_sko_lm$coefficients[2], color = "blue", size = 3, alpha = 0.3) +
+  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), linetype = 2) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), shape = 3) +
+  geom_abline(intercept = log2_slp_lm$coefficients[1], slope = log2_slp_lm$coefficients[2], size =3, alpha =0.3)
+
+model_frame <- data.frame("days" = seq(0,6, 1), "sko_fit" = NA, "slp_fit" = NA)
+model_frame$sko_fit[1] <- 5e5 #2^log2_sko_lm$coefficients[1]
+model_frame$slp_fit[1] <- 5e5 #2^log2_slp_lm$coefficients[1]
+for(x in 2:nrow(model_frame)){
+  model_frame$sko_fit[x] <- model_frame$sko_fit[x-1] * 2^log2_sko_lm$coefficients[2]
+  model_frame$slp_fit[x] <- model_frame$slp_fit[x-1] * 2^log2_slp_lm$coefficients[2]
+}
+
+ggplot() + scale_y_log10() +
+  geom_line(data = cell_ct_rev2, aes(x = days, y = sko_ct, color = rep)) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = sko_ct, color = rep)) +
+  geom_line(data = model_frame, aes(x = days, y = sko_fit), color = "blue") +
+  geom_line(data = cell_ct_rev2, aes(x = days, y = slp_ct, color = rep), linetype = 2) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = slp_ct, color = rep), shape = 2) +
+  geom_line(data = model_frame, aes(x = days, y = slp_fit), color = "black")
+
+## Try flipping the equation around
+log2_sko_lm2 <- lm(cell_ct_rev2$days ~ cell_ct_rev2$log2_sko_ct)
+paste("The knockout cells seem to double every ~", round(log2_sko_lm2$coefficients[2],1),"days")
+
+log2_slp_lm2 <- lm(cell_ct_rev2$days ~ cell_ct_rev2$log2_slp_ct)
+paste("The knockout cells seem to double every ~", round(log2_slp_lm2$coefficients[2],1),"days")
+
 ```
 
 ```{r bacteria growth over time}
@@ -2893,6 +2966,62 @@ bac_growth_stim_plot = ggplot(data = bac_growth %>% filter(plasmid == "stim"), a
   labs(x= "Time point (hours after transformation)", y= "OD600", title = "STIM1") +
   theme(legend.position = "none")+NULL; bac_growth_stim_plot
 ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_stim_plot.pdf", bac_growth_stim_plot, height = 2, width = 2)
+
+## KAM mods
+
+bac_growth2 <- bac_growth %>% group_by(rep, strain, plasmid, time_point) %>% summarize(cell_number = mean(cell_number))
+
+bac_growth2$rep <- as.factor(bac_growth2$rep)
+bac_growth2$log2_cells <- log(bac_growth2$cell_number,2)
+
+ggplot() + 
+  #geom_smooth(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid)) +
+  geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid)) +
+  facet_grid(cols = vars(strain))
+```
+
+
+```{r TEMPORARY SCRATCH}
+log2_sko_lm <- lm(cell_ct_rev2$log2_sko_ct ~ cell_ct_rev2$days)
+2^log2_sko_lm$coefficients[1]
+2^log2_sko_lm$coefficients[2]
+
+log2_slp_lm <- lm(cell_ct_rev2$log2_slp_ct ~ cell_ct_rev2$days)
+2^log2_slp_lm$coefficients[1]
+2^log2_slp_lm$coefficients[2]
+
+ggplot() + 
+  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_sko_ct, color = rep)) +
+  geom_abline(intercept = log2_sko_lm$coefficients[1], slope = log2_sko_lm$coefficients[2], color = "blue", size = 3, alpha = 0.3) +
+  geom_line(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), linetype = 2) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = log2_slp_ct, color = rep), shape = 3) +
+  geom_abline(intercept = log2_slp_lm$coefficients[1], slope = log2_slp_lm$coefficients[2], size =3, alpha =0.3)
+
+model_frame <- data.frame("days" = seq(0,6, 1), "sko_fit" = NA, "slp_fit" = NA)
+model_frame$sko_fit[1] <- 5e5 #2^log2_sko_lm$coefficients[1]
+model_frame$slp_fit[1] <- 5e5 #2^log2_slp_lm$coefficients[1]
+for(x in 2:nrow(model_frame)){
+  model_frame$sko_fit[x] <- model_frame$sko_fit[x-1] * 2^log2_sko_lm$coefficients[2]
+  model_frame$slp_fit[x] <- model_frame$slp_fit[x-1] * 2^log2_slp_lm$coefficients[2]
+}
+
+ggplot() + scale_y_log10() +
+  geom_line(data = cell_ct_rev2, aes(x = days, y = sko_ct, color = rep)) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = sko_ct, color = rep)) +
+  geom_line(data = model_frame, aes(x = days, y = sko_fit), color = "blue") +
+  geom_line(data = cell_ct_rev2, aes(x = days, y = slp_ct, color = rep), linetype = 2) +
+  geom_point(data = cell_ct_rev2, aes(x = days, y = slp_ct, color = rep), shape = 2) +
+  geom_line(data = model_frame, aes(x = days, y = slp_fit), color = "black")
+
+## Try flipping the equation around
+log2_sko_lm2 <- lm(cell_ct_rev2$days ~ cell_ct_rev2$log2_sko_ct)
+paste("The knockout cells seem to double every ~", round(log2_sko_lm2$coefficients[2],1),"days")
+
+log2_slp_lm2 <- lm(cell_ct_rev2$days ~ cell_ct_rev2$log2_slp_ct)
+paste("The knockout cells seem to double every ~", round(log2_slp_lm2$coefficients[2],1),"days")
+
+
 ```
 
 ```{r session info}
