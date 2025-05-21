@@ -2993,6 +2993,165 @@ ggplot() +
   geom_point(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2) +
   geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid), alpha = 0.4) +
   facet_grid(cols = vars(strain))
+
+bac_10b_none = bac_growth2 %>% filter(strain == "10b" & plasmid == "none")
+bac_10b_none = data.frame(bac_10b_none)
+bac_10b_none = bac_10b_none %>% select(rep, time_point, log2_cells)
+colnames(bac_10b_none)[3] = "10b_none"
+
+bac_10b_mch = bac_growth2 %>% filter(strain == "10b" & plasmid == "mch")
+bac_10b_mch = data.frame(bac_10b_mch)
+bac_10b_mch = bac_10b_mch %>% select(rep, time_point, log2_cells)
+colnames(bac_10b_mch)[3] = "10b_mch"
+
+bac_10b_stim = bac_growth2 %>% filter(strain == "10b" & plasmid == "stim")
+bac_10b_stim = data.frame(bac_10b_stim)
+bac_10b_stim = bac_10b_stim %>% select(rep, time_point, log2_cells)
+colnames(bac_10b_stim)[3] = "10b_stim"
+
+bac_5a_none = bac_growth2 %>% filter(strain == "5a" & plasmid == "none")
+bac_5a_none = data.frame(bac_5a_none)
+bac_5a_none = bac_5a_none %>% select(rep, time_point, log2_cells)
+colnames(bac_5a_none)[3] = "5a_none"
+
+bac_5a_mch = bac_growth2 %>% filter(strain == "5a" & plasmid == "mch")
+bac_5a_mch = data.frame(bac_5a_mch)
+bac_5a_mch = bac_5a_mch %>% select(rep, time_point, log2_cells)
+colnames(bac_5a_mch)[3] = "5a_mch"
+
+bac_5a_stim = bac_growth2 %>% filter(strain == "5a" & plasmid == "stim")
+bac_5a_stim = data.frame(bac_5a_stim)
+bac_5a_stim = bac_5a_stim %>% select(rep, time_point, log2_cells)
+colnames(bac_5a_stim)[3] = "5a_stim"
+
+bac_bl21_none = bac_growth2 %>% filter(strain == "BL21" & plasmid == "none")
+bac_bl21_none = data.frame(bac_bl21_none)
+bac_bl21_none = bac_bl21_none %>% select(rep, time_point, log2_cells)
+colnames(bac_bl21_none)[3] = "bl21_none"
+
+bac_bl21_mch = bac_growth2 %>% filter(strain == "BL21" & plasmid == "mch")
+bac_bl21_mch = data.frame(bac_bl21_mch)
+bac_bl21_mch = bac_bl21_mch %>% select(rep, time_point, log2_cells)
+colnames(bac_bl21_mch)[3] = "bl21_mch"
+
+bac_bl21_stim = bac_growth2 %>% filter(strain == "BL21" & plasmid == "stim")
+bac_bl21_stim = data.frame(bac_bl21_stim)
+bac_bl21_stim = bac_bl21_stim %>% select(rep, time_point, log2_cells)
+colnames(bac_bl21_stim)[3] = "bl21_stim"
+
+bac_growth3 = left_join(bac_10b_none, bac_10b_mch)
+bac_growth3 = left_join(bac_growth3, bac_10b_stim)
+bac_growth3 = left_join(bac_growth3, bac_5a_none)
+bac_growth3 = left_join(bac_growth3, bac_5a_mch)
+bac_growth3 = left_join(bac_growth3, bac_5a_stim)
+bac_growth3 = left_join(bac_growth3, bac_bl21_none)
+bac_growth3 = left_join(bac_growth3, bac_bl21_mch)
+bac_growth3 = left_join(bac_growth3, bac_bl21_stim)
+
+log2_10b_none_lm <- lm(bac_growth3$'10b_none' ~ bac_growth3$time_point)
+2^log2_10b_none_lm$coefficients[1]
+2^log2_10b_none_lm$coefficients[2]
+
+log2_10b_mch_lm <- lm(bac_growth3$'10b_mch' ~ bac_growth3$time_point)
+2^log2_10b_mch_lm$coefficients[1]
+2^log2_10b_mch_lm$coefficients[2]
+
+log2_10b_stim_lm <- lm(bac_growth3$'10b_stim' ~ bac_growth3$time_point)
+2^log2_10b_stim_lm$coefficients[1]
+2^log2_10b_stim_lm$coefficients[2]
+
+log2_5a_none_lm <- lm(bac_growth3$'5a_none' ~ bac_growth3$time_point)
+2^log2_5a_none_lm$coefficients[1]
+2^log2_5a_none_lm$coefficients[2]
+
+log2_5a_mch_lm <- lm(bac_growth3$'5a_mch' ~ bac_growth3$time_point)
+2^log2_5a_mch_lm$coefficients[1]
+2^log2_5a_mch_lm$coefficients[2]
+
+log2_5a_stim_lm <- lm(bac_growth3$'5a_stim' ~ bac_growth3$time_point)
+2^log2_5a_stim_lm$coefficients[1]
+2^log2_5a_stim_lm$coefficients[2]
+
+log2_bl21_none_lm <- lm(bac_growth3$'bl21_none' ~ bac_growth3$time_point)
+2^log2_bl21_none_lm$coefficients[1]
+2^log2_bl21_none_lm$coefficients[2]
+
+log2_bl21_mch_lm <- lm(bac_growth3$'bl21_mch' ~ bac_growth3$time_point)
+2^log2_bl21_mch_lm$coefficients[1]
+2^log2_bl21_mch_lm$coefficients[2]
+
+log2_bl21_stim_lm <- lm(bac_growth3$'bl21_stim' ~ bac_growth3$time_point)
+2^log2_bl21_stim_lm$coefficients[1]
+2^log2_bl21_stim_lm$coefficients[2]
+
+model_frame1 <- data.frame("hours" = c(0,4,8,12,24), "10b_none" = NA, "10b_mch" = NA, "10b_stim" = NA,
+                           "5a_none" = NA, "5a_mch" = NA, "5a_stim" = NA,
+                           "bl21_none" = NA, "bl21_mch" = NA, "bl21_stim" = NA)
+model_frame1$X10b_none[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
+model_frame1$X10b_mch[1] <- 1e8 #2^log2_slp_lm$coefficients[1]
+model_frame1$X10b_stim[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
+model_frame1$X5a_none[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
+model_frame1$X5a_mch[1] <- 1e8 #2^log2_slp_lm$coefficients[1]
+model_frame1$X5a_stim[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
+model_frame1$bl21_none[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
+model_frame1$bl21_mch[1] <- 1e8 #2^log2_slp_lm$coefficients[1]
+model_frame1$bl21_stim[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
+for(x in 2:nrow(model_frame1)){
+  model_frame1$X10b_none[x] <- model_frame1$X10b_none[x-1] * 2^log2_10b_none_lm$coefficients[2]
+  model_frame1$X10b_mch[x] <- model_frame1$X10b_mch[x-1] * 2^log2_10b_mch_lm$coefficients[2]
+  model_frame1$X10b_stim[x] <- model_frame1$X10b_stim[x-1] * 2^log2_10b_stim_lm$coefficients[2]
+  model_frame1$X5a_none[x] <- model_frame1$X5a_none[x-1] * 2^log2_5a_none_lm$coefficients[2]
+  model_frame1$X5a_mch[x] <- model_frame1$X5a_mch[x-1] * 2^log2_5a_mch_lm$coefficients[2]
+  model_frame1$X5a_stim[x] <- model_frame1$X5a_stim[x-1] * 2^log2_5a_stim_lm$coefficients[2]
+  model_frame1$bl21_none[x] <- model_frame1$bl21_none[x-1] * 2^log2_bl21_none_lm$coefficients[2]
+  model_frame1$bl21_mch[x] <- model_frame1$bl21_mch[x-1] * 2^log2_bl21_mch_lm$coefficients[2]
+  model_frame1$bl21_stim[x] <- model_frame1$bl21_stim[x-1] * 2^log2_bl21_stim_lm$coefficients[2]
+}
+
+## Try flipping the equation around
+log2_10b_none_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'10b_none')
+paste("The 10b cells seem to double every ~", round(log2_10b_none_lm2$coefficients[2],1),"hours")
+
+log2_10b_mch_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'10b_mch')
+paste("The 10b cells transformed with attB-mCherry seem to double every ~", round(log2_10b_mch_lm2$coefficients[2],1),"hours")
+
+log2_10b_stim_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'10b_stim')
+paste("The 10b cells transformed with WT STIM1 seem to double every ~", round(log2_10b_stim_lm2$coefficients[2],1),"hours")
+
+log2_5a_none_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'5a_none')
+paste("The 5a cells seem to double every ~", round(log2_5a_none_lm2$coefficients[2],1),"hours")
+
+log2_5a_mch_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'5a_mch')
+paste("The 5a cells transformed with attB-mCherry seem to double every ~", round(log2_5a_mch_lm2$coefficients[2],1),"hours")
+
+log2_5a_stim_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'5a_stim')
+paste("The 5a cells transformed with WT STIM1 seem to double every ~", round(log2_5a_stim_lm2$coefficients[2],1),"hours")
+
+log2_bl21_none_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'bl21_none')
+paste("The bl21 cells seem to double every ~", round(log2_bl21_none_lm2$coefficients[2],1),"hours")
+
+log2_bl21_mch_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'bl21_mch')
+paste("The bl21 cells transformed with attB-mCherry seem to double every ~", round(log2_bl21_mch_lm2$coefficients[2],1),"hours")
+
+log2_bl21_stim_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'bl21_stim')
+paste("The bl21 cells transformed with WT STIM1 seem to double every ~", round(log2_bl21_stim_lm2$coefficients[2],1),"hours")
+
+model_frame2 = model_frame1 %>% melt(id = 'hours') %>% mutate(log2cells = log(value, 2))
+
+ggplot(data = model_frame2, aes(x= hours, y= value))+
+  geom_point(alpha = 0.5)+
+  geom_line()+
+  facet_grid(cols = vars(variable))
+
+ggplot() + 
+  theme(panel.grid = element_blank()) + 
+  #geom_smooth(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid)) +
+  geom_line(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2, alpha = 0.4) +
+  geom_point(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2) +
+  geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid), alpha = 0.4) +
+  geom_line(data = model_frame2, aes(x= hours, y= log2cells))+
+  facet_grid(cols = vars(strain))
+
 ```
 
 ```{r session info}
