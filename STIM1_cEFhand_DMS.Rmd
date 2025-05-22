@@ -2995,7 +2995,7 @@ bac_growth_plot = ggplot() +
   labs(x= "Time point", y= "Cell number \n(Log2 transformed)", color = "Sample")+
   theme(legend.position = "bottom")+
   facet_grid(cols = vars(strain))+NULL; bac_growth_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.pdf", bac_growth_plot, height = 2, width = 4)
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.pdf", bac_growth_plot, height = 2.5, width = 4)
 
 bac_10b_none = bac_growth2 %>% filter(strain == "10b" & plasmid == "none")
 bac_10b_none = data.frame(bac_10b_none)
