@@ -2986,13 +2986,16 @@ bac_growth2$rep <- as.factor(bac_growth2$rep)
 bac_growth2$log2_cells <- log(bac_growth2$cell_number,2)
 bac_growth_geomean$log2_cells <- log(bac_growth_geomean$cell_number,2)
 
-ggplot() + 
+bac_growth_plot = ggplot() + 
   theme(panel.grid = element_blank()) + 
   #geom_smooth(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid)) +
   geom_line(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2, alpha = 0.4) +
   geom_point(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2) +
   geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid), alpha = 0.4) +
-  facet_grid(cols = vars(strain))
+  labs(x= "Time point", y= "Cell number \n(Log2 transformed)", color = "Sample")+
+  theme(legend.position = "bottom")+
+  facet_grid(cols = vars(strain))+NULL; bac_growth_plot
+ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.pdf", bac_growth_plot, height = 2, width = 4)
 
 bac_10b_none = bac_growth2 %>% filter(strain == "10b" & plasmid == "none")
 bac_10b_none = data.frame(bac_10b_none)
