@@ -2774,6 +2774,27 @@ bac_growth_plot = ggplot() +
   theme(legend.position = "bottom")+
   facet_grid(cols = vars(strain))+NULL; bac_growth_plot
 ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.pdf", bac_growth_plot, height = 2.5, width = 4)
+
+## Replotting with OD instead of cell number
+
+bac_growth2 <- bac_growth %>% group_by(rep, strain, plasmid, time_point) %>% summarize(a600 = mean(A600))
+bac_growth_geomean <- bac_growth %>% group_by(strain, plasmid, time_point) %>% summarize(a600 = 10^mean(log10(A600), na.rm = T))
+
+bac_growth2$rep <- as.factor(bac_growth2$rep)
+#bac_growth2$log10_a600 <- log(bac_growth2$a600,2)
+#bac_growth_geomean$log10_a600 <- log(bac_growth_geomean$a600,2)
+
+Bacterial_growth_plot <- ggplot() + 
+  theme(panel.grid = element_blank()) + 
+  #geom_smooth(data = bac_growth2 %>% filter(!is.na(log10_a600)), aes(x = time_point, y = log10_a600, color = plasmid)) +
+  geom_line(data = bac_growth_geomean , aes(x = time_point, y = a600, color = plasmid), size = 2, alpha = 0.4) +
+  geom_point(data = bac_growth_geomean , aes(x = time_point, y = a600, color = plasmid), size = 2) +
+  geom_point(data = bac_growth2 %>% filter(!is.na(a600)), aes(x = time_point, y = a600, color = plasmid), alpha = 0.4) +
+  facet_grid(cols = vars(strain)) +
+  labs(x = "Hours after transformation", y = "OD (A600)") + 
+  NULL; Bacterial_growth_plot
+ggsave("Revision_1/plots_r1/supplement_r1/Bacterial_growth_plot.pdf", Bacterial_growth_plot, height = 2, width = 5)
+ggsave("Revision_1/plots_r1/supplement_r1/Bacterial_growth_plot.png", Bacterial_growth_plot, height = 2, width = 5)
 ```
 
 ```{r session info}
