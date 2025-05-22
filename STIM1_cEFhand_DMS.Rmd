@@ -1070,7 +1070,7 @@ ggsave(file = "Plots/supplement/supp3c_Endogenous_SKO_histogram.pdf", Endogenous
 
 ```
 
-#Bacteria - original
+##Bacteria - original
 ```{r Bacteria STIM1 heatmap}
 bac_mis = combined2 %>% filter(type == "mis") %>% select(c("variant", "bac_ratio", "start", "end", "position"))
 bac_non = combined2 %>% filter(type == "non") %>% select(c("variant", "bac_ratio", "start", "end", "position"))
@@ -1146,7 +1146,7 @@ heatmap_bac <- ggplot() + labs(x = NULL, y = NULL) +
   NULL; heatmap_bac
 ggsave(file = "Plots/main/fig4a_heatmap_bac.pdf", heatmap_bac, height = 2, width = 4)
 ```
-#Validation plots
+##Validation plots
 ```{r validation plots}
 #standard LP
 endo_ssv_plot = ggplot(data = combined2, aes(x= log10(endo_ratio) , y= log10(endo_ssv_ratio)))+
@@ -1171,7 +1171,7 @@ sko_ssv_plot = ggplot(data = combined2, aes(x= log10(sko_ratio) , y= log10(sko_s
 ggsave("plots/supplement/supp3e_sko_ssv_plot.pdf", sko_ssv_plot, height = 2.5, width = 2.5)
 ```
 
-Bacteria DMS with three E.coli strains and three different media
+##Bacteria DMS with three E.coli strains and three different media
 ```{r counts}
 bac_raw_counts <- read.csv(file = "data/bac_stim1.csv", header = T, stringsAsFactors = F)
 bac_raw_counts <-  subset(bac_raw_counts, select = -X )
@@ -1474,7 +1474,7 @@ write.csv(t3, "data/final_table.csv")
 
 
 
-Analysis of DMS scores:
+##Analysis of DMS scores:
 1. Comparisons of variants based on position, mutated residue, synonymous or nonsense variants for all three datasets
 ```{r positional comparison}
 positional_matrix_for_pca <- data.frame((positional_scores))
@@ -1944,7 +1944,7 @@ ggsave(file = "Plots/main/fig7e_Ortholog_variants.pdf", Ortholog_variants, heigh
 
 ```
 
-STIM1 cEF-hand variants invovled in human disease
+##STIM1 cEF-hand variants invovled in human disease
 ```{r Subset for SNVs}
 Endo_snv_histogram <- ggplot() + 
   theme(panel.grid.minor = element_blank(), panel.grid.major = element_blank()) +
@@ -2077,7 +2077,7 @@ ggsave(file = "Plots/main/fig8d_cBioPortal_cosmic_variants.pdf", cBioPortal_cosm
 
 ```
 
-Functional assays - CaMPARI calcium influx and ER stress
+##Functional assays - CaMPARI calcium influx and ER stress
 ```{r}
 er_campari = read.csv("data/er_stress_campari.csv")
 
@@ -2234,8 +2234,6 @@ chop_er_plot <- ggplot() +
   geom_text_repel(data = chop_scatterplot_set, aes(y= log10(endo_ratio), x= mean_exp, label = variant)) +
   NULL; chop_er_plot
 ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_plot.pdf", chop_er_plot, height = 2, width = 2.25)
-
-
 ggsave("Revision_1/plots_r1/main_r1/fig9b_r1_bax_bcl_er_ss.pdf", bax_bcl_er_ss, height = 1.5, width = 1.8)
 ggsave("Revision_1/plots_r1/main_r1/fig9b_r1_bax_bcl_er_dms.pdf", bax_bcl_er_dms, height = 1.5, width = 1.8)
 ggsave("Revision_1/plots_r1/main_r1/fig9c_r1_bip_er_ss.pdf", bip_er_ss, height = 1.5, width = 1.8)
@@ -2246,7 +2244,6 @@ ggsave("Revision_1/plots_r1/main_r1/fig9d_r1_chop_er_dms.pdf", chop_er_dms, heig
 ```
 
 Raw data for low-throughput functional assays
-
 ```{r}
 bip_chop_manuscript0 = read.csv("Revision_1/data_r1/chop_bip_12dec24_edit.csv")
 bip_chop_manuscript <- bip_chop_manuscript0 %>% filter(Content != "NTC") %>% group_by(variant, Target, replicate) %>% summarize(Cq = 10^mean(log10(Cq)), delta_cq = 10^mean(log10(delta_cq))) %>% mutate(mean_deltacq = exp(mean(log(delta_cq), na.rm = T)))
@@ -2365,48 +2362,10 @@ ggsave("Revision_1/plots_r1/supplement_r1/campari_manu_plot.pdf", campari_manu_p
 
 ```
 
-
+##FoldX vs survival scores - Supplement fig. 10a-b
 ```{r}
-#Revision 1 = Survival scores vs foldx
 foldx = read.csv("Revision_1/data_r1/foldx.csv")
 foldx_ef = left_join(combined2, foldx)
-foldx_dms_plot = ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= total.energy))+
-  geom_point(alpha = 0.15, size = 1) +
-  geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant), size = 2) +
-  # geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= total.energy), color = "red", alpha = 0.25) +
-  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25, size = 1) +
-  labs(x= "Standard LP score", y= "Foldx Total Energy")+NULL; foldx_dms_plot
-ggsave("Revision_1/plots_r1/supplement_r1/foldx_dms_plot.pdf", foldx_dms_plot, height = 2.5, width = 2.5)
-
-foldx_flre_plot = ggplot(data = foldx_ef %>% filter(total.energy <= 10), aes(x= log10(endo_ratio), y= total.energy))+
-  geom_point(alpha = 0.15, size = 1) +
-  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91:94)), aes(label = variant), size = 2) +
-  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= total.energy), color = "red", alpha = 0.25, size = 1) +
-  geom_point(data = foldx_ef %>% filter(type == "syn"), aes(x= log10(endo_ratio), y= total.energy), color = "green", alpha = 0.25, size = 1) +
-  labs(x= "Standard LP score", y= "Foldx Total Energy")+NULL; foldx_flre_plot
-ggsave("Revision_1/plots_r1/supplement_r1/foldx_flre_plot.pdf", foldx_flre_plot, height = 2.5, width = 3)
-
-foldx_ef %>% filter(total.energy >= 10)
-
-ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= BackbonEHbond))+
-  geom_point(alpha = 0.5) +
-  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= BackbonEHbond), color = "red", alpha = 0.25) +
-  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91,92,93,94)), aes(label = variant))
-# + geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
-
-ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= Sidechain.Hbond))+
-  geom_point(alpha = 0.5) +
-  geom_point(data = foldx_ef %>% filter(position %in% c(91:94)), aes(x= log10(endo_ratio), y= Sidechain.Hbond), color = "red", alpha = 0.25) +
-  geom_text_repel(data = foldx_ef %>% filter(position %in% c(91,92,93,94)), aes(label = variant))
-# + geom_text_repel(data = foldx_ef %>% filter(total.energy >= 10), aes(label = variant))
-
-ggplot(data = foldx_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = total.energy))+
-  geom_point()+
-  scale_color_gradient2(high = "red", low = "blue")
-```
-
-```{r Kenny trying FoldX data}
-
 annots[annots$value == "0.98","annot"] <- "1_alpha1"
 annots[annots$value == "0.99","annot"] <- "2_EFhand"
 annots[annots$value == "1","annot"] <- "3_alpha2"
@@ -2441,65 +2400,15 @@ ggsave(file = "Revision_1/plots_r1/supplement_r1/Variant_foldx_plot.pdf", Varian
 
 ```
 
+
+##AlphaMissense vs survival scores - Supplement fig 10c-d
 ```{r}
-#Revision 1 - Survival scores vs Alpha Missense
 am_ef = read.csv("Revision_1/data_r1/alpha_missense_ef.csv")
 am_ef = am_ef[-1]
 am_ef = am_ef %>% select(protein_variant, am_pathogenicity, am_class)
 colnames(am_ef)[1] = "variant"
 am_ef = left_join(combined2, am_ef)
 am_path_var = am_ef %>% filter(variant %in% c("H72Q", "L74P", "G81D", "D84G", "L92V", "L96V"))
-
-am_ef %>% filter(am_class == "benign")
-
-am_ef = am_ef %>% mutate(std_score = log10(endo_ratio), knockout_score = log10(sko_ratio))
-ggplot(data = am_ef, aes(x= std_score, y = am_pathogenicity))+
-  geom_point(alpha = 0.5)
-ggplot(data = am_ef, aes(x= knockout_score, y = am_pathogenicity))+
-  geom_point(alpha = 0.5)
-
-#spearman correlation
-cor.test(am_ef$std_score, am_ef$am_pathogenicity, method = "spearman", data = am_ef)
-cor.test(am_ef$knockout_score, am_ef$am_pathogenicity, method = "spearman", data = am_ef)
-
-ggplot(data = am_ef %>% filter(am_pathogenicity >= 0.75), aes(x= log10(endo_ratio), y = am_pathogenicity))+
-  geom_point(alpha = 0.5) +
-  geom_text_repel(data = am_path_var, aes(x= log10(endo_ratio), y= am_pathogenicity, label = variant))
-
-am_dms_benign_plot = ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
-  labs(x= "Standard LP score", y= "Knockout LP score")+
-  geom_point(alpha = 0.15, size = 0.5) +
-  geom_point(data = am_ef %>% filter(am_class == "benign"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "green", alpha = 0.5, size = 0.5)+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)+NULL; am_dms_benign_plot
-ggsave("Revision_1/plots_r1/supplement_r1/am_dms_benign_plot.pdf", am_dms_benign_plot, height = 2.5, width = 2.5)
-
-am_dms_path_plot = ggplot(data = am_ef %>% filter(type == "mis"), aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
-  labs(x= "Standard LP score", y= "Knockout LP score")+
-  geom_point(alpha = 0.15, size = 0.5) +
-  geom_point(data = am_ef %>% filter(am_class == "pathogenic"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "red", alpha = 0.5, size = 0.5)+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)+NULL; am_dms_path_plot
-ggsave("Revision_1/plots_r1/supplement_r1/am_dms_path_plot.pdf", am_dms_path_plot, height = 2.5, width = 2.5)
-
-snv$position = as.character(snv$position)
-am_ef_snv = left_join(snv, am_ef) %>% filter(position %in% c(63:98))
-
-ggplot(data = am_ef_snv, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
-  geom_point(alpha = 0.15) +
-  geom_point(data = am_ef_snv %>% filter(am_class == "pathogenic"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "red", alpha = 0.5)+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA) +
-  geom_text_repel(data = am_ef_snv %>% filter(std_score < -1 & knockout_score < -0.5), aes(x= log10(endo_ratio), y= log10(sko_ratio), label = variant))
-
-ggplot(data = am_ef_snv, aes(x= log10(endo_ratio), y= log10(sko_ratio)))+
-  geom_point(alpha = 0.15) +
-  geom_point(data = am_ef_snv %>% filter(am_class == "benign"), aes(x= log10(endo_ratio), y= log10(sko_ratio)), color = "green", alpha = 0.5)+
-  geom_rect(aes(xmin=syn_endo_range[1], xmax=syn_endo_range[2], ymin=syn_sko_range[1], ymax=syn_sko_range[2]), color = "black", alpha = 0.5, fill = NA)
-
-ggplot(data = am_ef, aes(x= log10(endo_ratio), y= log10(sko_ratio), color = am_class))+
-  geom_point(alpha = 0.15)+
-  geom_text_repel(data = am_path_var, aes(x = log10(endo_ratio), y= log10(sko_ratio), label = variant))
-```
-
-```{r KAM comparing our scores with Alpha Missense}
 
 kam_am_ef <- am_ef
 
@@ -2527,14 +2436,10 @@ Alpha_missense_controls <- ggplot() + geom_point(data = kam_am_comparison, aes(x
   NULL; Alpha_missense_controls
 ggsave("Revision_1/plots_r1/supplement_r1/Alpha_missense_controls.pdf", Alpha_missense_controls, height = 2.5, width = 5.25)
 
-
-
-
 ```
 
-
+##ESM
 ```{r}
-#Revision 1 Survival scores vs ESM scores
 esm_scores = read.csv("Revision_1/data_r1/esm_scores_stim1.csv") %>% filter(pos %in% c(63:98))
 colnames(esm_scores)[2] = "esm_score"
 esm_scores = left_join(combined2, esm_scores)
@@ -2564,8 +2469,8 @@ cor.test(esm_scores$esm_score, esm_scores$std_score, method = "spearman", data =
 cor.test(esm_scores_path$esm_score, esm_scores_path$std_score, method = "spearman", data = esm_scores_path)
 ```
 
+##Error bars for replicate scores - Supplement fig. 9
 ```{r}
-#Revision 1 error bars on endo and sko scores
 eb_endo = endo_freq %>% select(variant, r1_ratio, r2_ratio, r4_ratio, r5_ratio, r6_ratio)
 colnames(eb_endo) = c("variant", "er1", "er2", "er4" ,"er5", "er6")
 for(x in 1:nrow(eb_endo)){
@@ -2621,6 +2526,9 @@ vus_errorbar_sko = bind_rows(vus_errorbar_sko, svus_syn)
 combined3 = combined2 %>% select(variant, endo_ratio, sko_ratio)
 combined3 = left_join(combined3, eb_endo)
 combined3 = left_join(combined3, eb_sko)
+
+write.csv(eb_endo, "eb_endo.csv")
+write.csv(eb_sko, "eb_sko.csv")
 
 clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar)
 clinvar_errorbar = left_join(clinvar_variants, combined3)
@@ -2693,53 +2601,7 @@ ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_sko_plot.pdf", vus_eb_sko_plot 
 
 ```
 
-```{r bacteria growth over time}
-bac_growth = read.csv("Revision_1/data_r1/rev_bac_growth.csv")
-bac_growth = bac_growth %>% group_by(strain, plasmid, time_point) %>% mutate(mean = exp(mean(log(A600), na.rm = T)))
-bac_growth_4hr_none = bac_growth %>% filter(time_point == "4" & plasmid == "none")
-bac_growth_4hr_mch = bac_growth %>% filter(time_point == "4" & plasmid == "mch")
-bac_growth_4hr_stim = bac_growth %>% filter(time_point == "4" & plasmid == "stim")
-
-bac_growth_8hr_none = bac_growth %>% filter(time_point == "8" & plasmid == "none")
-bac_growth_8hr_mch = bac_growth %>% filter(time_point == "8" & plasmid == "mch")
-bac_growth_8hr_stim = bac_growth %>% filter(time_point == "8" & plasmid == "stim")
-
-bac_growth_12hr_none = bac_growth %>% filter(time_point == "12" & plasmid == "none")
-bac_growth_12hr_mch = bac_growth %>% filter(time_point == "12" & plasmid == "mch")
-bac_growth_12hr_stim = bac_growth %>% filter(time_point == "12" & plasmid == "stim")
-
-bac_growth_24hr_none = bac_growth %>% filter(time_point == "24" & plasmid == "none")
-bac_growth_24hr_mch = bac_growth %>% filter(time_point == "24" & plasmid == "mch")
-bac_growth_24hr_stim = bac_growth %>% filter(time_point == "24" & plasmid == "stim")
-
-library(tidyverse)
-library(ggbeeswarm)
-bac_growth_plot = ggplot(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= A600))+ theme_bw()+
-  geom_quasirandom(alpha = 0.5)+
-  geom_point(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= mean), color = "red") +
-  labs(x= "Strain", y= "OD600")+ scale_y_continuous(limits = c(1, 5))+NULL; bac_growth_mch_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.png", bac_growth_plot, height = 2, width = 2)
-
-bac_growth_none_plot = ggplot(data = bac_growth %>% filter(plasmid == "none"), aes(x= time_point, y= A600, color = strain))+ theme_bw()+
-  geom_quasirandom(alpha = 0.5) +
-  labs(x= "Time point (hours after transformation)", y= "OD600", title = "No plasmid") +
-  theme(legend.position = "none")+NULL; bac_growth_none_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_none_plot.pdf", bac_growth_none_plot, height = 2, width = 2)
-
-bac_growth_mch_plot = ggplot(data = bac_growth %>% filter(plasmid == "mch"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
-  geom_quasirandom(alpha = 0.5) +
-  labs(x= "Time point (hours after transformation)", y= "OD600", title = "attB-mCherry") +
-  theme(legend.position = "none")+NULL; bac_growth_mch_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_mch_plot.pdf", bac_growth_mch_plot, height = 2, width = 2)
-
-bac_growth_stim_plot = ggplot(data = bac_growth %>% filter(plasmid == "stim"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
-  geom_quasirandom(alpha = 0.5) +
-  labs(x= "Time point (hours after transformation)", y= "OD600", title = "STIM1") +
-  theme(legend.position = "none")+NULL; bac_growth_stim_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_stim_plot.pdf", bac_growth_stim_plot, height = 2, width = 2)
-```
-
-
+##STIM1 abundance - Supplement Fig 7b
 ```{r}
 revision_mgl = read.csv("Revision_1/data_r1/mGL_mfi.csv")
 revision_mgl = revision_mgl %>% group_by(variant, rep) %>% mutate(mean_norm = exp(mean(log(norm_wt))))
@@ -2770,7 +2632,7 @@ revision_mgl_dms = revision_mgl %>% select(variant, mean)
 revision_mgl_dms = left_join(revision_mgl, combined2)
 ```
 
-Rosace - Full script can be found in Github repo as rosace_9apr25.rmd
+##Rosace - Full script can be found in Github repo as rosace_9apr25.rmd
 score tables read in here 
 ```{r}
 rosace_std = read.csv("Revision_1/rosace/rosace_standard_score.csv")
@@ -2808,7 +2670,7 @@ cor.test(combined4$std_score, log10(combined4$endo_ratio), method = "spearman", 
 cor.test(combined4$ko_score, log10(combined4$sko_ratio), method = "spearman", data = scores)
 
 ```
-
+##Western Blot band intensities - Supplement Fig 1d
 ```{r}
 wb_intensity = read.csv("Revision_1/data_r1/wb_intensity.csv")
 wb_intensity$rep = as.character(wb_intensity$rep)
@@ -2825,39 +2687,9 @@ wb_intensity_plot = ggplot(data = wb_intensity, aes(x= sample, y= norm_int, colo
 ggsave("Revision_1/plots_r1/supplement_r1/wb_intensity_plot.pdf", wb_intensity_plot, height = 2, width = 1.5)
 ```
 
-Cell counts - Revision
+##Cell counts - Supplement Fig 1a
 ```{r}
 cell_ct_rev = read.csv("Revision_1/data_r1/cell_ct_rev.csv")
-cell_ct_r1 = cell_ct_rev %>% filter(rep == 1) %>% mutate(lag_slp_ct = lag(slp_ct),
-                                                         lag_sko_ct = lag(sko_ct))
-cell_ct_r1 = cell_ct_r1 %>% mutate(Standard = log(slp_ct/lag(slp_ct))/48,
-                                   Knockout = log(sko_ct/lag(sko_ct))/48)
-
-cell_ct_r2 = cell_ct_rev %>% filter(rep == 2) %>% mutate(lag_slp_ct = lag(slp_ct),
-                                                         lag_sko_ct = lag(sko_ct))
-cell_ct_r2 = cell_ct_r2 %>% mutate(Standard = log(slp_ct/lag(slp_ct))/48,
-                                   Knockout = log(sko_ct/lag(sko_ct))/48)
-cell_ct_r3 = cell_ct_rev %>% filter(rep == 3) %>% mutate(lag_slp_ct = lag(slp_ct),
-                                                         lag_sko_ct = lag(sko_ct))
-cell_ct_r3 = cell_ct_r3 %>% mutate(Standard = log(slp_ct/lag(slp_ct))/48,
-                                   Knockout = log(sko_ct/lag(sko_ct))/48)
-
-db_r1 = cell_ct_r1 %>% select(hrs, Standard, Knockout) %>% melt(id = 'hrs')
-db_r2 = cell_ct_r2 %>% select(hrs, Standard, Knockout) %>% melt(id = 'hrs')
-db_r3 = cell_ct_r3 %>% select(hrs, Standard, Knockout) %>% melt(id = 'hrs')
-
-db = bind_rows(db_r1, db_r2, db_r3)
-db = db %>% group_by(hrs, variable) %>% mutate(mean_gr = mean(value))
-
-cell_growth_rate = ggplot(data = db, aes(x= hrs, y= value, color = variable))+ 
-  geom_quasirandom(alpha = 0.5, dodge.width = 25)+ theme(panel.grid = element_blank()) +
-  geom_quasirandom(data = db %>% distinct(hrs, mean_gr, variable), aes(x= hrs, y= mean_gr, color = variable), shape = 45, size = 5, dodge.width = 25) + theme(legend.position = "bottom")+
-  scale_x_continuous(breaks = c(48, 96, 144))+
-  labs(x= "Hours", y = "Growth Rate", color = "Cell Type")+NULL; cell_growth_rate
-ggsave("Revision_1/plots_r1/supplement_r1/cell_growth_rate.pdf", cell_growth_rate, height = 2, width = 4)
-
-## KAM try this analysis too
-
 cell_ct_rev2 <- cell_ct_rev %>% filter(rep != 1) %>% mutate(days = hrs / 24)
 cell_ct_rev2$rep <- as.factor(cell_ct_rev2$rep)
 cell_ct_rev2$log2_slp_ct <- log(cell_ct_rev2$slp_ct,2)
@@ -2919,65 +2751,11 @@ ggsave(file = "Revision_1/plots_r1/supplement_r1/Cell_growth_plot.pdf", Cell_gro
 
 ```
 
-```{r bacteria growth over time}
+##Bacteria growth - Supplement Fig 5c
+```{r}
 bac_growth = read.csv("Revision_1/data_r1/rev_bac_growth.csv")
 bac_growth = bac_growth %>% mutate(cell_number = A600*8*10^8)
 bac_growth = bac_growth %>% group_by(strain, plasmid, time_point) %>% mutate(mean = exp(mean(log(cell_number), na.rm = T)))
-
-bac_growth_10b = bac_growth %>% filter(plasmid == "none" & strain == "10b") 
-bac_growth_10b = data.frame(bac_growth_10b)
-bac_growth_10b = bac_growth_10b %>% select(rep, cell_number, time_point) %>% group_by(rep) %>% mutate(lag_cell_number = lag(cell_number), lag_timept = lag(time_point))
-bac_growth_10b = bac_growth_10b %>% mutate(gr_10b = log(cell_number/lag_cell_number) / (time_point-lag_timept))
-bac_growth_10b1 = bac_growth_10b %>% select(time_point, rep, gr_10b)
-
-bac_growth_5a = bac_growth %>% filter(plasmid == "none" & strain == "5a") 
-bac_growth_5a = data.frame(bac_growth_5a)
-bac_growth_5a = bac_growth_5a %>% select(rep, cell_number, time_point) %>% group_by(rep) %>% mutate(lag_cell_number = lag(cell_number), lag_timept = lag(time_point))
-bac_growth_5a = bac_growth_5a %>% mutate(gr_5a = log(cell_number/lag_cell_number) / (time_point-lag_timept))
-bac_growth_5a1 = bac_growth_5a %>% select(time_point, rep, gr_5a)
-
-bac_growth_BL21 = bac_growth %>% filter(plasmid == "none" & strain == "BL21") 
-bac_growth_BL21 = data.frame(bac_growth_BL21)
-bac_growth_BL21 = bac_growth_BL21 %>% select(rep, cell_number, time_point) %>% group_by(rep) %>% mutate(lag_cell_number = lag(cell_number), lag_timept = lag(time_point))
-bac_growth_BL21 = bac_growth_BL21 %>% mutate(gr_BL21 = log(cell_number/lag_cell_number) / (time_point-lag_timept))
-bac_growth_BL211 = bac_growth_BL21 %>% select(time_point, rep, gr_BL21)
-
-bac_growth_rate = left_join(bac_growth_10b1, bac_growth_5a1)
-bac_growth_rate = left_join(bac_growth_rate, bac_growth_BL211)
-bac_growth_rate = data.frame(bac_growth_rate)
-bac_growth_rate = bac_growth_rate %>% melt(id = c('time_point', 'rep'))
-bac_growth_rate = bac_growth_rate %>% group_by(time_point, variable) %>% mutate(mean_gr = mean(value, na.rm = T)) 
-
-ggplot(data = bac_growth_rate, aes(x= time_point, y= value, color = variable))+
-  geom_quasirandom(alpha = 0.5, dodge.width = 2.5)+
-  geom_quasirandom(data = bac_growth_rate %>% distinct(time_point, mean_gr, variable), aes(x= time_point, y= mean_gr, color = variable), shape = 45, size = 5)+
-  scale_x_continuous(breaks = c(8, 12, 16, 24)) 
-
-bac_growth_plot = ggplot(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= A600))+ theme_bw()+
-  geom_quasirandom(alpha = 0.5)+
-  geom_point(data = bac_growth %>% filter(time_point == "24" & plasmid == "stim"), aes(x= strain, y= mean), color = "red") +
-  labs(x= "Strain", y= "OD600")+ scale_y_continuous(limits = c(1, 5))+NULL; bac_growth_mch_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.png", bac_growth_plot, height = 2, width = 2)
-
-bac_growth_none_plot = ggplot(data = bac_growth %>% filter(plasmid == "none"), aes(x= time_point, y= A600, color = strain))+ theme_bw()+
-  geom_quasirandom(alpha = 0.5) +
-  labs(x= "Time point (hours after transformation)", y= "OD600", title = "No plasmid") +
-  theme(legend.position = "none")+NULL; bac_growth_none_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_none_plot.pdf", bac_growth_none_plot, height = 2, width = 2)
-
-bac_growth_mch_plot = ggplot(data = bac_growth %>% filter(plasmid == "mch"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
-  geom_quasirandom(alpha = 0.5) +
-  labs(x= "Time point (hours after transformation)", y= "OD600", title = "attB-mCherry") +
-  theme(legend.position = "none")+NULL; bac_growth_mch_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_mch_plot.pdf", bac_growth_mch_plot, height = 2, width = 2)
-
-bac_growth_stim_plot = ggplot(data = bac_growth %>% filter(plasmid == "stim"), aes(x= time_point, y= A600, color = strain))+theme_bw()+
-  geom_quasirandom(alpha = 0.5) +
-  labs(x= "Time point (hours after transformation)", y= "OD600", title = "STIM1") +
-  theme(legend.position = "none")+NULL; bac_growth_stim_plot
-ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_stim_plot.pdf", bac_growth_stim_plot, height = 2, width = 2)
-
-## KAM mods
 
 bac_growth2 <- bac_growth %>% group_by(rep, strain, plasmid, time_point) %>% summarize(cell_number = mean(cell_number))
 bac_growth_geomean <- bac_growth %>% group_by(strain, plasmid, time_point) %>% summarize(cell_number = 10^mean(log10(cell_number), na.rm = T))
@@ -2996,165 +2774,6 @@ bac_growth_plot = ggplot() +
   theme(legend.position = "bottom")+
   facet_grid(cols = vars(strain))+NULL; bac_growth_plot
 ggsave("Revision_1/plots_r1/supplement_r1/bac_growth_plot.pdf", bac_growth_plot, height = 2.5, width = 4)
-
-bac_10b_none = bac_growth2 %>% filter(strain == "10b" & plasmid == "none")
-bac_10b_none = data.frame(bac_10b_none)
-bac_10b_none = bac_10b_none %>% select(rep, time_point, log2_cells)
-colnames(bac_10b_none)[3] = "10b_none"
-
-bac_10b_mch = bac_growth2 %>% filter(strain == "10b" & plasmid == "mch")
-bac_10b_mch = data.frame(bac_10b_mch)
-bac_10b_mch = bac_10b_mch %>% select(rep, time_point, log2_cells)
-colnames(bac_10b_mch)[3] = "10b_mch"
-
-bac_10b_stim = bac_growth2 %>% filter(strain == "10b" & plasmid == "stim")
-bac_10b_stim = data.frame(bac_10b_stim)
-bac_10b_stim = bac_10b_stim %>% select(rep, time_point, log2_cells)
-colnames(bac_10b_stim)[3] = "10b_stim"
-
-bac_5a_none = bac_growth2 %>% filter(strain == "5a" & plasmid == "none")
-bac_5a_none = data.frame(bac_5a_none)
-bac_5a_none = bac_5a_none %>% select(rep, time_point, log2_cells)
-colnames(bac_5a_none)[3] = "5a_none"
-
-bac_5a_mch = bac_growth2 %>% filter(strain == "5a" & plasmid == "mch")
-bac_5a_mch = data.frame(bac_5a_mch)
-bac_5a_mch = bac_5a_mch %>% select(rep, time_point, log2_cells)
-colnames(bac_5a_mch)[3] = "5a_mch"
-
-bac_5a_stim = bac_growth2 %>% filter(strain == "5a" & plasmid == "stim")
-bac_5a_stim = data.frame(bac_5a_stim)
-bac_5a_stim = bac_5a_stim %>% select(rep, time_point, log2_cells)
-colnames(bac_5a_stim)[3] = "5a_stim"
-
-bac_bl21_none = bac_growth2 %>% filter(strain == "BL21" & plasmid == "none")
-bac_bl21_none = data.frame(bac_bl21_none)
-bac_bl21_none = bac_bl21_none %>% select(rep, time_point, log2_cells)
-colnames(bac_bl21_none)[3] = "bl21_none"
-
-bac_bl21_mch = bac_growth2 %>% filter(strain == "BL21" & plasmid == "mch")
-bac_bl21_mch = data.frame(bac_bl21_mch)
-bac_bl21_mch = bac_bl21_mch %>% select(rep, time_point, log2_cells)
-colnames(bac_bl21_mch)[3] = "bl21_mch"
-
-bac_bl21_stim = bac_growth2 %>% filter(strain == "BL21" & plasmid == "stim")
-bac_bl21_stim = data.frame(bac_bl21_stim)
-bac_bl21_stim = bac_bl21_stim %>% select(rep, time_point, log2_cells)
-colnames(bac_bl21_stim)[3] = "bl21_stim"
-
-bac_growth3 = left_join(bac_10b_none, bac_10b_mch)
-bac_growth3 = left_join(bac_growth3, bac_10b_stim)
-bac_growth3 = left_join(bac_growth3, bac_5a_none)
-bac_growth3 = left_join(bac_growth3, bac_5a_mch)
-bac_growth3 = left_join(bac_growth3, bac_5a_stim)
-bac_growth3 = left_join(bac_growth3, bac_bl21_none)
-bac_growth3 = left_join(bac_growth3, bac_bl21_mch)
-bac_growth3 = left_join(bac_growth3, bac_bl21_stim)
-
-log2_10b_none_lm <- lm(bac_growth3$'10b_none' ~ bac_growth3$time_point)
-2^log2_10b_none_lm$coefficients[1]
-2^log2_10b_none_lm$coefficients[2]
-
-log2_10b_mch_lm <- lm(bac_growth3$'10b_mch' ~ bac_growth3$time_point)
-2^log2_10b_mch_lm$coefficients[1]
-2^log2_10b_mch_lm$coefficients[2]
-
-log2_10b_stim_lm <- lm(bac_growth3$'10b_stim' ~ bac_growth3$time_point)
-2^log2_10b_stim_lm$coefficients[1]
-2^log2_10b_stim_lm$coefficients[2]
-
-log2_5a_none_lm <- lm(bac_growth3$'5a_none' ~ bac_growth3$time_point)
-2^log2_5a_none_lm$coefficients[1]
-2^log2_5a_none_lm$coefficients[2]
-
-log2_5a_mch_lm <- lm(bac_growth3$'5a_mch' ~ bac_growth3$time_point)
-2^log2_5a_mch_lm$coefficients[1]
-2^log2_5a_mch_lm$coefficients[2]
-
-log2_5a_stim_lm <- lm(bac_growth3$'5a_stim' ~ bac_growth3$time_point)
-2^log2_5a_stim_lm$coefficients[1]
-2^log2_5a_stim_lm$coefficients[2]
-
-log2_bl21_none_lm <- lm(bac_growth3$'bl21_none' ~ bac_growth3$time_point)
-2^log2_bl21_none_lm$coefficients[1]
-2^log2_bl21_none_lm$coefficients[2]
-
-log2_bl21_mch_lm <- lm(bac_growth3$'bl21_mch' ~ bac_growth3$time_point)
-2^log2_bl21_mch_lm$coefficients[1]
-2^log2_bl21_mch_lm$coefficients[2]
-
-log2_bl21_stim_lm <- lm(bac_growth3$'bl21_stim' ~ bac_growth3$time_point)
-2^log2_bl21_stim_lm$coefficients[1]
-2^log2_bl21_stim_lm$coefficients[2]
-
-model_frame1 <- data.frame("hours" = c(0,4,8,12,24), "10b_none" = NA, "10b_mch" = NA, "10b_stim" = NA,
-                           "5a_none" = NA, "5a_mch" = NA, "5a_stim" = NA,
-                           "bl21_none" = NA, "bl21_mch" = NA, "bl21_stim" = NA)
-model_frame1$X10b_none[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
-model_frame1$X10b_mch[1] <- 1e8 #2^log2_slp_lm$coefficients[1]
-model_frame1$X10b_stim[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
-model_frame1$X5a_none[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
-model_frame1$X5a_mch[1] <- 1e8 #2^log2_slp_lm$coefficients[1]
-model_frame1$X5a_stim[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
-model_frame1$bl21_none[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
-model_frame1$bl21_mch[1] <- 1e8 #2^log2_slp_lm$coefficients[1]
-model_frame1$bl21_stim[1] <- 1e8 #2^log2_sko_lm$coefficients[1]
-for(x in 2:nrow(model_frame1)){
-  model_frame1$X10b_none[x] <- model_frame1$X10b_none[x-1] * 2^log2_10b_none_lm$coefficients[2]
-  model_frame1$X10b_mch[x] <- model_frame1$X10b_mch[x-1] * 2^log2_10b_mch_lm$coefficients[2]
-  model_frame1$X10b_stim[x] <- model_frame1$X10b_stim[x-1] * 2^log2_10b_stim_lm$coefficients[2]
-  model_frame1$X5a_none[x] <- model_frame1$X5a_none[x-1] * 2^log2_5a_none_lm$coefficients[2]
-  model_frame1$X5a_mch[x] <- model_frame1$X5a_mch[x-1] * 2^log2_5a_mch_lm$coefficients[2]
-  model_frame1$X5a_stim[x] <- model_frame1$X5a_stim[x-1] * 2^log2_5a_stim_lm$coefficients[2]
-  model_frame1$bl21_none[x] <- model_frame1$bl21_none[x-1] * 2^log2_bl21_none_lm$coefficients[2]
-  model_frame1$bl21_mch[x] <- model_frame1$bl21_mch[x-1] * 2^log2_bl21_mch_lm$coefficients[2]
-  model_frame1$bl21_stim[x] <- model_frame1$bl21_stim[x-1] * 2^log2_bl21_stim_lm$coefficients[2]
-}
-
-## Try flipping the equation around
-log2_10b_none_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'10b_none')
-paste("The 10b cells seem to double every ~", round(log2_10b_none_lm2$coefficients[2],1),"hours")
-
-log2_10b_mch_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'10b_mch')
-paste("The 10b cells transformed with attB-mCherry seem to double every ~", round(log2_10b_mch_lm2$coefficients[2],1),"hours")
-
-log2_10b_stim_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'10b_stim')
-paste("The 10b cells transformed with WT STIM1 seem to double every ~", round(log2_10b_stim_lm2$coefficients[2],1),"hours")
-
-log2_5a_none_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'5a_none')
-paste("The 5a cells seem to double every ~", round(log2_5a_none_lm2$coefficients[2],1),"hours")
-
-log2_5a_mch_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'5a_mch')
-paste("The 5a cells transformed with attB-mCherry seem to double every ~", round(log2_5a_mch_lm2$coefficients[2],1),"hours")
-
-log2_5a_stim_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'5a_stim')
-paste("The 5a cells transformed with WT STIM1 seem to double every ~", round(log2_5a_stim_lm2$coefficients[2],1),"hours")
-
-log2_bl21_none_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'bl21_none')
-paste("The bl21 cells seem to double every ~", round(log2_bl21_none_lm2$coefficients[2],1),"hours")
-
-log2_bl21_mch_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'bl21_mch')
-paste("The bl21 cells transformed with attB-mCherry seem to double every ~", round(log2_bl21_mch_lm2$coefficients[2],1),"hours")
-
-log2_bl21_stim_lm2 <- lm(bac_growth3$time_point ~ bac_growth3$'bl21_stim')
-paste("The bl21 cells transformed with WT STIM1 seem to double every ~", round(log2_bl21_stim_lm2$coefficients[2],1),"hours")
-
-model_frame2 = model_frame1 %>% melt(id = 'hours') %>% mutate(log2cells = log(value, 2))
-
-ggplot(data = model_frame2, aes(x= hours, y= value))+
-  geom_point(alpha = 0.5)+
-  geom_line()+
-  facet_grid(cols = vars(variable))
-
-ggplot() + 
-  theme(panel.grid = element_blank()) + 
-  #geom_smooth(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid)) +
-  geom_line(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2, alpha = 0.4) +
-  geom_point(data = bac_growth_geomean , aes(x = time_point, y = log2_cells, color = plasmid), size = 2) +
-  geom_point(data = bac_growth2 %>% filter(!is.na(log2_cells)), aes(x = time_point, y = log2_cells, color = plasmid), alpha = 0.4) +
-  geom_line(data = model_frame2, aes(x= hours, y= log2cells))+
-  facet_grid(cols = vars(strain))
-
 ```
 
 ```{r session info}
