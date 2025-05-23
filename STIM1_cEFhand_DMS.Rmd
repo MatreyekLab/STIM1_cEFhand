@@ -15,6 +15,8 @@ library(scales)
 library(stringr)
 library(ggpubr)
 library(GGally)
+# install.packages("pak")
+# pak::pkg_install("ggpmisc")
 library(ggpmisc)
 library(ggbeeswarm)
 library(patchwork)
@@ -256,7 +258,7 @@ lib_simulation = ggplot() +
 
 ggsave("plots/supplement/supp2d_lib_simulation.pdf", lib_simulation, height = 2, width = 3)
 ```
-#Key: endo = standard LP cells, sko = knockout LP cells
+Key: endo = standard LP cells, sko = knockout LP cells
 ## Looking at standard LP cell DMS data and turning variant counts into frequencies
 ```{r counts}
 ## Import raw standard LP DMS counts
@@ -2076,7 +2078,7 @@ cBioPortal_cosmic_variants <- ggplot() +
 ggsave(file = "Plots/main/fig8d_cBioPortal_cosmic_variants.pdf", cBioPortal_cosmic_variants, height = 1.4, width = 2)
 
 ```
-
+Revision 1 
 ##Functional assays - CaMPARI calcium influx and ER stress
 ```{r}
 er_campari = read.csv("data/er_stress_campari.csv")
@@ -2396,11 +2398,9 @@ Variant_foldx_plot <- ggplot() + theme(panel.grid = element_blank(), legend.posi
   geom_point(data = foldx_ef_kam %>% filter(position == 70), aes(x = log10(endo_ratio), y = total.energy), color = "pink", alpha = 0.5) +
   labs(x = "Standard score", y = "FoldX total energy") +
   NULL; Variant_foldx_plot
-ggsave(file = "Revision_1/plots_r1/supplement_r1/Variant_foldx_plot.pdf", Variant_foldx_plot, height = 2.25, width = 3.25)
+ggsave(file = "Revision_1/plots_r1/supplement_r1/supp10_Variant_foldx_plot.pdf", Variant_foldx_plot, height = 2.25, width = 3.25)
 
 ```
-
-
 ##AlphaMissense vs survival scores - Supplement fig 10c-d
 ```{r}
 am_ef = read.csv("Revision_1/data_r1/alpha_missense_ef.csv")
@@ -2434,7 +2434,7 @@ Alpha_missense_controls <- ggplot() + geom_point(data = kam_am_comparison, aes(x
   labs(x = "Standard score", y = "AlphaMissense score", color = "Patients and general population", shape = "AlphaMissense prediction") +
   theme(panel.grid = element_blank(), legend.position = "right") + 
   NULL; Alpha_missense_controls
-ggsave("Revision_1/plots_r1/supplement_r1/Alpha_missense_controls.pdf", Alpha_missense_controls, height = 2.5, width = 5.25)
+ggsave("Revision_1/plots_r1/supplement_r1/supp10_Alpha_missense_controls.pdf", Alpha_missense_controls, height = 2.5, width = 5.25)
 
 ```
 
@@ -2551,7 +2551,7 @@ clinvar_eb_endo_plot <- ggplot()+
   #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= NULL, y= "Standard Score", color = "Replicate")+
   NULL; clinvar_eb_endo_plot
-ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_endo_plot.pdf", clinvar_eb_endo_plot ,height = 1.5, width = 3.3)
+ggsave("Revision_1/plots_r1/supplement_r1/supp9_clinvar_eb_endo_plot.pdf", clinvar_eb_endo_plot ,height = 1.5, width = 3.3)
 
 clinvar_eb_sko_plot <- ggplot()+ 
   geom_quasirandom(data = clinvar_errorbar_sko %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
@@ -2564,7 +2564,7 @@ clinvar_eb_sko_plot <- ggplot()+
   labs(x= NULL, y= "Knockout Score", color = "Replicate")+
   scale_y_continuous(limits = c(-1,0.6)) +
   NULL; clinvar_eb_sko_plot
-ggsave("Revision_1/plots_r1/supplement_r1/clinvar_eb_sko_plot.pdf", clinvar_eb_sko_plot ,height = 1.5, width = 3.3)
+ggsave("Revision_1/plots_r1/supplement_r1/supp9_clinvar_eb_sko_plot.pdf", clinvar_eb_sko_plot ,height = 1.5, width = 3.3)
 
 
 vus_errorbar_endo$log10_value <- log10(vus_errorbar_endo$value)
@@ -2584,7 +2584,7 @@ vus_eb_endo_plot <- ggplot()+
   #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= NULL, y= "Standard Score", color = "Replicate")+
   NULL; vus_eb_endo_plot
-ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_endo_plot.pdf", vus_eb_endo_plot ,height = 1.5, width = 3.3)
+ggsave("Revision_1/plots_r1/supplement_r1/supp9_vus_eb_endo_plot.pdf", vus_eb_endo_plot ,height = 1.5, width = 3.3)
 
 vus_eb_sko_plot = ggplot() +
   geom_quasirandom(data = vus_errorbar_sko %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
@@ -2597,7 +2597,7 @@ vus_eb_sko_plot = ggplot() +
   labs(x= NULL, y= "Knockout Score", color = "Replicate")+
   scale_y_continuous(limits = c(-1,0.6)) +
   NULL; vus_eb_sko_plot
-ggsave("Revision_1/plots_r1/supplement_r1/vus_eb_sko_plot.pdf", vus_eb_sko_plot ,height = 1.5, width = 3.3)
+ggsave("Revision_1/plots_r1/supplement_r1/supp9_vus_eb_sko_plot.pdf", vus_eb_sko_plot ,height = 1.5, width = 3.3)
 
 ```
 
@@ -2621,7 +2621,7 @@ mgl_abundance_plot = ggplot(data = revision_mgl, aes(x= variant, y= norm_wt))+ t
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))+
   labs(x= "Variant", y= "Normalized \nGreen MFI")+NULL; mgl_abundance_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/mgl_abundance_plot.pdf", mgl_abundance_plot, height = 2, width = 2)
+ggsave("Revision_1/plots_r1/supplement_r1/supp_7b_mgl_abundance_plot.pdf", mgl_abundance_plot, height = 2, width = 2)
 
 t.test(mgl_norm_f91d$norm_wt, mgl_norm_wt$norm_wt)
 t.test(mgl_norm_l92k$norm_wt, mgl_norm_wt$norm_wt)
@@ -2644,14 +2644,6 @@ rosace_ko = rosace_ko %>% select(variants, wildtype, mutation, type, ko_score)
 rosace_scores = left_join(rosace_std, rosace_ko)
 colnames(rosace_scores)[1] = "variant"
 
-ggplot(data = rosace_scores, aes(x= std_score, y= ko_score))+
-  geom_point(alpha = 0.5)
-
-ggplot(data = scores, aes(x= position, y= mutation, fill = std_score))+
-  geom_tile()
-
-ggplot(data = scores, aes(x= position, y= mutation, fill = ko_score))+
-  geom_tile()
 
 combined4 = left_join(combined3, rosace_scores)
 
@@ -2663,13 +2655,14 @@ dms_rosace_sko_plot = ggplot(data = combined4, aes(x= log10(sko_ratio), y= ko_sc
   geom_point(alpha = 0.25)+
   labs(x= "Knockout score (DMS)", y= "Knockout score \n(ROSACE)")+NULL; dms_rosace_sko_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/dms_rosace_endo_plot.pdf", dms_rosace_endo_plot, height = 2, width = 2)
-ggsave("Revision_1/plots_r1/supplement_r1/dms_rosace_sko_plot.pdf", dms_rosace_sko_plot, height = 2, width = 2)
+ggsave("Revision_1/plots_r1/supplement_r1/supp10_dms_rosace_endo_plot.pdf", dms_rosace_endo_plot, height = 2, width = 2)
+ggsave("Revision_1/plots_r1/supplement_r1/supp10_dms_rosace_sko_plot.pdf", dms_rosace_sko_plot, height = 2, width = 2)
 
 cor.test(combined4$std_score, log10(combined4$endo_ratio), method = "spearman", data = scores)
 cor.test(combined4$ko_score, log10(combined4$sko_ratio), method = "spearman", data = scores)
 
 ```
+
 ##Western Blot band intensities - Supplement Fig 1d
 ```{r}
 wb_intensity = read.csv("Revision_1/data_r1/wb_intensity.csv")
@@ -2684,7 +2677,7 @@ wb_intensity_plot = ggplot(data = wb_intensity, aes(x= sample, y= norm_int, colo
   labs(y= "Band intensity \nnormalized to actin", color = "Replicate") + 
   NULL; wb_intensity_plot
 
-ggsave("Revision_1/plots_r1/supplement_r1/wb_intensity_plot.pdf", wb_intensity_plot, height = 2, width = 1.5)
+ggsave("Revision_1/plots_r1/supplement_r1/supp_1d_wb_intensity_plot.pdf", wb_intensity_plot, height = 2, width = 1.5)
 ```
 
 ##Cell counts - Supplement Fig 1a
@@ -2747,7 +2740,7 @@ Cell_growth_plot <- ggplot() + scale_y_log10() +
   annotate("text", x = 0, y = 3.8e6, label = paste("Standard cells: ~",round(log2_slp_lm2$coefficients[2],1),"days"), hjust = 0, size = 3) +
   annotate("text", x = 0, y = 3e6, label = paste("Knockout cells: ~",round(log2_sko_lm2$coefficients[2],1),"days"), hjust = 0, size = 3, color = "blue") +
   NULL; Cell_growth_plot
-ggsave(file = "Revision_1/plots_r1/supplement_r1/Cell_growth_plot.pdf", Cell_growth_plot, height = 2, width = 3)
+ggsave(file = "Revision_1/plots_r1/supplement_r1/supp1a_Cell_growth_plot.pdf", Cell_growth_plot, height = 2, width = 3)
 
 ```
 
@@ -2793,7 +2786,7 @@ Bacterial_growth_plot <- ggplot() +
   facet_grid(cols = vars(strain)) +
   labs(x = "Hours after transformation", y = "OD (A600)") + 
   NULL; Bacterial_growth_plot
-ggsave("Revision_1/plots_r1/supplement_r1/Bacterial_growth_plot.pdf", Bacterial_growth_plot, height = 2, width = 5)
+ggsave("Revision_1/plots_r1/supplement_r1/supp5c_Bacterial_growth_plot.pdf", Bacterial_growth_plot, height = 2, width = 5)
 ggsave("Revision_1/plots_r1/supplement_r1/Bacterial_growth_plot.png", Bacterial_growth_plot, height = 2, width = 5)
 ```
 
