@@ -2470,6 +2470,7 @@ cor.test(esm_scores_path$esm_score, esm_scores_path$std_score, method = "spearma
 ```
 
 ##Error bars for replicate scores - Supplement fig. 9
+
 ```{r}
 eb_endo = endo_freq %>% select(variant, r1_ratio, r2_ratio, r4_ratio, r5_ratio, r6_ratio)
 colnames(eb_endo) = c("variant", "er1", "er2", "er4" ,"er5", "er6")
@@ -2478,8 +2479,10 @@ for(x in 1:nrow(eb_endo)){
  eb_endo$count[x] <- sum(!is.na(unlist(eb_endo[x,c(2,3,4,5,6)])))
  eb_endo$endo_se[x] <- sd(unlist(eb_endo[x,c(2,3,4,5,6)]), na.rm = T) / sqrt(eb_endo$count[x])
 }
-clinvar_errorbar_endo = eb_endo %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = 'variant')
-vus_errorbar_endo = eb_endo %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = "variant")
+clinvar_errorbar_endo = eb_endo %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C", "Z0Z")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = 'variant')
+clinvar_errorbar_endo[clinvar_errorbar_endo == "Z0Z"] = "WT"
+vus_errorbar_endo = eb_endo %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R", "Z0Z")) %>% select(variant, er1, er2, er4, er5, er6) %>% melt(id = "variant")
+vus_errorbar_endo[vus_errorbar_endo == "Z0Z"] = "WT"
 evus_syn = eb_endo %>% mutate(start = substr(variant, 1,1),
                              end = substr(variant, 4,4),
                              position = substr(variant, 2,3))
@@ -2504,8 +2507,10 @@ for(x in 1:nrow(eb_sko)){
  eb_sko$count[x] <- sum(!is.na(unlist(eb_sko[x,c(2,3,4,5,6)])))
  eb_sko$sko_se[x] <- sd(unlist(eb_sko[x,c(2,3,4,5,6)]), na.rm = T) / sqrt(eb_sko$count[x])
 }
-clinvar_errorbar_sko = eb_sko %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = 'variant')
-vus_errorbar_sko = eb_sko %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = "variant")
+clinvar_errorbar_sko = eb_sko %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C", "Z0Z")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = 'variant')
+clinvar_errorbar_sko[clinvar_errorbar_sko == "Z0Z"] = "WT"
+vus_errorbar_sko = eb_sko %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R", "Z0Z")) %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(id = "variant")
+vus_errorbar_sko[vus_errorbar_sko == "Z0Z"] = "WT"
 svus_syn = eb_sko %>% mutate(start = substr(variant, 1,1),
                              end = substr(variant, 4,4),
                              position = substr(variant, 2,3))
@@ -2523,33 +2528,229 @@ svus_syn = svus_syn %>% select(variant, sr1, sr2, sr3, sr4, sr5, sr6) %>% melt(i
 clinvar_errorbar_sko = bind_rows(clinvar_errorbar_sko, svus_syn)
 vus_errorbar_sko = bind_rows(vus_errorbar_sko, svus_syn)
 
+#WT
+wt_endo = eb_endo %>% filter(variant == "Z0Z") %>% select(variant, mean)
+colnames(wt_endo)[2] = "endo_ratio"
+wt_endo[wt_endo == "Z0Z"] = "WT"
+
+wt_sko = eb_sko %>% filter(variant == "Z0Z") %>% select(variant, mean)
+colnames(wt_sko)[2] = "sko_ratio"
+wt_sko[wt_sko == "Z0Z"] = "WT"
+
+wt_score = left_join(wt_endo, wt_sko)
+
 combined3 = combined2 %>% select(variant, endo_ratio, sko_ratio)
 combined3 = left_join(combined3, eb_endo)
 combined3 = left_join(combined3, eb_sko)
 
-write.csv(eb_endo, "eb_endo.csv")
-write.csv(eb_sko, "eb_sko.csv")
+# write.csv(eb_endo, "eb_endo.csv")
+# write.csv(eb_sko, "eb_sko.csv")
 
 clinvar_variants = clinvar2 %>% select(variant, Disease1, Disease2, ClinVar)
 clinvar_errorbar = left_join(clinvar_variants, combined3)
+clinvar_errorbar = bind_rows(clinvar_errorbar, wt_score)
+
 
 clinvar_errorbar_endo$log10_value <- log10(clinvar_errorbar_endo$value)
 clinvar_errorbar_endo <- rbind(clinvar_errorbar_endo, c("",NA, NA, NA))
-clinvar_errorbar_endo$variant = factor(clinvar_errorbar_endo$variant, c("syn", "", "H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
+clinvar_errorbar_endo$variant = factor(clinvar_errorbar_endo$variant, c("syn", "", "WT", "H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
 clinvar_errorbar_sko$log10_value <- log10(clinvar_errorbar_sko$value)
 clinvar_errorbar_sko <- rbind(clinvar_errorbar_sko, c("",NA, NA, NA))
-clinvar_errorbar_sko$variant = factor(clinvar_errorbar_sko$variant, c("syn", "", "H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
+clinvar_errorbar_sko$variant = factor(clinvar_errorbar_sko$variant, c("syn", "","WT", "H72Q","N80T","G81D","D84A", "D84E", "D84G", "D84N" ,"S88G", "L92V", "L96V", "Y98C"))
+str(clinvar_errorbar_endo)
 
+vus_errorbar_endo$log10_value <- log10(vus_errorbar_endo$value)
+vus_errorbar_endo <- rbind(vus_errorbar_endo, c("",NA, NA, NA))
+vus_errorbar_endo$variant = factor(vus_errorbar_endo$variant, c("syn", "","WT", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
+vus_errorbar_sko$log10_value <- log10(vus_errorbar_sko$value)
+vus_errorbar_sko <- rbind(vus_errorbar_sko, c("",NA, NA, NA))
+vus_errorbar_sko$variant = factor(vus_errorbar_sko$variant, c("syn", "","WT", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
+```
+
+```{r t-test for each variant}
+vus_errorbar_endo$log10_value = as.numeric(vus_errorbar_endo$log10_value)
+vus_errorbar_sko$log10_value = as.numeric(vus_errorbar_sko$log10_value)
+clinvar_errorbar_endo$log10_value = as.numeric(clinvar_errorbar_endo$log10_value)
+clinvar_errorbar_sko$log10_value = as.numeric(clinvar_errorbar_sko$log10_value)
+evus_syn = evus_syn %>% mutate(log10_value = log10(value))
+# evus_syn = na.omit(evus_syn)
+evus_syn_mean = evus_syn %>% group_by(variable) %>% mutate(mean = mean(log10_value, na.rm = T)) %>% distinct(variant, variable, mean)
+
+vus_errorbar_endo$log10_value = as.numeric(vus_errorbar_endo$log10_value)
+vus_errorbar_sko$log10_value = as.numeric(vus_errorbar_sko$log10_value)
+clinvar_errorbar_endo$log10_value = as.numeric(clinvar_errorbar_endo$log10_value)
+clinvar_errorbar_sko$log10_value = as.numeric(clinvar_errorbar_sko$log10_value)
+svus_syn = svus_syn %>% mutate(log10_value = log10(value))
+# svus_syn = na.omit(svus_syn)
+svus_syn_mean = svus_syn %>% group_by(variable) %>% mutate(mean = mean(log10_value, na.rm = T)) %>% distinct(variant, variable, mean)
+
+
+#standard clinvar
+h72q_eb_endo = clinvar_errorbar_endo %>% filter(variant == "H72Q")
+n80t_eb_endo = clinvar_errorbar_endo %>% filter(variant == "N80T")
+g81d_eb_endo = clinvar_errorbar_endo %>% filter(variant == "G81D")
+d84a_eb_endo = clinvar_errorbar_endo %>% filter(variant == "D84A")
+d84e_eb_endo = clinvar_errorbar_endo %>% filter(variant == "D84E")
+d84g_eb_endo = clinvar_errorbar_endo %>% filter(variant == "D84G")
+d84n_eb_endo = clinvar_errorbar_endo %>% filter(variant == "D84N")
+s88g_eb_endo = clinvar_errorbar_endo %>% filter(variant == "S88G")
+l92v_eb_endo = clinvar_errorbar_endo %>% filter(variant == "L92V")
+l96v_eb_endo = clinvar_errorbar_endo %>% filter(variant == "L96V")
+y98c_eb_endo = clinvar_errorbar_endo %>% filter(variant == "Y98C")
+
+#knockout clinvar
+h72q_eb_sko = clinvar_errorbar_sko %>% filter(variant == "H72Q")
+n80t_eb_sko = clinvar_errorbar_sko %>% filter(variant == "N80T")
+g81d_eb_sko = clinvar_errorbar_sko %>% filter(variant == "G81D")
+d84a_eb_sko = clinvar_errorbar_sko %>% filter(variant == "D84A")
+d84e_eb_sko = clinvar_errorbar_sko %>% filter(variant == "D84E")
+d84g_eb_sko = clinvar_errorbar_sko %>% filter(variant == "D84G")
+d84n_eb_sko = clinvar_errorbar_sko %>% filter(variant == "D84N")
+s88g_eb_sko = clinvar_errorbar_sko %>% filter(variant == "S88G")
+l92v_eb_sko = clinvar_errorbar_sko %>% filter(variant == "L92V")
+l96v_eb_sko = clinvar_errorbar_sko %>% filter(variant == "L96V")
+y98c_eb_sko = clinvar_errorbar_sko %>% filter(variant == "Y98C")
+
+#standard vus
+e66k_eb_endo = vus_errorbar_endo %>% filter(variant == "E66K")
+a67t_eb_endo = vus_errorbar_endo %>% filter(variant == "A67T")
+r69c_eb_endo = vus_errorbar_endo %>% filter(variant == "R69C")
+r69h_eb_endo = vus_errorbar_endo %>% filter(variant == "R69H")
+k73r_eb_endo = vus_errorbar_endo %>% filter(variant == "K73R")
+l74p_eb_endo = vus_errorbar_endo %>% filter(variant == "L74P")
+d76g_eb_endo = vus_errorbar_endo %>% filter(variant == "D76G")
+n80d_eb_endo = vus_errorbar_endo %>% filter(variant == "N80D")
+n80s_eb_endo = vus_errorbar_endo %>% filter(variant == "N80S")
+g81c_eb_endo = vus_errorbar_endo %>% filter(variant == "G81C")
+e90d_eb_endo = vus_errorbar_endo %>% filter(variant == "E90D")
+f91y_eb_endo = vus_errorbar_endo %>% filter(variant == "F91Y")
+
+
+#knockout vus
+e66k_eb_sko = vus_errorbar_sko %>% filter(variant == "E66K")
+a67t_eb_sko = vus_errorbar_sko %>% filter(variant == "A67T")
+r69c_eb_sko = vus_errorbar_sko %>% filter(variant == "R69C")
+r69h_eb_sko = vus_errorbar_sko %>% filter(variant == "R69H")
+k73r_eb_sko = vus_errorbar_sko %>% filter(variant == "K73R")
+l74p_eb_sko = vus_errorbar_sko %>% filter(variant == "L74P")
+d76g_eb_sko = vus_errorbar_sko %>% filter(variant == "D76G")
+n80d_eb_sko = vus_errorbar_sko %>% filter(variant == "N80D")
+n80s_eb_sko = vus_errorbar_sko %>% filter(variant == "N80S")
+g81c_eb_sko = vus_errorbar_sko %>% filter(variant == "G81C")
+e90d_eb_sko = vus_errorbar_sko %>% filter(variant == "E90D")
+f91y_eb_sko = vus_errorbar_sko %>% filter(variant == "F91Y")
+
+
+
+
+clinvar_errorbar_endo$value = as.numeric(clinvar_errorbar_endo$value)
+clinvar_errorbar_endo$log10_value = as.numeric(clinvar_errorbar_endo$log10_value)
+clinvar_errorbar_sko$value = as.numeric(clinvar_errorbar_sko$value)
+clinvar_errorbar_sko$log10_value = as.numeric(clinvar_errorbar_sko$log10_value)
+
+vus_errorbar_endo$value = as.numeric(vus_errorbar_endo$value)
+vus_errorbar_endo$log10_value = as.numeric(vus_errorbar_endo$log10_value)
+vus_errorbar_sko$value = as.numeric(vus_errorbar_sko$value)
+vus_errorbar_sko$log10_value = as.numeric(vus_errorbar_sko$log10_value)
+
+clinvar_errorbar_endo = bind_rows(clinvar_errorbar_endo, eb_wt_endo1)
+clinvar_errorbar_sko = bind_rows(clinvar_errorbar_sko, eb_wt_sko1)
+vus_errorbar_endo = bind_rows(vus_errorbar_endo, eb_wt_endo1)
+vus_errorbar_sko = bind_rows(vus_errorbar_sko, eb_wt_sko1)
+
+
+#std clinvar
+wt_std_clinvar_pvalues = data.frame(variant = c("H72Q","N80T", "G81D", "D84A", "D84E","D84G","D84N","S88G", "L92V","L96V" ,"Y98C", "syn"), pvalue = c(
+t.test(eb_wt_endo1$log10_value, h72q_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, n80t_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, g81d_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, d84a_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, d84e_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, d84g_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, d84n_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, s88g_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, l92v_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, l96v_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, y98c_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, evus_syn_mean$mean, paired = TRUE)$p.value))
+wt_std_clinvar_pvalues$p_adjusted = p.adjust(wt_std_clinvar_pvalues$pvalue, method = "bonferroni")
+wt_std_clinvar_pvalues = wt_std_clinvar_pvalues %>% mutate(sig_lvl = case_when(p_adjusted <= 0.05 & p_adjusted >= 0.01 & variant != "syn" ~ "*",
+                                                                                                    p_adjusted <= 0.01 & p_adjusted > 0.001 & variant != "syn" ~ "**",
+                                                                                                    p_adjusted <= 0.001 & variant != "syn" ~ "***"))
+
+#ko clinvar
+wt_ko_clinvar_pvalues = data.frame(variant = c("H72Q","N80T", "G81D", "D84A", "D84E","D84G","D84N","S88G", "L92V","L96V" ,"Y98C", "syn"), pvalue = c(
+t.test(eb_wt_sko1$log10_value, h72q_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, n80t_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, g81d_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, d84a_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, d84e_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, d84g_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, d84n_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, s88g_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, l92v_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, l96v_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, y98c_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, svus_syn_mean$mean, paired = TRUE)$p.value))
+wt_ko_clinvar_pvalues$p_adjusted = p.adjust(wt_ko_clinvar_pvalues$pvalue, method = "bonferroni")
+wt_ko_clinvar_pvalues = wt_ko_clinvar_pvalues %>% mutate(sig_lvl = case_when(p_adjusted <= 0.05 & p_adjusted >= 0.01 & variant != "syn" ~ "*",
+                                                                                                    p_adjusted <= 0.01 & p_adjusted > 0.001 & variant != "syn" ~ "**",
+                                                                                                    p_adjusted <= 0.001 & variant != "syn" ~ "***"))
+
+#std vus
+wt_std_vus_pvalues = data.frame(variant = c("E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D", "N80S", "G81C", "E90D", "F91Y", "syn"), pvalue = c(
+t.test(eb_wt_endo1$log10_value, e66k_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, a67t_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, r69c_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, r69h_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, k73r_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, l74p_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, d76g_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, n80d_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, n80s_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, g81c_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, e90d_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, f91y_eb_endo$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_endo1$log10_value, evus_syn_mean$mean, paired = TRUE)$p.value))
+wt_std_vus_pvalues$p_adjusted = p.adjust(wt_std_vus_pvalues$pvalue, method = "bonferroni")
+wt_std_vus_pvalues = wt_std_vus_pvalues %>% mutate(sig_lvl = case_when(p_adjusted <= 0.05 & p_adjusted >= 0.01 & variant != "syn" ~ "*",
+                                                                                                    p_adjusted <= 0.01 & p_adjusted > 0.001 & variant != "syn" ~ "**",
+                                                                                                    p_adjusted <= 0.001 & variant != "syn" ~ "***"))
+
+#ko vus
+wt_ko_vus_pvalues = data.frame(variant = c("E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D", "N80S", "G81C", "E90D", "F91Y", "syn"), pvalue = c(
+t.test(eb_wt_sko1$log10_value, e66k_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, a67t_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, r69c_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, r69h_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, k73r_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, l74p_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, d76g_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, n80d_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, n80s_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, g81c_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, e90d_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, f91y_eb_sko$log10_value, paired = TRUE)$p.value,
+t.test(eb_wt_sko1$log10_value, svus_syn_mean$mean, paired = TRUE)$p.value))
+wt_ko_vus_pvalues$p_adjusted = p.adjust(wt_ko_vus_pvalues$pvalue, method = "bonferroni")
+
+wt_ko_vus_pvalues = wt_ko_vus_pvalues %>% mutate(sig_lvl = case_when(p_adjusted <= 0.05 & p_adjusted >= 0.01 & variant != "syn" ~ "*",
+                                                                                                    p_adjusted <= 0.01 & p_adjusted > 0.001 & variant != "syn" ~ "**",
+                                                                                                    p_adjusted <= 0.001 & variant != "syn" ~ "***"))
+```
+
+```{r}
 clinvar_eb_endo_plot <- ggplot()+ 
   geom_quasirandom(data = clinvar_errorbar_endo %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
   geom_quasirandom(data = clinvar_errorbar_endo %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) + 
   geom_hline(yintercept = c(syn_endo_range[1],syn_endo_range[2]), linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")),
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C", "WT")),
              aes(x= variant, y= log10(endo_ratio)), color = "black", shape = 45, size = 6)+
   theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
-  scale_y_continuous(limits = c(-2.2,1.1)) +
+  scale_y_continuous(limits = c(-2.2,1.3)) +
+  geom_text(data = wt_std_clinvar_pvalues, aes(x= variant, y= 0.95, label = sig_lvl))+
   #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
-  labs(x= NULL, y= "Standard Score", color = "Replicate")+
+  labs(x= "Variant", y= "Standard Score", color = "Replicate")+
   NULL; clinvar_eb_endo_plot
 ggsave("Revision_1/plots_r1/supplement_r1/supp9_clinvar_eb_endo_plot.pdf", clinvar_eb_endo_plot ,height = 1.5, width = 3.3)
 
@@ -2557,32 +2758,27 @@ clinvar_eb_sko_plot <- ggplot()+
   geom_quasirandom(data = clinvar_errorbar_sko %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
   geom_quasirandom(data = clinvar_errorbar_sko %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) + 
   geom_hline(yintercept = c(syn_sko_range[1],syn_sko_range[2]), linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C")),
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("L92V", "L96V", "N80T", "H72Q", "D84G", "G81D", "D84A", "D84E", "D84N", "S88G", "Y98C","WT")),
              aes(x= variant, y= log10(sko_ratio)), color = "black", shape = 45, size = 6)+
   theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
   #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= NULL, y= "Knockout Score", color = "Replicate")+
-  scale_y_continuous(limits = c(-1,0.6)) +
+  scale_y_continuous(limits = c(-1,0.7)) +
+  geom_text(data = wt_ko_clinvar_pvalues, aes(x= variant, y= 0.5, label = sig_lvl))+
   NULL; clinvar_eb_sko_plot
 ggsave("Revision_1/plots_r1/supplement_r1/supp9_clinvar_eb_sko_plot.pdf", clinvar_eb_sko_plot ,height = 1.5, width = 3.3)
 
-
-vus_errorbar_endo$log10_value <- log10(vus_errorbar_endo$value)
-vus_errorbar_endo <- rbind(vus_errorbar_endo, c("",NA, NA, NA))
-vus_errorbar_endo$variant = factor(vus_errorbar_endo$variant, c("syn", "","E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
-vus_errorbar_sko$log10_value <- log10(vus_errorbar_sko$value)
-vus_errorbar_sko <- rbind(vus_errorbar_sko, c("",NA, NA, NA))
-vus_errorbar_sko$variant = factor(vus_errorbar_sko$variant, c("syn", "", "E66K", "A67T", "R69C", "R69H", "K73R", "L74P", "D76G", "N80D","N80S", "G81C", "E90D", "F91Y"))
 
 vus_eb_endo_plot <- ggplot()+ 
   geom_quasirandom(data = vus_errorbar_endo %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
   geom_quasirandom(data = vus_errorbar_endo %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) +
   geom_hline(yintercept = c(syn_endo_range[1],syn_endo_range[2]), linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")), aes(x= variant, y= log10(endo_ratio)), color = "black", shape = 45, size = 6)+
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R", "WT")), aes(x= variant, y= log10(endo_ratio)), color = "black", shape = 45, size = 6)+
   theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
-  scale_y_continuous(limits = c(-2.2,1.1)) +
+  scale_y_continuous(limits = c(-2.2,1.3)) +
   #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= NULL, y= "Standard Score", color = "Replicate")+
+  geom_text(data = wt_std_vus_pvalues, aes(x= variant, y= 0.95, label = sig_lvl))+
   NULL; vus_eb_endo_plot
 ggsave("Revision_1/plots_r1/supplement_r1/supp9_vus_eb_endo_plot.pdf", vus_eb_endo_plot ,height = 1.5, width = 3.3)
 
@@ -2590,16 +2786,20 @@ vus_eb_sko_plot = ggplot() +
   geom_quasirandom(data = vus_errorbar_sko %>% filter(variant == "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.25, width = 1.25) + 
   geom_quasirandom(data = vus_errorbar_sko %>% filter(variant != "syn"), aes(x= variant, y= as.numeric(log10_value), color = variable), alpha = 0.5, size = 0.75, width = 0.2) +
   geom_hline(yintercept = c(syn_sko_range[1], syn_sko_range[2]), linetype = "dotted")+
-  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R")),
+  geom_point(data = clinvar_errorbar %>% filter(variant %in% c("F91Y", "D76G", "G81C", "E66K", "E90D", "R69C", "L74P", "N80S", "A67T", "N80D", "R69H", "K73R", "WT")),
              aes(x= variant, y= log10(sko_ratio)), color = "black", shape = 45, size = 6)+ 
   theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")+
   #stat_summary(fun.data="mean_cl_boot", geom="errorbar",width=0.05, colour="black", alpha = 0.25)+
   labs(x= NULL, y= "Knockout Score", color = "Replicate")+
-  scale_y_continuous(limits = c(-1,0.6)) +
+  scale_y_continuous(limits = c(-1,0.7)) +
+  geom_text(data = wt_ko_vus_pvalues, aes(x= variant, y= 0.6, label = sig_lvl))+
   NULL; vus_eb_sko_plot
 ggsave("Revision_1/plots_r1/supplement_r1/supp9_vus_eb_sko_plot.pdf", vus_eb_sko_plot ,height = 1.5, width = 3.3)
 
 ```
+
+
+
 
 ##STIM1 abundance - Supplement Fig 7b
 ```{r}
