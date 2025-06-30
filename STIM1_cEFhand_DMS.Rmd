@@ -2797,8 +2797,12 @@ vus_eb_sko_plot = ggplot() +
 ggsave("Revision_1/plots_r1/supplement_r1/supp9_vus_eb_sko_plot.pdf", vus_eb_sko_plot ,height = 1.5, width = 3.3)
 
 ```
+```{r removing the dataframes used for the t-tests}
+rm(list = ls(pattern = "_eb_sko"))
+rm(list = ls(pattern = "_eb_endo"))
+```
 
-
+x
 
 
 ##STIM1 abundance - Supplement Fig 7b
