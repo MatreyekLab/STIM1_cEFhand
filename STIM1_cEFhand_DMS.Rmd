@@ -2802,7 +2802,6 @@ rm(list = ls(pattern = "_eb_sko"))
 rm(list = ls(pattern = "_eb_endo"))
 ```
 
-x
 
 
 ##STIM1 abundance - Supplement Fig 7b
